@@ -1,0 +1,66 @@
+package nl.gogognome.gogochess.game;
+
+public class Square {
+
+	private final static int MASK = 0xffffffff ^ 7;
+
+	private final int boardIndex;
+
+	public Square(String square) {
+		if (square == null || square.length() != 2) {
+			throw new IllegalArgumentException("Square must be a string of length 2 like B6");
+		}
+		int column = square.charAt(0) - 'A';
+		int row = square.charAt(1) - '1';
+		validateColumnAndRow(column, row);
+		boardIndex = column * 8 + row;
+	}
+
+	public Square(int column, int row) {
+		validateColumnAndRow(column, row);
+		this.boardIndex = column * 8 + row;
+	}
+
+	private void validateColumnAndRow(int column, int row) {
+		if (((column | row) & MASK) != 0) {
+			throw new IllegalArgumentException("column and row must be in the range [0..7]");
+		}
+	}
+
+	/**
+	 * @return the column in the range [0..7]
+	 */
+	public int column() {
+		return boardIndex / 8;
+	}
+
+	/**
+	 * @return the row in the range [0..7]
+	 */
+	public int row() {
+		return boardIndex % 8;
+	}
+
+	@Override
+	public String toString() {
+		return Character.toString((char)('A' + column())) + (row() + 1);
+	}
+
+	int getBoardIndex() {
+		return boardIndex;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null || !obj.getClass().equals(this.getClass())) {
+			return false;
+		}
+		Square that = (Square) obj;
+		return this.boardIndex == that.boardIndex;
+	}
+
+	@Override
+	public int hashCode() {
+		return boardIndex;
+	}
+}
