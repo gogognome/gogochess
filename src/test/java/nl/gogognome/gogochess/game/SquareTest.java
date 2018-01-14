@@ -69,7 +69,7 @@ class SquareTest {
 	}
 
 	@Test
-	void getBoardIndexReturnsValueInRange0_63() {
+	void boardIndexReturnsValueInRange0_63() {
 		assertBoardIndex("A1", 0);
 		assertBoardIndex("A2", 1);
 		assertBoardIndex("A8", 7);
@@ -79,7 +79,7 @@ class SquareTest {
 	}
 
 	private void assertBoardIndex(String square, int expectedIndex) {
-		assertEquals(expectedIndex, new Square(square).getBoardIndex());
+		assertEquals(expectedIndex, new Square(square).boardIndex());
 	}
 
 	@Test

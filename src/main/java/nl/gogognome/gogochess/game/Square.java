@@ -46,7 +46,7 @@ public class Square {
 		return Character.toString((char)('A' + column())) + (row() + 1);
 	}
 
-	int getBoardIndex() {
+	int boardIndex() {
 		return boardIndex;
 	}
 
