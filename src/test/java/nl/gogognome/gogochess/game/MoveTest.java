@@ -6,20 +6,19 @@ import org.junit.jupiter.api.*;
 class MoveTest {
 
 	@Test
-	void initialMove() {
+	void initalBoard() {
 		Board board = new Board();
 		board.process(Move.INITIAL_BOARD);
 		String actualBoard = board.toString();
 
+		String boardWithoutEmptySquares = actualBoard.replaceAll("[ *\n]", "");
+
 		assertEquals(
-				"RKBQKBKR\n" +
-				"PPPPPPPP\n" +
-				"* * * * \n" +
-				" * * * *\n" +
-				"* * * * \n" +
-				" * * * *\n" +
-				"pppppppp\n" +
-				"rkbqkbkr\n",
-				actualBoard);
+				"RKBQKBKR" +
+				"PPPPPPPP" +
+				"pppppppp" +
+				"rkbqkbkr",
+				boardWithoutEmptySquares);
 	}
+
 }
