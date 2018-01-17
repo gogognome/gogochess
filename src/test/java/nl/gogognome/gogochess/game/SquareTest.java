@@ -6,6 +6,21 @@ import org.junit.jupiter.api.*;
 class SquareTest {
 
 	@Test
+	 void createSquareWithInvalidBoardIndex() {
+		assertThrows(IllegalArgumentException.class, () -> new Square(-1));
+		assertThrows(IllegalArgumentException.class, () -> new Square(64));
+	}
+
+	@Test
+	void createSquareWithValidBoardIndex() {
+		assertEquals(new Square("A1"), new Square(0));
+		assertEquals(new Square("A2"), new Square(1));
+		assertEquals(new Square("A8"), new Square(7));
+		assertEquals(new Square("B1"), new Square(8));
+		assertEquals(new Square("H8"), new Square(63));
+	}
+
+	@Test
 	void createWithValidString() {
 		assertEquals("A1", new Square("A1").toString());
 		assertEquals("C6", new Square("C6").toString());

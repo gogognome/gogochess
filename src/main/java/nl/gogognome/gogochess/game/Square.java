@@ -27,6 +27,17 @@ public class Square {
 		}
 	}
 
+	public Square(int boardIndex) {
+		validateBoardIndex(boardIndex);
+		this.boardIndex = boardIndex;
+	}
+
+	private void validateBoardIndex(int boardIndex) {
+		if (boardIndex < 0 || boardIndex >= 8*8) {
+			throw new IllegalArgumentException("Board index must be in the range [0..63]");
+		}
+	}
+
 	/**
 	 * @return the column in the range [0..7]
 	 */
@@ -48,6 +59,10 @@ public class Square {
 
 	int boardIndex() {
 		return boardIndex;
+	}
+
+	public Square addRow(int nrRows) {
+		return new Square(column(), row() + nrRows);
 	}
 
 	@Override
