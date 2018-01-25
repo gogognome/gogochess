@@ -1,5 +1,7 @@
 package nl.gogognome.gogochess.game;
 
+import nl.gogognome.gogochess.game.piece.*;
+
 public class BoardMutation {
 
 	public enum Mutation {
@@ -11,7 +13,7 @@ public class BoardMutation {
 	private final Square square;
 	private final Mutation mutation;
 
-	BoardMutation(PlayerPiece playerPiece, Square square, Mutation mutation) {
+	public BoardMutation(PlayerPiece playerPiece, Square square, Mutation mutation) {
 		if (playerPiece == null || square == null || mutation == null) {
 			throw new IllegalArgumentException("Arguments must not be null");
 		}

@@ -7,6 +7,7 @@ import static nl.gogognome.gogochess.game.Player.WHITE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import org.junit.jupiter.api.*;
+import nl.gogognome.gogochess.game.piece.*;
 
 class PlayerPieceTest {
 

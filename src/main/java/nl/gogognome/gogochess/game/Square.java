@@ -65,6 +65,10 @@ public class Square {
 		return new Square(column(), row() + nrRows);
 	}
 
+	public Square addColumnAndRow(int nrColumns, int nrRows) {
+		return new Square(column() + nrColumns, row() + nrRows);
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj == null || !obj.getClass().equals(this.getClass())) {

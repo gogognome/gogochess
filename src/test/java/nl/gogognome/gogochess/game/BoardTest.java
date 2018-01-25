@@ -5,7 +5,7 @@ import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 import static nl.gogognome.gogochess.game.BoardMutation.Mutation.*;
 import static nl.gogognome.gogochess.game.Player.*;
-import static nl.gogognome.gogochess.game.PlayerPiece.*;
+import static nl.gogognome.gogochess.game.piece.PlayerPiece.*;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.*;
 import org.junit.jupiter.api.*;
@@ -14,6 +14,9 @@ class BoardTest {
 
 	private static final Square A2 = new Square("A2");
 	private static final Square A3 = new Square("A3");
+	private static final Square A4 = new Square("A4");
+	private static final Square B1 = new Square("B1");
+	private static final Square B2 = new Square("B2");
 
 	private Board board = new Board();
 
@@ -80,16 +83,68 @@ class BoardTest {
 		assertEquals(emptyList(), board.validMoves(WHITE));
 		assertEquals(emptyList(), board.validMoves(BLACK));
 	}
+
 	@Test
-	void validMovesForPawn() {
-		Move setup = new Move("setup", null, new BoardMutation(WHITE_PAWN, A2, ADD));
+	void validMovesForPawnAtInitialPosition() {
+		Move setup = new Move("setup", null,
+				new BoardMutation(WHITE_PAWN, A2, ADD));
 		board.process(setup);
 
 		List<Move> moves = board.validMoves(WHITE);
 
 		assertEquals(singleton(setup), moves.stream().map(Move::getPrecedingMove).collect(toSet()));
 		assertEquals(
-				asList(asList(new BoardMutation(WHITE_PAWN, A2, REMOVE), new BoardMutation(WHITE_PAWN, A3, ADD))),
+				asList(
+						asList(new BoardMutation(WHITE_PAWN, A2, REMOVE), new BoardMutation(WHITE_PAWN, A3, ADD)),
+						asList(new BoardMutation(WHITE_PAWN, A2, REMOVE), new BoardMutation(WHITE_PAWN, A4, ADD))),
 				moves.stream().map(Move::getBoardMutations).collect(toList()));
+	}
+
+	@Test
+	void validMovesForPawnThatCannotMoveForward() {
+		Move setup = new Move("setup", null,
+				new BoardMutation(WHITE_PAWN, A2, ADD),
+				new BoardMutation(BLACK_PAWN, A3, ADD));
+		board.process(setup);
+
+		List<Move> moves = board.validMoves(WHITE);
+
+		assertEquals(emptySet(), moves.stream().map(Move::getPrecedingMove).collect(toSet()));
+		assertEquals(
+				emptyList(),
+				moves.stream().map(Move::getBoardMutations).collect(toList()));
+	}
+
+	@Test
+	void validMovesForPawnAtInitialPositionThatCannotMoveForwardOneStepButNotTwo() {
+		Move setup = new Move("setup", null,
+				new BoardMutation(WHITE_PAWN, A2, ADD),
+				new BoardMutation(BLACK_PAWN, A4, ADD));
+		board.process(setup);
+
+		List<Move> moves = board.validMoves(WHITE);
+
+		assertEquals(singleton(setup), moves.stream().map(Move::getPrecedingMove).collect(toSet()));
+		assertEquals(
+				asList(
+						asList(new BoardMutation(WHITE_PAWN, A2, REMOVE), new BoardMutation(WHITE_PAWN, A3, ADD))),
+				moves.stream().map(Move::getBoardMutations).collect(toList()));
+	}
+
+	@Test
+	void validMovesForPawnThatCanCaptureAnotherPiece() {
+		Move setup = new Move("setup", null,
+				new BoardMutation(WHITE_PAWN, B2, ADD),
+				new BoardMutation(BLACK_PAWN, A3, ADD));
+		board.process(setup);
+
+		List<Move> moves = board.validMoves(WHITE);
+
+		List<List<BoardMutation>> actualMoves = moves.stream().map(Move::getBoardMutations).collect(toList());
+		assertTrue(actualMoves.contains(asList(
+				new BoardMutation(WHITE_PAWN, B2, REMOVE),
+				new BoardMutation(BLACK_PAWN, A3, REMOVE),
+				new BoardMutation(WHITE_PAWN, A3, ADD))),
+				actualMoves.toString());
 	}
 }

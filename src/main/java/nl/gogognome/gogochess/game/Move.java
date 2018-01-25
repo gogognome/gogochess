@@ -3,6 +3,7 @@ package nl.gogognome.gogochess.game;
 import static java.util.Arrays.*;
 import static nl.gogognome.gogochess.game.BoardMutation.Mutation.ADD;
 import java.util.*;
+import nl.gogognome.gogochess.game.piece.*;
 
 public class Move {
 
