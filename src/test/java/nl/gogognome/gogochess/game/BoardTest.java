@@ -92,6 +92,7 @@ class BoardTest {
 
 		List<Move> moves = board.validMoves(WHITE);
 
+		assertEquals("[a2-a3, a2-a4]", moves.toString());
 		assertEquals(singleton(setup), moves.stream().map(Move::getPrecedingMove).collect(toSet()));
 		assertEquals(
 				asList(
@@ -109,6 +110,7 @@ class BoardTest {
 
 		List<Move> moves = board.validMoves(WHITE);
 
+		assertEquals("[]", moves.toString());
 		assertEquals(emptySet(), moves.stream().map(Move::getPrecedingMove).collect(toSet()));
 		assertEquals(
 				emptyList(),
@@ -124,6 +126,7 @@ class BoardTest {
 
 		List<Move> moves = board.validMoves(WHITE);
 
+		assertEquals("[a2-a3]", moves.toString());
 		assertEquals(singleton(setup), moves.stream().map(Move::getPrecedingMove).collect(toSet()));
 		assertEquals(
 				asList(
@@ -140,6 +143,7 @@ class BoardTest {
 
 		List<Move> moves = board.validMoves(WHITE);
 
+		assertTrue(moves.toString().contains("b2xa3"), "actual moves: " + moves);
 		List<List<BoardMutation>> actualMoves = moves.stream().map(Move::getBoardMutations).collect(toList());
 		assertTrue(actualMoves.contains(asList(
 				new BoardMutation(WHITE_PAWN, B2, REMOVE),

@@ -8,6 +8,8 @@ import nl.gogognome.gogochess.game.*;
 
 public class Pawn extends PlayerPiece {
 
+	private MoveNotation moveNotation = new MoveNotation();
+
 	private final int forwardRowDelta;
 	private final int initialRow;
 	private final int promotionRow;
@@ -23,14 +25,14 @@ public class Pawn extends PlayerPiece {
 	public void addPossibleMoves(List<Move> moves, Square square, Board board) {
 		Square destination1 = square.addRow(forwardRowDelta);
 		if (board.empty(destination1)) {
-			moves.add(new Move(square + "-" + destination1, board.lastMove(),
+			moves.add(new Move(moveNotation.move(this, square, destination1), board.lastMove(),
 					new BoardMutation(this, square, REMOVE),
 					new BoardMutation(this, destination1, ADD)));
 		}
 
 		Square destination2 = square.addRow(2 * forwardRowDelta);
 		if (square.row() == initialRow && board.empty(destination1) && board.empty(destination2)) {
-			moves.add(new Move(square + "-" + destination2, board.lastMove(),
+			moves.add(new Move(moveNotation.move(this, square, destination2), board.lastMove(),
 					new BoardMutation(this, square, REMOVE),
 					new BoardMutation(this, destination2, ADD)));
 		}
@@ -48,7 +50,7 @@ public class Pawn extends PlayerPiece {
 	private void addCaptureMove(List<Move> moves, Square square, Board board, Square captureDestination) {
 		PlayerPiece capturedPiece = board.pieceAt(captureDestination);
 		if (capturedPiece != null && capturedPiece.getPlayer() == getPlayer().other()) {
-			moves.add(new Move(square + "-" + captureDestination, board.lastMove(),
+			moves.add(new Move(moveNotation.capture(this, square, captureDestination, capturedPiece), board.lastMove(),
 					new BoardMutation(this, square, REMOVE),
 					new BoardMutation(capturedPiece, captureDestination, REMOVE),
 					new BoardMutation(this, captureDestination, ADD)));
