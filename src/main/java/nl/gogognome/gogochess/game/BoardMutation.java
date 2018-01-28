@@ -41,7 +41,7 @@ public class BoardMutation {
 			return false;
 		}
 		BoardMutation that = (BoardMutation) obj;
-		return this.playerPiece == that.playerPiece
+		return this.playerPiece.equals(that.playerPiece)
 				&& this.square.equals(that.square)
 				&& this.mutation == that.mutation;
 	}
