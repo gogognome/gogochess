@@ -1,5 +1,7 @@
 package nl.gogognome.gogochess.game.piece;
 
+import static nl.gogognome.gogochess.game.BoardMutation.Mutation.ADD;
+import static nl.gogognome.gogochess.game.BoardMutation.Mutation.REMOVE;
 import static nl.gogognome.gogochess.game.Piece.*;
 import static nl.gogognome.gogochess.game.Player.BLACK;
 import static nl.gogognome.gogochess.game.Player.WHITE;
@@ -20,6 +22,8 @@ public class PlayerPiece {
 	public static final PlayerPiece BLACK_ROOK = new PlayerPiece(BLACK, ROOK);
 	public static final PlayerPiece BLACK_QUEEN = new PlayerPiece(BLACK, QUEEN);
 	public static final PlayerPiece BLACK_KING = new PlayerPiece(BLACK, KING);
+
+	private MoveNotation moveNotation = new MoveNotation();
 
 	private final Piece piece;
 	private final Player player;
@@ -43,6 +47,22 @@ public class PlayerPiece {
 
 	// TODO: make this abstract after all pieces have been implemented
 	public void addPossibleMoves(List<Move> moves, Square square, Board board) {
+	}
+
+	protected BoardMutation addTo(Square square) {
+		return new BoardMutation(this, square, ADD);
+	}
+
+	protected BoardMutation removeFrom(Square square) {
+		return new BoardMutation(this, square, REMOVE);
+	}
+
+	protected String moveNotation(Square from, Square to) {
+		return moveNotation.move(this, from, to);
+	}
+
+	protected String captureNotation(Square from, Square to, PlayerPiece capturedPiece) {
+		return moveNotation.capture(this, from, to, capturedPiece);
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package nl.gogognome.gogochess.game.piece;
 
-import static nl.gogognome.gogochess.game.BoardMutation.Mutation.*;
 import static nl.gogognome.gogochess.game.Piece.*;
 import static nl.gogognome.gogochess.game.Player.*;
 import java.util.*;
@@ -8,13 +7,11 @@ import nl.gogognome.gogochess.game.*;
 
 public class Pawn extends PlayerPiece {
 
-	private MoveNotation moveNotation = new MoveNotation();
-
 	private final int forwardRowDelta;
 	private final int initialRow;
 	private final int promotionRow;
 
-	public Pawn(Player player) {
+	Pawn(Player player) {
 		super(player, PAWN);
 
 		forwardRowDelta = player == WHITE ? 1 : -1;
@@ -25,16 +22,14 @@ public class Pawn extends PlayerPiece {
 	public void addPossibleMoves(List<Move> moves, Square square, Board board) {
 		Square destination1 = square.addRow(forwardRowDelta);
 		if (board.empty(destination1)) {
-			moves.add(new Move(moveNotation.move(this, square, destination1), board.lastMove(),
-					new BoardMutation(this, square, REMOVE),
-					new BoardMutation(this, destination1, ADD)));
+			moves.add(new Move(moveNotation(square, destination1), board.lastMove(),
+					removeFrom(square), addTo(destination1)));
 		}
 
 		Square destination2 = square.addRow(2 * forwardRowDelta);
 		if (square.row() == initialRow && board.empty(destination1) && board.empty(destination2)) {
-			moves.add(new Move(moveNotation.move(this, square, destination2), board.lastMove(),
-					new BoardMutation(this, square, REMOVE),
-					new BoardMutation(this, destination2, ADD)));
+			moves.add(new Move(moveNotation(square, destination2), board.lastMove(),
+					removeFrom(square), addTo(destination2)));
 		}
 
 		if (square.column() > 0) {
@@ -52,10 +47,8 @@ public class Pawn extends PlayerPiece {
 	private void addCaptureMove(List<Move> moves, Square square, Board board, Square captureDestination) {
 		PlayerPiece capturedPiece = board.pieceAt(captureDestination);
 		if (capturedPiece != null && capturedPiece.getPlayer() == getPlayer().other()) {
-			moves.add(new Move(moveNotation.capture(this, square, captureDestination, capturedPiece), board.lastMove(),
-					new BoardMutation(this, square, REMOVE),
-					new BoardMutation(capturedPiece, captureDestination, REMOVE),
-					new BoardMutation(this, captureDestination, ADD)));
+			moves.add(new Move(captureNotation(square, captureDestination, capturedPiece), board.lastMove(),
+					removeFrom(square), capturedPiece.removeFrom(captureDestination), addTo(captureDestination)));
 		}
 	}
 
@@ -63,16 +56,14 @@ public class Pawn extends PlayerPiece {
 		Square capturedPawnSquare = captureDestination.addRow(-forwardRowDelta);
 		PlayerPiece capturedPiece = board.pieceAt(capturedPawnSquare);
 		if (canCaptureEnPassant(board, capturedPawnSquare, capturedPiece)) {
-			moves.add(new Move(moveNotation.capture(this, square, captureDestination, capturedPiece), board.lastMove(),
-					new BoardMutation(this, square, REMOVE),
-					new BoardMutation(capturedPiece, capturedPawnSquare, REMOVE),
-					new BoardMutation(this, captureDestination, ADD)));
+			moves.add(new Move(captureNotation(square, captureDestination, capturedPiece), board.lastMove(),
+					removeFrom(square), capturedPiece.removeFrom(capturedPawnSquare), addTo(captureDestination)));
 		}
 	}
 
 	private boolean canCaptureEnPassant(Board board, Square capturedPawnSquare, PlayerPiece capturedPiece) {
 		return capturedPiece != null && capturedPiece.getPlayer() == getPlayer().other() && capturedPiece.getPiece() == PAWN
-				&& board.lastMove().getBoardMutations().contains(new BoardMutation(capturedPiece, capturedPawnSquare, ADD))
-				&& board.lastMove().getBoardMutations().contains(new BoardMutation(capturedPiece, capturedPawnSquare.addRow(2*forwardRowDelta), REMOVE));
+				&& board.lastMove().getBoardMutations().contains(capturedPiece.addTo(capturedPawnSquare))
+				&& board.lastMove().getBoardMutations().contains(capturedPiece.removeFrom(capturedPawnSquare.addRow(2*forwardRowDelta)));
 	}
 }
