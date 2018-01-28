@@ -18,10 +18,12 @@ class BoardTest {
 	private static final Square A5 = new Square("A5");
 	private static final Square A6 = new Square("A6");
 	private static final Square A7 = new Square("A7");
+	private static final Square A8 = new Square("A8");
 	private static final Square B1 = new Square("B1");
 	private static final Square B2 = new Square("B2");
 	private static final Square B5 = new Square("B5");
 	private static final Square B7 = new Square("B7");
+	private static final Square B8 = new Square("B8");
 
 	private Board board = new Board();
 
@@ -178,4 +180,56 @@ class BoardTest {
 				new BoardMutation(WHITE_PAWN, A6, ADD))),
 				actualMoves.toString());
 	}
+
+	@Test
+	void validMovesForPawnThatCannotCaptureAnotherPawnEnPassantBeacuseOtherPawnDidNotMoveTwoStepsInPreviousMove() {
+		Move setup = new Move("setup", null,
+				new BoardMutation(WHITE_PAWN, B5, ADD),
+				new BoardMutation(BLACK_PAWN, A6, ADD));
+		board.process(setup);
+		Move blackPawnMoves2 = new Move("a6-a5", setup,
+				new BoardMutation(BLACK_PAWN, A6, REMOVE),
+				new BoardMutation(BLACK_PAWN, A5, ADD));
+		board.process(blackPawnMoves2);
+
+		List<Move> moves = board.validMoves(WHITE);
+
+		assertFalse(moves.toString().contains("b5xa6"), "actual moves: " + moves);
+	}
+
+	@Test
+	void validMovesForPawnThatCanMoveAndPromote() {
+		Move setup = new Move("setup", null,
+				new BoardMutation(WHITE_PAWN, B7, ADD));
+		board.process(setup);
+
+		List<Move> moves = board.validMoves(WHITE);
+
+		assertTrue(moves.toString().contains("b7-b8(N), b7-b8(B), b7-b8(R), b7-b8(Q)"), "actual moves: " + moves);
+		List<List<BoardMutation>> actualMoves = moves.stream().map(Move::getBoardMutations).collect(toList());
+		assertTrue(actualMoves.contains(asList(WHITE_PAWN.removeFrom(B7), WHITE_KNIGHT.addTo(B8))), actualMoves.toString());
+		assertTrue(actualMoves.contains(asList(WHITE_PAWN.removeFrom(B7), WHITE_BISHOP.addTo(B8))), actualMoves.toString());
+		assertTrue(actualMoves.contains(asList(WHITE_PAWN.removeFrom(B7), WHITE_ROOK.addTo(B8))), actualMoves.toString());
+		assertTrue(actualMoves.contains(asList(WHITE_PAWN.removeFrom(B7), WHITE_QUEEN.addTo(B8))), actualMoves.toString());
+		assertFalse(actualMoves.contains(asList(WHITE_PAWN.removeFrom(B7), WHITE_PAWN.addTo(B8))), actualMoves.toString());
+	}
+
+	@Test
+	void validMovesForPawnThatCanCaptureAnotherPieceAndPromote() {
+		Move setup = new Move("setup", null,
+				new BoardMutation(WHITE_PAWN, B7, ADD),
+				new BoardMutation(BLACK_ROOK, A8, ADD));
+		board.process(setup);
+
+		List<Move> moves = board.validMoves(WHITE);
+
+		assertTrue(moves.toString().contains("b7xRa8(N), b7xRa8(B), b7xRa8(R), b7xRa8(Q)"), "actual moves: " + moves);
+		List<List<BoardMutation>> actualMoves = moves.stream().map(Move::getBoardMutations).collect(toList());
+		assertTrue(actualMoves.contains(asList(WHITE_PAWN.removeFrom(B7), BLACK_ROOK.removeFrom(A8), WHITE_KNIGHT.addTo(A8))), actualMoves.toString());
+		assertTrue(actualMoves.contains(asList(WHITE_PAWN.removeFrom(B7), BLACK_ROOK.removeFrom(A8), WHITE_BISHOP.addTo(A8))), actualMoves.toString());
+		assertTrue(actualMoves.contains(asList(WHITE_PAWN.removeFrom(B7), BLACK_ROOK.removeFrom(A8), WHITE_ROOK.addTo(A8))), actualMoves.toString());
+		assertTrue(actualMoves.contains(asList(WHITE_PAWN.removeFrom(B7), BLACK_ROOK.removeFrom(A8), WHITE_QUEEN.addTo(A8))), actualMoves.toString());
+		assertFalse(actualMoves.contains(asList(WHITE_PAWN.removeFrom(B7), BLACK_ROOK.removeFrom(A8), WHITE_PAWN.addTo(A8))), actualMoves.toString());
+	}
+
 }

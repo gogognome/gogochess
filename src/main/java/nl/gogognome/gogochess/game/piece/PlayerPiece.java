@@ -6,7 +6,7 @@ import nl.gogognome.gogochess.game.*;
 
 public class PlayerPiece {
 
-	private MoveNotation moveNotation = new MoveNotation();
+	protected MoveNotation moveNotation = new MoveNotation();
 
 	private final Piece piece;
 	private final Player player;
@@ -32,19 +32,19 @@ public class PlayerPiece {
 	public void addPossibleMoves(List<Move> moves, Square square, Board board) {
 	}
 
-	protected BoardMutation addTo(Square square) {
+	public BoardMutation addTo(Square square) {
 		return new BoardMutation(this, square, ADD);
 	}
 
-	protected BoardMutation removeFrom(Square square) {
+	public BoardMutation removeFrom(Square square) {
 		return new BoardMutation(this, square, REMOVE);
 	}
 
-	protected String moveNotation(Square from, Square to) {
+	public String moveNotation(Square from, Square to) {
 		return moveNotation.move(this, from, to);
 	}
 
-	protected String captureNotation(Square from, Square to, PlayerPiece capturedPiece) {
+	public String captureNotation(Square from, Square to, PlayerPiece capturedPiece) {
 		return moveNotation.capture(this, from, to, capturedPiece);
 	}
 

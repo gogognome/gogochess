@@ -12,6 +12,10 @@ public class MoveNotation {
 		return pieceName(playerPiece) + format(from) + 'x' + pieceName(capturedPiece) + format(to);
 	}
 
+	public String appendPromotionPiece(String description, PlayerPiece playerPiece) {
+		return description + '(' + pieceName(playerPiece) + ')';
+	}
+
 	private String pieceName(PlayerPiece playerPiece) {
 		switch (playerPiece.getPiece()) {
 			case PAWN: return "";

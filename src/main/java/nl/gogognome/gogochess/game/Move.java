@@ -11,8 +11,12 @@ public class Move {
 	private String description;
 
 	public Move(String description, Move precedingMove, BoardMutation... boardMutations) {
+		this(description, precedingMove, asList(boardMutations));
+	}
+
+	public Move(String description, Move precedingMove, List<BoardMutation> boardMutations) {
 		this.precedingMove = precedingMove;
-		this.boardMutations = Collections.unmodifiableList(asList(boardMutations));
+		this.boardMutations = Collections.unmodifiableList(boardMutations);
 		this.description = description;
 	}
 
