@@ -62,11 +62,15 @@ public class Square {
 	}
 
 	public Square addRow(int nrRows) {
-		return new Square(column(), row() + nrRows);
+		return buildSquareIfValid(column(), row() + nrRows);
 	}
 
 	public Square addColumnAndRow(int nrColumns, int nrRows) {
-		return new Square(column() + nrColumns, row() + nrRows);
+		return buildSquareIfValid(column() + nrColumns, row() + nrRows);
+	}
+
+	private Square buildSquareIfValid(int newColumn, int newRow) {
+		return ((newColumn | newRow) & MASK) == 0 ? new Square(newColumn, newRow) : null;
 	}
 
 	@Override
