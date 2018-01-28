@@ -1,27 +1,10 @@
 package nl.gogognome.gogochess.game.piece;
 
-import static nl.gogognome.gogochess.game.BoardMutation.Mutation.ADD;
-import static nl.gogognome.gogochess.game.BoardMutation.Mutation.REMOVE;
-import static nl.gogognome.gogochess.game.Piece.*;
-import static nl.gogognome.gogochess.game.Player.BLACK;
-import static nl.gogognome.gogochess.game.Player.WHITE;
+import static nl.gogognome.gogochess.game.BoardMutation.Mutation.*;
 import java.util.*;
 import nl.gogognome.gogochess.game.*;
 
 public class PlayerPiece {
-
-	public static final PlayerPiece WHITE_PAWN = new Pawn(WHITE);
-	public static final PlayerPiece WHITE_KNIGHT = new PlayerPiece(WHITE, KNIGHT);
-	public static final PlayerPiece WHITE_BISHOP = new PlayerPiece(WHITE, BISHOP);
-	public static final PlayerPiece WHITE_ROOK = new PlayerPiece(WHITE, ROOK);
-	public static final PlayerPiece WHITE_QUEEN = new PlayerPiece(WHITE, QUEEN);
-	public static final PlayerPiece WHITE_KING = new PlayerPiece(WHITE, KING);
-	public static final PlayerPiece BLACK_PAWN = new Pawn(BLACK);
-	public static final PlayerPiece BLACK_KNIGHT = new PlayerPiece(BLACK, KNIGHT);
-	public static final PlayerPiece BLACK_BISHOP = new PlayerPiece(BLACK, BISHOP);
-	public static final PlayerPiece BLACK_ROOK = new PlayerPiece(BLACK, ROOK);
-	public static final PlayerPiece BLACK_QUEEN = new PlayerPiece(BLACK, QUEEN);
-	public static final PlayerPiece BLACK_KING = new PlayerPiece(BLACK, KING);
 
 	private MoveNotation moveNotation = new MoveNotation();
 

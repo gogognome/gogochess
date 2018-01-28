@@ -11,7 +11,7 @@ public class Pawn extends PlayerPiece {
 	private final int initialRow;
 	private final int promotionRow;
 
-	Pawn(Player player) {
+	public Pawn(Player player) {
 		super(player, PAWN);
 
 		forwardRowDelta = player == WHITE ? 1 : -1;
