@@ -15,8 +15,13 @@ class BoardTest {
 	private static final Square A2 = new Square("A2");
 	private static final Square A3 = new Square("A3");
 	private static final Square A4 = new Square("A4");
+	private static final Square A5 = new Square("A5");
+	private static final Square A6 = new Square("A6");
+	private static final Square A7 = new Square("A7");
 	private static final Square B1 = new Square("B1");
 	private static final Square B2 = new Square("B2");
+	private static final Square B5 = new Square("B5");
+	private static final Square B7 = new Square("B7");
 
 	private Board board = new Board();
 
@@ -149,6 +154,28 @@ class BoardTest {
 				new BoardMutation(WHITE_PAWN, B2, REMOVE),
 				new BoardMutation(BLACK_PAWN, A3, REMOVE),
 				new BoardMutation(WHITE_PAWN, A3, ADD))),
+				actualMoves.toString());
+	}
+
+	@Test
+	void validMovesForPawnThatCanCaptureAnotherPawnEnPassant() {
+		Move setup = new Move("setup", null,
+				new BoardMutation(WHITE_PAWN, B5, ADD),
+				new BoardMutation(BLACK_PAWN, A7, ADD));
+		board.process(setup);
+		Move blackPawnMoves2 = new Move("a7-a5", setup,
+				new BoardMutation(BLACK_PAWN, A7, REMOVE),
+				new BoardMutation(BLACK_PAWN, A5, ADD));
+		board.process(blackPawnMoves2);
+
+		List<Move> moves = board.validMoves(WHITE);
+
+		assertTrue(moves.toString().contains("b5xa6"), "actual moves: " + moves);
+		List<List<BoardMutation>> actualMoves = moves.stream().map(Move::getBoardMutations).collect(toList());
+		assertTrue(actualMoves.contains(asList(
+				new BoardMutation(WHITE_PAWN, B5, REMOVE),
+				new BoardMutation(BLACK_PAWN, A5, REMOVE),
+				new BoardMutation(WHITE_PAWN, A6, ADD))),
 				actualMoves.toString());
 	}
 }

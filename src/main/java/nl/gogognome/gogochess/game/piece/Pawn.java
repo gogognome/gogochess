@@ -40,10 +40,12 @@ public class Pawn extends PlayerPiece {
 		if (square.column() > 0) {
 			Square captureDestination = square.addColumnAndRow(-1, forwardRowDelta);
 			addCaptureMove(moves, square, board, captureDestination);
+			addEnPassantCaptureMove(moves, square, board, captureDestination);
 		}
 		if (square.column() < 7) {
 			Square captureDestination = square.addColumnAndRow(1, forwardRowDelta);
 			addCaptureMove(moves, square, board, captureDestination);
+			addEnPassantCaptureMove(moves, square, board, captureDestination);
 		}
 	}
 
@@ -55,5 +57,22 @@ public class Pawn extends PlayerPiece {
 					new BoardMutation(capturedPiece, captureDestination, REMOVE),
 					new BoardMutation(this, captureDestination, ADD)));
 		}
+	}
+
+	private void addEnPassantCaptureMove(List<Move> moves, Square square, Board board, Square captureDestination) {
+		Square capturedPawnSquare = captureDestination.addRow(-forwardRowDelta);
+		PlayerPiece capturedPiece = board.pieceAt(capturedPawnSquare);
+		if (canCaptureEnPassant(board, capturedPawnSquare, capturedPiece)) {
+			moves.add(new Move(moveNotation.capture(this, square, captureDestination, capturedPiece), board.lastMove(),
+					new BoardMutation(this, square, REMOVE),
+					new BoardMutation(capturedPiece, capturedPawnSquare, REMOVE),
+					new BoardMutation(this, captureDestination, ADD)));
+		}
+	}
+
+	private boolean canCaptureEnPassant(Board board, Square capturedPawnSquare, PlayerPiece capturedPiece) {
+		return capturedPiece != null && capturedPiece.getPlayer() == getPlayer().other() && capturedPiece.getPiece() == PAWN
+				&& board.lastMove().getBoardMutations().contains(new BoardMutation(capturedPiece, capturedPawnSquare, ADD))
+				&& board.lastMove().getBoardMutations().contains(new BoardMutation(capturedPiece, capturedPawnSquare.addRow(2*forwardRowDelta), REMOVE));
 	}
 }
