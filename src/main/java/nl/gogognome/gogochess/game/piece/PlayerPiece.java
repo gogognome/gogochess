@@ -50,7 +50,7 @@ public class PlayerPiece {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null || !obj.getClass().equals(this.getClass())) {
+		if (!(obj instanceof PlayerPiece)) {
 			return false;
 		}
 		PlayerPiece that = (PlayerPiece) obj;

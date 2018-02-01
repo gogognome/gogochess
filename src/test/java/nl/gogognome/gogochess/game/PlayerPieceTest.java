@@ -1,11 +1,9 @@
 package nl.gogognome.gogochess.game;
 
-import static nl.gogognome.gogochess.game.Piece.KNIGHT;
-import static nl.gogognome.gogochess.game.Piece.PAWN;
-import static nl.gogognome.gogochess.game.Player.BLACK;
-import static nl.gogognome.gogochess.game.Player.WHITE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static nl.gogognome.gogochess.game.Board.*;
+import static nl.gogognome.gogochess.game.Piece.*;
+import static nl.gogognome.gogochess.game.Player.*;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.*;
 import nl.gogognome.gogochess.game.piece.*;
 
@@ -13,21 +11,21 @@ class PlayerPieceTest {
 
 	@Test
 	void testEqualsAndHashCode() {
-		PlayerPiece WHITE_PAWN_1 = new PlayerPiece(WHITE, PAWN);
-		PlayerPiece WHITE_PAWN_2 = new PlayerPiece(WHITE, PAWN);
-		PlayerPiece BLACK_KNIGHT = new PlayerPiece(BLACK, KNIGHT);
+		PlayerPiece whitePawn1 = WHITE_PAWN;
+		PlayerPiece whitePawn2 = new PlayerPiece(WHITE, PAWN);
+		PlayerPiece blackKnight = BLACK_KNIGHT;
 
-		assertEquals(WHITE_PAWN_1, WHITE_PAWN_1);
-		assertEquals(WHITE_PAWN_1, WHITE_PAWN_2);
-		assertEquals(WHITE_PAWN_2, WHITE_PAWN_1);
-		assertNotEquals(null, WHITE_PAWN_1);
-		assertNotEquals(WHITE_PAWN_1, null);
-		assertNotEquals(WHITE_PAWN_1, BLACK_KNIGHT);
-		assertNotEquals(BLACK_KNIGHT, WHITE_PAWN_1);
-		assertNotEquals(WHITE_PAWN_1, "foobar");
+		assertEquals(whitePawn1, whitePawn1);
+		assertEquals(whitePawn1, whitePawn2);
+		assertEquals(whitePawn2, whitePawn1);
+		assertNotEquals(null, whitePawn1);
+		assertNotEquals(whitePawn1, null);
+		assertNotEquals(whitePawn1, blackKnight);
+		assertNotEquals(blackKnight, whitePawn1);
+		assertNotEquals(whitePawn1, "foobar");
 
-		assertEquals(WHITE_PAWN_1.hashCode(), WHITE_PAWN_2.hashCode());
-		assertNotEquals(WHITE_PAWN_1.hashCode(), BLACK_KNIGHT.hashCode());
+		assertEquals(whitePawn1.hashCode(), whitePawn2.hashCode());
+		assertNotEquals(whitePawn1.hashCode(), blackKnight.hashCode());
 	}
 
 	@Test
