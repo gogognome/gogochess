@@ -1,4 +1,4 @@
-package nl.gogognome.gogochess.game;
+package nl.gogognome.gogochess.game.piece;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
@@ -9,12 +9,14 @@ import static nl.gogognome.gogochess.game.Board.*;
 import static nl.gogognome.gogochess.game.Board.WHITE_PAWN;
 import static nl.gogognome.gogochess.game.BoardMutation.Mutation.ADD;
 import static nl.gogognome.gogochess.game.BoardMutation.Mutation.REMOVE;
+import static nl.gogognome.gogochess.game.Moves.assertMovesContain;
 import static nl.gogognome.gogochess.game.Player.WHITE;
 import static nl.gogognome.gogochess.game.Squares.*;
 import static nl.gogognome.gogochess.game.Squares.A8;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.*;
 import org.junit.jupiter.api.*;
+import nl.gogognome.gogochess.game.*;
 
 class PawnTest {
 
@@ -80,12 +82,10 @@ class PawnTest {
 		List<Move> moves = board.validMoves(WHITE);
 
 		assertTrue(moves.toString().contains("b2xa3"), "actual moves: " + moves);
-		List<List<BoardMutation>> actualMoves = moves.stream().map(Move::getBoardMutations).collect(toList());
-		assertTrue(actualMoves.contains(asList(
+		assertMovesContain(moves,
 				new BoardMutation(WHITE_PAWN, B2, REMOVE),
 				new BoardMutation(BLACK_PAWN, A3, REMOVE),
-				new BoardMutation(WHITE_PAWN, A3, ADD))),
-				actualMoves.toString());
+				new BoardMutation(WHITE_PAWN, A3, ADD));
 	}
 
 	@Test
@@ -102,12 +102,10 @@ class PawnTest {
 		List<Move> moves = board.validMoves(WHITE);
 
 		assertTrue(moves.toString().contains("b5xa6"), "actual moves: " + moves);
-		List<List<BoardMutation>> actualMoves = moves.stream().map(Move::getBoardMutations).collect(toList());
-		assertTrue(actualMoves.contains(asList(
+		assertMovesContain(moves,
 				new BoardMutation(WHITE_PAWN, B5, REMOVE),
 				new BoardMutation(BLACK_PAWN, A5, REMOVE),
-				new BoardMutation(WHITE_PAWN, A6, ADD))),
-				actualMoves.toString());
+				new BoardMutation(WHITE_PAWN, A6, ADD));
 	}
 
 	@Test

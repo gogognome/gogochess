@@ -1,4 +1,4 @@
-package nl.gogognome.gogochess.game;
+package nl.gogognome.gogochess.game.piece;
 
 import static nl.gogognome.gogochess.game.Board.*;
 import static nl.gogognome.gogochess.game.Piece.*;
