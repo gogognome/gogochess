@@ -19,45 +19,45 @@ public class Pawn extends PlayerPiece {
 		promotionRow = player == WHITE ? 7 : 0;
 	}
 
-	public void addPossibleMoves(List<Move> moves, Square square, Board board) {
-		Square destination1 = square.addRow(forwardRowDelta);
-		if (board.empty(destination1)) {
-			addMoveIncludingPromotions(moves, new Move(moveNotation(square, destination1), board.lastMove(),
-					removeFrom(square), addTo(destination1)));
+	public void addPossibleMoves(List<Move> moves, Square from, Board board) {
+		Square to1 = from.addRow(forwardRowDelta);
+		if (board.empty(to1)) {
+			addMoveIncludingPromotions(moves, new Move(moveNotation(from, to1), board.lastMove(),
+					removeFrom(from), addTo(to1)));
 		}
 
-		Square destination2 = square.addRow(2 * forwardRowDelta);
-		if (square.row() == initialRow && board.empty(destination1) && board.empty(destination2)) {
-			addMoveIncludingPromotions(moves, new Move(moveNotation(square, destination2), board.lastMove(),
-					removeFrom(square), addTo(destination2)));
+		Square to2 = from.addRow(2 * forwardRowDelta);
+		if (from.row() == initialRow && board.empty(to1) && board.empty(to2)) {
+			addMoveIncludingPromotions(moves, new Move(moveNotation(from, to2), board.lastMove(),
+					removeFrom(from), addTo(to2)));
 		}
 
-		if (square.column() > 0) {
-			Square captureDestination = square.addColumnAndRow(-1, forwardRowDelta);
-			addCaptureMove(moves, square, board, captureDestination);
-			addEnPassantCaptureMove(moves, square, board, captureDestination);
+		if (from.column() > 0) {
+			Square to = from.addColumnAndRow(-1, forwardRowDelta);
+			addCaptureMove(moves, from, board, to);
+			addEnPassantCaptureMove(moves, from, board, to);
 		}
-		if (square.column() < 7) {
-			Square captureDestination = square.addColumnAndRow(1, forwardRowDelta);
-			addCaptureMove(moves, square, board, captureDestination);
-			addEnPassantCaptureMove(moves, square, board, captureDestination);
+		if (from.column() < 7) {
+			Square to = from.addColumnAndRow(1, forwardRowDelta);
+			addCaptureMove(moves, from, board, to);
+			addEnPassantCaptureMove(moves, from, board, to);
 		}
 	}
 
-	private void addCaptureMove(List<Move> moves, Square square, Board board, Square captureDestination) {
-		PlayerPiece capturedPiece = board.pieceAt(captureDestination);
+	private void addCaptureMove(List<Move> moves, Square square, Board board, Square to) {
+		PlayerPiece capturedPiece = board.pieceAt(to);
 		if (capturedPiece != null && capturedPiece.getPlayer() == getPlayer().other()) {
-			addMoveIncludingPromotions(moves, new Move(captureNotation(square, captureDestination, capturedPiece), board.lastMove(),
-					removeFrom(square), capturedPiece.removeFrom(captureDestination), addTo(captureDestination)));
+			addMoveIncludingPromotions(moves, new Move(captureNotation(square, to, capturedPiece), board.lastMove(),
+					removeFrom(square), capturedPiece.removeFrom(to), addTo(to)));
 		}
 	}
 
-	private void addEnPassantCaptureMove(List<Move> moves, Square square, Board board, Square captureDestination) {
-		Square capturedPawnSquare = captureDestination.addRow(-forwardRowDelta);
+	private void addEnPassantCaptureMove(List<Move> moves, Square square, Board board, Square to) {
+		Square capturedPawnSquare = to.addRow(-forwardRowDelta);
 		PlayerPiece capturedPiece = board.pieceAt(capturedPawnSquare);
 		if (canCaptureEnPassant(board, capturedPawnSquare, capturedPiece)) {
-			addMoveIncludingPromotions(moves, new Move(captureNotation(square, captureDestination, capturedPiece), board.lastMove(),
-					removeFrom(square), capturedPiece.removeFrom(capturedPawnSquare), addTo(captureDestination)));
+			addMoveIncludingPromotions(moves, new Move(captureNotation(square, to, capturedPiece), board.lastMove(),
+					removeFrom(square), capturedPiece.removeFrom(capturedPawnSquare), addTo(to)));
 		}
 	}
 
