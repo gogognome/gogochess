@@ -6,9 +6,11 @@ import java.util.*;
 
 public class Move {
 
+	private int depthInTree;
 	private final Move precedingMove;
 	private List<BoardMutation> boardMutations;
 	private String description;
+	private List<Move> followingMoves;
 
 	public Move(String description, Move precedingMove, BoardMutation... boardMutations) {
 		this(description, precedingMove, asList(boardMutations));
@@ -18,6 +20,7 @@ public class Move {
 		this.precedingMove = precedingMove;
 		this.boardMutations = Collections.unmodifiableList(boardMutations);
 		this.description = description;
+		this.depthInTree = precedingMove == null ? 0 : precedingMove.depthInTree + 1;
 	}
 
 	public List<BoardMutation> getBoardMutations() {
@@ -30,6 +33,35 @@ public class Move {
 
 	public String getDescription() {
 		return description;
+	}
+
+	public boolean hasFollowingMoves() {
+		return followingMoves != null;
+	}
+
+	public List<Move> getFollowingMoves() {
+		return followingMoves;
+	}
+
+	public void setFollowingMoves(List<Move> followingMoves) {
+		this.followingMoves = followingMoves;
+	}
+
+	public static Move findCommonAncestor(Move left, Move right) {
+		if (left == null || right == null) {
+			return null;
+		}
+		while (left.depthInTree > right.depthInTree) {
+			left = left.precedingMove;
+		}
+		while (right.depthInTree > left.depthInTree) {
+			right = right.precedingMove;
+		}
+		while (left != right) {
+			left = left.precedingMove;
+			right = right.precedingMove;
+		}
+		return left;
 	}
 
 	@Override

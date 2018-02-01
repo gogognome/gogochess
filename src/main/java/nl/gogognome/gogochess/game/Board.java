@@ -27,10 +27,41 @@ public class Board {
 	private PlayerPiece[] playerPiecesPerSquare = new PlayerPiece[8*8];
 
 	public void process(Move move) {
+		Move commonAncestor = Move.findCommonAncestor(lastMove, move);
+		undoUntil(commonAncestor);
+		processForwardUntil(move, commonAncestor);
+		lastMove = move;
+	}
+
+	private void undoUntil(Move commonAncestor) {
+		while (lastMove != commonAncestor) {
+			undoSingleMove(lastMove);
+			lastMove = lastMove.getPrecedingMove();
+		}
+	}
+
+	private void processForwardUntil(Move move, Move commonAncestor) {
+		Deque<Move> moves = new LinkedList<>();
+		while (move != commonAncestor) {
+			moves.push(move);
+			move = move.getPrecedingMove();
+		}
+		while (!moves.isEmpty()) {
+			processSingleMove(moves.pop());
+		}
+	}
+
+	private void processSingleMove(Move move) {
 		for (BoardMutation boardMutation : move.getBoardMutations()) {
 			process(boardMutation);
 		}
-		lastMove = move;
+	}
+
+	private void undoSingleMove(Move move) {
+		List<BoardMutation> boardMutations = move.getBoardMutations();
+		for (int i=boardMutations.size() - 1; i >=0; i--) {
+			undo(boardMutations.get(i));
+		}
 	}
 
 	void process(BoardMutation mutation) {
@@ -40,6 +71,19 @@ public class Board {
 				break;
 			case REMOVE:
 				removePlayerPiece(mutation.getPlayerPiece(), mutation.getSquare());
+				break;
+			default:
+				throw new IllegalArgumentException("Unexpected mutation found: " + mutation.getMutation());
+		}
+	}
+
+	private void undo(BoardMutation mutation) {
+		switch (mutation.getMutation()) {
+			case ADD:
+				removePlayerPiece(mutation.getPlayerPiece(), mutation.getSquare());
+				break;
+			case REMOVE:
+				addPlayerPiece(mutation.getPlayerPiece(), mutation.getSquare());
 				break;
 			default:
 				throw new IllegalArgumentException("Unexpected mutation found: " + mutation.getMutation());
@@ -76,14 +120,20 @@ public class Board {
 	}
 
 	public List<Move> validMoves(Player player) {
-		List<Move> moves = new ArrayList<>(40);
-		for (int index=0; index < playerPiecesPerSquare.length; index++) {
-			PlayerPiece playerPiece = playerPiecesPerSquare[index];
-			if (playerPiece != null && playerPiece.getPlayer() == player) {
-				playerPiece.addPossibleMoves(moves, new Square(index), this);
-			}
+		if (lastMove == null) {
+			throw new IllegalStateException("No moves can be determined when the board is empty");
 		}
-		return moves;
+		if (!lastMove.hasFollowingMoves()) {
+			List<Move> moves = new ArrayList<>(40);
+			for (int index = 0; index < playerPiecesPerSquare.length; index++) {
+				PlayerPiece playerPiece = playerPiecesPerSquare[index];
+				if (playerPiece != null && playerPiece.getPlayer() == player) {
+					playerPiece.addPossibleMoves(moves, new Square(index), this);
+				}
+			}
+			lastMove.setFollowingMoves(moves);
+		}
+		return lastMove.getFollowingMoves();
 	}
 
 	public Move lastMove() {

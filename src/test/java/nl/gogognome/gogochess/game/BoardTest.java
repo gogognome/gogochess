@@ -1,11 +1,12 @@
 package nl.gogognome.gogochess.game;
 
-import static java.util.Collections.*;
 import static nl.gogognome.gogochess.game.Board.*;
 import static nl.gogognome.gogochess.game.BoardMutation.Mutation.*;
+import static nl.gogognome.gogochess.game.Moves.*;
 import static nl.gogognome.gogochess.game.Player.*;
 import static nl.gogognome.gogochess.game.Squares.*;
 import static org.junit.jupiter.api.Assertions.*;
+import java.util.*;
 import org.junit.jupiter.api.*;
 
 class BoardTest {
@@ -72,8 +73,48 @@ class BoardTest {
 
 	@Test
 	void validMovesForEmptyBoard() {
-		assertEquals(emptyList(), board.validMoves(WHITE));
-		assertEquals(emptyList(), board.validMoves(BLACK));
+		assertThrows(IllegalStateException.class, () -> board.validMoves(WHITE));
+		assertThrows(IllegalStateException.class, () -> board.validMoves(BLACK));
+	}
+
+	@Test
+	void undoMove() {
+		board.process(Move.INITIAL_BOARD);
+		List<Move> moves = board.validMoves(WHITE);
+		board.process(find(moves, "e2-e4"));
+		board.process(Move.INITIAL_BOARD);
+
+		String actualBoard = board.toString();
+		assertEquals(
+				"RKBQKBKR\n" +
+				"PPPPPPPP\n" +
+				"* * * * \n" +
+				" * * * *\n" +
+				"* * * * \n" +
+				" * * * *\n" +
+				"pppppppp\n" +
+				"rkbqkbkr\n",
+				actualBoard);
+	}
+
+	@Test
+	void automaticallyUndoMoveAndProcessNewMove() {
+		board.process(Move.INITIAL_BOARD);
+		List<Move> moves = board.validMoves(WHITE);
+		board.process(find(moves, "e2-e4"));
+		board.process(find(moves, "d2-d4"));
+
+		String actualBoard = board.toString();
+		assertEquals(
+				"RKBQKBKR\n" +
+				"PPPPPPPP\n" +
+				"* * * * \n" +
+				" * * * *\n" +
+				"* *p* * \n" +
+				" * * * *\n" +
+				"ppp pppp\n" +
+				"rkbqkbkr\n",
+				actualBoard);
 	}
 
 }
