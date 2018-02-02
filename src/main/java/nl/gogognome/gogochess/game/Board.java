@@ -1,9 +1,7 @@
 package nl.gogognome.gogochess.game;
 
 import static nl.gogognome.gogochess.game.Piece.*;
-import static nl.gogognome.gogochess.game.Piece.KING;
-import static nl.gogognome.gogochess.game.Player.BLACK;
-import static nl.gogognome.gogochess.game.Player.WHITE;
+import static nl.gogognome.gogochess.game.Player.*;
 import java.util.*;
 import nl.gogognome.gogochess.game.piece.*;
 
@@ -13,13 +11,13 @@ public class Board {
 	public static final PlayerPiece WHITE_KNIGHT = new Knight(WHITE);
 	public static final PlayerPiece WHITE_BISHOP = new Bishop(WHITE);
 	public static final PlayerPiece WHITE_ROOK = new Rook(WHITE);
-	public static final PlayerPiece WHITE_QUEEN = new PlayerPiece(WHITE, QUEEN);
+	public static final PlayerPiece WHITE_QUEEN = new Queen(WHITE);
 	public static final PlayerPiece WHITE_KING = new PlayerPiece(WHITE, KING);
 	public static final PlayerPiece BLACK_PAWN = new Pawn(BLACK);
 	public static final PlayerPiece BLACK_KNIGHT = new Knight(BLACK);
 	public static final PlayerPiece BLACK_BISHOP = new Bishop(BLACK);
 	public static final PlayerPiece BLACK_ROOK = new Rook(BLACK);
-	public static final PlayerPiece BLACK_QUEEN = new PlayerPiece(BLACK, QUEEN);
+	public static final PlayerPiece BLACK_QUEEN = new Queen(BLACK);
 	public static final PlayerPiece BLACK_KING = new PlayerPiece(BLACK, KING);
 
 	private Move lastMove;
