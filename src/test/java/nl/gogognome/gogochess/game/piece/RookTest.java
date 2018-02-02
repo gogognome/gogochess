@@ -14,6 +14,7 @@ import org.junit.jupiter.api.*;
 import nl.gogognome.gogochess.game.*;
 
 class RookTest {
+
 	private final Board board = new Board();
 
 	@Test
