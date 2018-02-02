@@ -19,4 +19,15 @@ public class Knight extends PlayerPiece {
 			addMoveToEmptyFieldOCapture(moves, board, square, to);
 		}
 	}
+
+	@Override
+	public boolean attacks(Square pieceSquare, Square attackedSquare, Board board) {
+		for (int i=0; i<DELTA_X.length; i++) {
+			Square to = pieceSquare.addColumnAndRow(DELTA_X[i], DELTA_Y[i]);
+			if (attackedSquare.equals(to)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

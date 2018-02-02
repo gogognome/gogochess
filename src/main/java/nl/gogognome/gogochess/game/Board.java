@@ -2,6 +2,8 @@ package nl.gogognome.gogochess.game;
 
 import static nl.gogognome.gogochess.game.Player.*;
 import java.util.*;
+import java.util.concurrent.atomic.*;
+import java.util.function.*;
 import nl.gogognome.gogochess.game.piece.*;
 
 public class Board {
@@ -122,15 +124,50 @@ public class Board {
 		}
 		if (!lastMove.hasFollowingMoves()) {
 			List<Move> moves = new ArrayList<>(40);
-			for (int index = 0; index < playerPiecesPerSquare.length; index++) {
-				PlayerPiece playerPiece = playerPiecesPerSquare[index];
-				if (playerPiece != null && playerPiece.getPlayer() == player) {
-					playerPiece.addPossibleMoves(moves, new Square(index), this);
-				}
-			}
+			addMovesIgnoringCheck(player, moves);
+			determineCheck(player, moves);
 			lastMove.setFollowingMoves(moves);
 		}
 		return lastMove.getFollowingMoves();
+	}
+
+	private void addMovesIgnoringCheck(Player player, List<Move> moves) {
+		forEachPlayerPiece(player, (playerPiece, square) -> playerPiece.addPossibleMoves(moves, square, this));
+	}
+
+	private void determineCheck(Player player, List<Move> moves) {
+		for (Move move : moves) {
+			processSingleMove(move);
+
+			Square oppositeKingSquare = squareOf(new King(player.other()));
+			if (oppositeKingSquare != null) {
+				AtomicBoolean chess = new AtomicBoolean();
+				forEachPlayerPiece(player, (playerPiece, square) -> chess.set(chess.get() || playerPiece.attacks(square, oppositeKingSquare, this)));
+				if (chess.get()) {
+					move.setCheck();
+				}
+			}
+
+			undoSingleMove(move);
+		}
+	}
+
+	private void forEachPlayerPiece(Player player, BiConsumer<PlayerPiece, Square> action) {
+		for (int index = 0; index < playerPiecesPerSquare.length; index++) {
+			PlayerPiece playerPiece = playerPiecesPerSquare[index];
+			if (playerPiece != null && playerPiece.getPlayer() == player) {
+				action.accept(playerPiece, new Square(index));
+			}
+		}
+	}
+
+	private Square squareOf(PlayerPiece playerPiece) {
+		for (int index = 0; index < playerPiecesPerSquare.length; index++) {
+			if (playerPiece.equals(playerPiecesPerSquare[index])) {
+				return new Square(index);
+			}
+		}
+		return null;
 	}
 
 	public Move lastMove() {

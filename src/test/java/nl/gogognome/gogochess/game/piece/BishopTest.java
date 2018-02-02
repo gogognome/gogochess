@@ -74,4 +74,48 @@ class BishopTest {
 				WHITE_BISHOP.addTo(F5));
 		assertFalse(moves.toString().contains("Be4-g6"), moves.toString());
 	}
+
+	@Test
+	void bishopDoesNotAttacksSquareItCannotReach() {
+		Move setup = new Move("setup", null,
+				new BoardMutation(WHITE_BISHOP, E4, ADD));
+		board.process(setup);
+
+		assertFalse(WHITE_BISHOP.attacks(E4, E5, board));
+		assertFalse(WHITE_BISHOP.attacks(E4, F4, board));
+		assertFalse(WHITE_BISHOP.attacks(E4, E3, board));
+		assertFalse(WHITE_BISHOP.attacks(E4, D4, board));
+	}
+
+	@Test
+	void bishopAttacksSquareContainingOwnPiece() {
+		Move setup = new Move("setup", null,
+				new BoardMutation(WHITE_BISHOP, E4, ADD),
+				new BoardMutation(WHITE_QUEEN, F5, ADD));
+		board.process(setup);
+
+		assertTrue(WHITE_BISHOP.attacks(E4, F5, board));
+		assertFalse(WHITE_BISHOP.attacks(E4, G6, board));
+	}
+
+	@Test
+	void bishopAttacksSquareContainingOtherPlayersPiece() {
+		Move setup = new Move("setup", null,
+				new BoardMutation(WHITE_BISHOP, E4, ADD),
+				new BoardMutation(BLACK_QUEEN, F5, ADD));
+		board.process(setup);
+
+		assertTrue(WHITE_BISHOP.attacks(E4, F5, board));
+		assertFalse(WHITE_BISHOP.attacks(E4, G6, board));
+	}
+
+	@Test
+	void bishopDoesNotAttacksUnreachableSquare() {
+		Move setup = new Move("setup", null,
+				new BoardMutation(WHITE_BISHOP, E4, ADD));
+		board.process(setup);
+
+		assertFalse(WHITE_BISHOP.attacks(E4, E5, board));
+	}
+
 }

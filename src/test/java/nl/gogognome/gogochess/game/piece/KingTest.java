@@ -68,4 +68,35 @@ class KingTest {
 				BLACK_KING.addTo(E5));
 	}
 
+
+	@Test
+	void kingAttacksSquareContainingOPiece() {
+		Move setup = new Move("setup", null,
+				new BoardMutation(BLACK_KING, E4, ADD),
+				new BoardMutation(BLACK_ROOK, E5, ADD));
+		board.process(setup);
+
+		assertTrue(BLACK_KING.attacks(E4, E5, board));
+	}
+
+	@Test
+	void kingAttacksSquareContainingOtherPlayersPiece() {
+		Move setup = new Move("setup", null,
+				new BoardMutation(BLACK_KING, E4, ADD),
+				new BoardMutation(WHITE_ROOK, E5, ADD));
+		board.process(setup);
+
+		assertTrue(BLACK_KING.attacks(E4, E5, board));
+	}
+
+	@Test
+	void kingDoesNotAttackUnreachableSquare() {
+		Move setup = new Move("setup", null,
+				new BoardMutation(BLACK_KING, E4, ADD));
+		board.process(setup);
+
+		assertFalse(BLACK_KING.attacks(E4, E6, board));
+	}
+
+
 }

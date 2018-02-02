@@ -1,18 +1,16 @@
 package nl.gogognome.gogochess.game.piece;
 
 import static nl.gogognome.gogochess.game.Board.*;
-import static nl.gogognome.gogochess.game.Piece.*;
 import static nl.gogognome.gogochess.game.Player.*;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.*;
-import nl.gogognome.gogochess.game.piece.*;
 
 class PlayerPieceTest {
 
 	@Test
 	void testEqualsAndHashCode() {
 		PlayerPiece whitePawn1 = WHITE_PAWN;
-		PlayerPiece whitePawn2 = new PlayerPiece(WHITE, PAWN);
+		PlayerPiece whitePawn2 = new Pawn(WHITE);
 		PlayerPiece blackKnight = BLACK_KNIGHT;
 
 		assertEquals(whitePawn1, whitePawn1);
@@ -30,6 +28,6 @@ class PlayerPieceTest {
 
 	@Test
 	void testToString() {
-		assertEquals("white pawn", new PlayerPiece(WHITE, PAWN).toString());
+		assertEquals("white pawn", new Pawn(WHITE).toString());
 	}
 }

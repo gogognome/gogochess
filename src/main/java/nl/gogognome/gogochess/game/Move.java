@@ -1,11 +1,14 @@
 package nl.gogognome.gogochess.game;
 
 import static java.util.Arrays.*;
-import static nl.gogognome.gogochess.game.BoardMutation.Mutation.*;
+import static nl.gogognome.gogochess.game.Board.*;
+import static nl.gogognome.gogochess.game.Squares.*;
 import java.util.*;
 
 public class Move {
 
+	private boolean check;
+	private boolean mate;
 	private int depthInTree;
 	private final Move precedingMove;
 	private List<BoardMutation> boardMutations;
@@ -64,42 +67,72 @@ public class Move {
 		return left;
 	}
 
+	public void setCheck() {
+		check = true;
+	}
+
+	public boolean isCheck() {
+		return check;
+	}
+
+	public void setMate() {
+		this.mate = true;
+	}
+
+	public boolean isMate() {
+		return mate;
+	}
+
+	public boolean isCheckMate() {
+		return isCheck() && isMate();
+	}
+
+	public boolean isStaleMate() {
+		return !isCheck() && isMate();
+	}
+
 	@Override
 	public String toString() {
-		return description;
+		String postfix = "";
+		if (isCheckMate()) {
+			postfix = "++";
+		} else if (isCheck()) {
+			postfix = "+";
+		}
+		return description + postfix;
 	}
 
 	public final static Move INITIAL_BOARD = new Move("initial board", null,
-			new BoardMutation(Board.WHITE_ROOK, new Square("A1"), ADD),
-			new BoardMutation(Board.WHITE_KNIGHT, new Square("B1"), ADD),
-			new BoardMutation(Board.WHITE_BISHOP, new Square("C1"), ADD),
-			new BoardMutation(Board.WHITE_QUEEN, new Square("D1"), ADD),
-			new BoardMutation(Board.WHITE_KING, new Square("E1"), ADD),
-			new BoardMutation(Board.WHITE_BISHOP, new Square("F1"), ADD),
-			new BoardMutation(Board.WHITE_KNIGHT, new Square("G1"), ADD),
-			new BoardMutation(Board.WHITE_ROOK, new Square("H1"), ADD),
-			new BoardMutation(Board.WHITE_PAWN, new Square("A2"), ADD),
-			new BoardMutation(Board.WHITE_PAWN, new Square("B2"), ADD),
-			new BoardMutation(Board.WHITE_PAWN, new Square("C2"), ADD),
-			new BoardMutation(Board.WHITE_PAWN, new Square("D2"), ADD),
-			new BoardMutation(Board.WHITE_PAWN, new Square("E2"), ADD),
-			new BoardMutation(Board.WHITE_PAWN, new Square("F2"), ADD),
-			new BoardMutation(Board.WHITE_PAWN, new Square("G2"), ADD),
-			new BoardMutation(Board.WHITE_PAWN, new Square("H2"), ADD),
-			new BoardMutation(Board.BLACK_PAWN, new Square("A7"), ADD),
-			new BoardMutation(Board.BLACK_PAWN, new Square("B7"), ADD),
-			new BoardMutation(Board.BLACK_PAWN, new Square("C7"), ADD),
-			new BoardMutation(Board.BLACK_PAWN, new Square("D7"), ADD),
-			new BoardMutation(Board.BLACK_PAWN, new Square("E7"), ADD),
-			new BoardMutation(Board.BLACK_PAWN, new Square("F7"), ADD),
-			new BoardMutation(Board.BLACK_PAWN, new Square("G7"), ADD),
-			new BoardMutation(Board.BLACK_PAWN, new Square("H7"), ADD),
-			new BoardMutation(Board.BLACK_ROOK, new Square("A8"), ADD),
-			new BoardMutation(Board.BLACK_KNIGHT, new Square("B8"), ADD),
-			new BoardMutation(Board.BLACK_BISHOP, new Square("C8"), ADD),
-			new BoardMutation(Board.BLACK_QUEEN, new Square("D8"), ADD),
-			new BoardMutation(Board.BLACK_KING, new Square("E8"), ADD),
-			new BoardMutation(Board.BLACK_BISHOP, new Square("F8"), ADD),
-			new BoardMutation(Board.BLACK_KNIGHT, new Square("G8"), ADD),
-			new BoardMutation(Board.BLACK_ROOK, new Square("H8"), ADD));
+			WHITE_ROOK.addTo(A1),
+			WHITE_KNIGHT.addTo(B1),
+			WHITE_BISHOP.addTo(C1),
+			WHITE_QUEEN.addTo(D1),
+			WHITE_KING.addTo(E1),
+			WHITE_BISHOP.addTo(F1),
+			WHITE_KNIGHT.addTo(G1),
+			WHITE_ROOK.addTo(H1),
+			WHITE_PAWN.addTo(A2),
+			WHITE_PAWN.addTo(B2),
+			WHITE_PAWN.addTo(C2),
+			WHITE_PAWN.addTo(D2),
+			WHITE_PAWN.addTo(E2),
+			WHITE_PAWN.addTo(F2),
+			WHITE_PAWN.addTo(G2),
+			WHITE_PAWN.addTo(H2),
+			BLACK_PAWN.addTo(A7),
+			BLACK_PAWN.addTo(B7),
+			BLACK_PAWN.addTo(C7),
+			BLACK_PAWN.addTo(D7),
+			BLACK_PAWN.addTo(E7),
+			BLACK_PAWN.addTo(F7),
+			BLACK_PAWN.addTo(G7),
+			BLACK_PAWN.addTo(H7),
+			BLACK_ROOK.addTo(A8),
+			BLACK_KNIGHT.addTo(B8),
+			BLACK_BISHOP.addTo(C8),
+			BLACK_QUEEN.addTo(D8),
+			BLACK_KING.addTo(E8),
+			BLACK_BISHOP.addTo(F8),
+			BLACK_KNIGHT.addTo(G8),
+			BLACK_ROOK.addTo(H8));
 }

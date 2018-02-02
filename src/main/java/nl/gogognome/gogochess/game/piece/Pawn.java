@@ -71,8 +71,7 @@ public class Pawn extends PlayerPiece {
 		BoardMutation lastMutation = move.getBoardMutations().get(move.getBoardMutations().size() - 1);
 		if (lastMutation.getSquare().row() == promotionRow) {
 			Player player = lastMutation.getPlayerPiece().getPlayer();
-			for (Piece piece : new Piece[] { KNIGHT, BISHOP, ROOK, QUEEN }) {
-				PlayerPiece promotedPlayerPiece = new PlayerPiece(player, piece);
+			for (PlayerPiece promotedPlayerPiece : new PlayerPiece[] { new Knight(player), new Bishop(player), new Rook(player), new Queen(player) }) {
 				List<BoardMutation> modifiedMutations = new ArrayList<>(move.getBoardMutations());
 				modifiedMutations.set(modifiedMutations.size()-1, new BoardMutation(promotedPlayerPiece, lastMutation.getSquare(), lastMutation.getMutation()));
 				Move promotionMove = new Move(moveNotation.appendPromotionPiece(move.getDescription(), promotedPlayerPiece), move.getPrecedingMove(), modifiedMutations);
@@ -81,5 +80,11 @@ public class Pawn extends PlayerPiece {
 		} else {
 			moves.add(move);
 		}
+	}
+
+	@Override
+	public boolean attacks(Square pieceSquare, Square attackedSquare, Board board) {
+		return attackedSquare.equals(pieceSquare.addColumnAndRow(-1, forwardRowDelta))
+				|| attackedSquare.equals(pieceSquare.addColumnAndRow(1, forwardRowDelta));
 	}
 }

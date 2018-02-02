@@ -76,4 +76,38 @@ class RookTest {
 		assertFalse(moves.toString().contains("Be4-e6"), moves.toString());
 	}
 
+	@Test
+	void rookDoesNotAttacksSquareItCannotReach() {
+		Move setup = new Move("setup", null,
+				new BoardMutation(WHITE_ROOK, E4, ADD));
+		board.process(setup);
+
+		assertFalse(WHITE_ROOK.attacks(E4, F5, board));
+		assertFalse(WHITE_ROOK.attacks(E4, F3, board));
+		assertFalse(WHITE_ROOK.attacks(E4, D5, board));
+		assertFalse(WHITE_ROOK.attacks(E4, D3, board));
+	}
+
+	@Test
+	void rookAttacksSquareContainingOwnPiece() {
+		Move setup = new Move("setup", null,
+				new BoardMutation(WHITE_ROOK, E4, ADD),
+				new BoardMutation(WHITE_QUEEN, E5, ADD));
+		board.process(setup);
+
+		assertTrue(WHITE_ROOK.attacks(E4, E5, board));
+		assertFalse(WHITE_ROOK.attacks(E4, E6, board));
+	}
+
+	@Test
+	void rookAttacksSquareContainingOtherPlayersPiece() {
+		Move setup = new Move("setup", null,
+				new BoardMutation(WHITE_ROOK, E4, ADD),
+				new BoardMutation(BLACK_QUEEN, E5, ADD));
+		board.process(setup);
+
+		assertTrue(WHITE_ROOK.attacks(E4, E5, board));
+		assertFalse(WHITE_ROOK.attacks(E4, E6, board));
+	}
+
 }

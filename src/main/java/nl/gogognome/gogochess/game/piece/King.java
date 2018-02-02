@@ -20,4 +20,15 @@ public class King extends PlayerPiece {
 			addMoveToEmptyFieldOCapture(moves, board, square, to);
 		}
 	}
+
+	@Override
+	public boolean attacks(Square pieceSquare, Square attackedSquare, Board board) {
+		for (int i=0; i<deltaX.length; i++) {
+			Square to = pieceSquare.addColumnAndRow(deltaX[i], deltaY[i]);
+			if (attackedSquare.equals(to)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

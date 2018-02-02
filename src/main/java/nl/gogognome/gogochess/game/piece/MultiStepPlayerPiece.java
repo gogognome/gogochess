@@ -17,12 +17,28 @@ public abstract class MultiStepPlayerPiece extends PlayerPiece {
 	public void addPossibleMoves(List<Move> moves, Square square, Board board) {
 		for (int i = 0; i< deltaX.length; i++) {
 			Square to = square;
-			boolean toIsEmptyField;
+			boolean toIsEmptySquare;
 			do {
 				to = to.addColumnAndRow(deltaX[i], deltaY[i]);
-				toIsEmptyField = addMoveToEmptyFieldOCapture(moves, board, square, to);
-			} while (toIsEmptyField);
+				toIsEmptySquare = addMoveToEmptyFieldOCapture(moves, board, square, to);
+			} while (toIsEmptySquare);
 		}
 	}
 
+	@Override
+	public boolean attacks(Square pieceSquare, Square attackedSquare, Board board) {
+		for (int i = 0; i< deltaX.length; i++) {
+			Square to = pieceSquare;
+			boolean toIsEmptySquare;
+			do {
+				to = to.addColumnAndRow(deltaX[i], deltaY[i]);
+				if (attackedSquare.equals(to)) {
+					return true;
+				}
+				toIsEmptySquare = to != null && board.empty(to);
+			} while (toIsEmptySquare);
+		}
+
+		return false;
+	}
 }

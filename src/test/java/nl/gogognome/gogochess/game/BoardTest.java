@@ -117,4 +117,13 @@ class BoardTest {
 				actualBoard);
 	}
 
+	@Test
+	void moveCausingCheckIsMarkedAsCheck() {
+		board.process(new Move("initial setup", null,
+				WHITE_PAWN.addTo(E6),
+				BLACK_KING.addTo(F8)));
+
+		String moves = board.validMoves(WHITE).toString();
+		assertTrue(moves.contains("e6-e7+"), moves);
+	}
 }

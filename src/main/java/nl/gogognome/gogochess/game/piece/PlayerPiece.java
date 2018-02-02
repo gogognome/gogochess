@@ -4,7 +4,7 @@ import static nl.gogognome.gogochess.game.BoardMutation.Mutation.*;
 import java.util.*;
 import nl.gogognome.gogochess.game.*;
 
-public class PlayerPiece {
+public abstract class PlayerPiece {
 
 	protected MoveNotation moveNotation = new MoveNotation();
 
@@ -28,9 +28,7 @@ public class PlayerPiece {
 		return player;
 	}
 
-	// TODO: make this abstract after all pieces have been implemented
-	public void addPossibleMoves(List<Move> moves, Square square, Board board) {
-	}
+	public abstract void addPossibleMoves(List<Move> moves, Square square, Board board);
 
 	protected boolean addMoveToEmptyFieldOCapture(List<Move> moves, Board board, Square square, Square to) {
 		if (to == null) {
@@ -57,6 +55,8 @@ public class PlayerPiece {
 	public BoardMutation removeFrom(Square square) {
 		return new BoardMutation(this, square, REMOVE);
 	}
+
+	public abstract boolean attacks(Square pieceSquare, Square attackedSquare, Board board);
 
 	public String moveNotation(Square from, Square to) {
 		return moveNotation.move(this, from, to);

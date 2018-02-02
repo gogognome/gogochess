@@ -159,4 +159,23 @@ class PawnTest {
 		assertFalse(actualMoves.contains(asList(WHITE_PAWN.removeFrom(B7), BLACK_ROOK.removeFrom(A8), WHITE_PAWN.addTo(A8))), actualMoves.toString());
 	}
 
+	@Test
+	void pawnAttacksForwardLeftAndForwardRightSquares() {
+		Move setup = new Move("setup", null,
+				new BoardMutation(WHITE_PAWN, B7, ADD),
+				new BoardMutation(BLACK_ROOK, A8, ADD));
+		board.process(setup);
+
+		assertTrue(WHITE_PAWN.attacks(B7, A8, board));
+		assertTrue(WHITE_PAWN.attacks(B7, C8, board));
+	}
+
+	@Test
+	void pawnDoesNotAttacksUnreachableSquare() {
+		Move setup = new Move("setup", null,
+				new BoardMutation(WHITE_PAWN, B7, ADD));
+		board.process(setup);
+
+		assertFalse(WHITE_PAWN.attacks(B7, B8, board));
+	}
 }
