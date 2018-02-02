@@ -13,25 +13,10 @@ public class Knight extends PlayerPiece {
 		super(player, KNIGHT);
 	}
 
-	public void addPossibleMoves(List<Move> moves, Square from, Board board) {
+	public void addPossibleMoves(List<Move> moves, Square square, Board board) {
 		for (int i=0; i<DELTA_X.length; i++) {
-			Square to = from.addColumnAndRow(DELTA_X[i], DELTA_Y[i]);
-			if (to == null) {
-				continue;
-			}
-
-			PlayerPiece targetPiece = board.pieceAt(to);
-			if (targetPiece != null && targetPiece.getPlayer() == getPlayer()) {
-				continue;
-			}
-
-			if (targetPiece == null) {
-				moves.add(new Move(moveNotation(from, to), board.lastMove(),
-						removeFrom(from), addTo(to)));
-			} else {
-				moves.add(new Move(captureNotation(from, to, targetPiece), board.lastMove(),
-						removeFrom(from), targetPiece.removeFrom(to), addTo(to)));
-			}
+			Square to = square.addColumnAndRow(DELTA_X[i], DELTA_Y[i]);
+			addMoveToEmptyFieldOCapture(moves, board, square, to);
 		}
 	}
 }

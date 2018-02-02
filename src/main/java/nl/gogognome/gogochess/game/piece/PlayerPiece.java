@@ -32,6 +32,24 @@ public class PlayerPiece {
 	public void addPossibleMoves(List<Move> moves, Square square, Board board) {
 	}
 
+	protected boolean addMoveToEmptyFieldOCapture(List<Move> moves, Board board, Square square, Square to) {
+		if (to == null) {
+			return false;
+		}
+		PlayerPiece capturedPiece = board.pieceAt(to);
+		if (capturedPiece == null) {
+			moves.add(new Move(moveNotation(square, to), board.lastMove(),
+					removeFrom(square), addTo(to)));
+			return true;
+		} else {
+			if (capturedPiece.getPlayer() != getPlayer()) {
+				moves.add(new Move(captureNotation(square, to, capturedPiece), board.lastMove(),
+						removeFrom(square), capturedPiece.removeFrom(to), addTo(to)));
+			}
+			return false;
+		}
+	}
+
 	public BoardMutation addTo(Square square) {
 		return new BoardMutation(this, square, ADD);
 	}

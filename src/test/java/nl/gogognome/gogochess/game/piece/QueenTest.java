@@ -37,7 +37,7 @@ class QueenTest {
 	}
 
 	@Test
-	void rookCannotCapturePieceOfOwnPlayer() {
+	void queenCannotCapturePieceOfOwnPlayer() {
 		Move setup = new Move("setup", null,
 				new BoardMutation(WHITE_QUEEN, E4, ADD),
 				new BoardMutation(WHITE_ROOK, E5, ADD));
@@ -50,7 +50,7 @@ class QueenTest {
 	}
 
 	@Test
-	void rookCanCapturePieceOfOtherPlayer() {
+	void queenCanCapturePieceOfOtherPlayer() {
 		Move setup = new Move("setup", null,
 				new BoardMutation(WHITE_QUEEN, E4, ADD),
 				new BoardMutation(BLACK_ROOK, E5, ADD));
