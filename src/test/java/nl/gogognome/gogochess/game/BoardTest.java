@@ -2,6 +2,7 @@ package nl.gogognome.gogochess.game;
 
 import static nl.gogognome.gogochess.game.Board.*;
 import static nl.gogognome.gogochess.game.BoardMutation.Mutation.*;
+import static nl.gogognome.gogochess.game.Move.Status.*;
 import static nl.gogognome.gogochess.game.Moves.*;
 import static nl.gogognome.gogochess.game.Player.*;
 import static nl.gogognome.gogochess.game.Squares.*;
@@ -123,8 +124,9 @@ class BoardTest {
 				WHITE_PAWN.addTo(E6),
 				BLACK_KING.addTo(F8)));
 
-		String moves = board.validMoves(WHITE).toString();
-		assertTrue(moves.contains("e6-e7+"), moves);
+		List<Move> moves = board.validMoves(WHITE);
+		assertTrue(moves.toString().contains("e6-e7+"), moves.toString());
+		assertEquals(CHECK, Moves.find(moves, "e6-e7+").getStatus());
 	}
 
 	@Test
@@ -138,4 +140,28 @@ class BoardTest {
 		assertFalse(moves.contains("e6-e7"), moves);
 	}
 
+	@Test
+	void moveCausingCheckMateIsMarkedAsCheckMate() {
+		board.process(new Move("initial setup", null,
+				WHITE_QUEEN.addTo(G1),
+				WHITE_KING.addTo(F7),
+				BLACK_KING.addTo(H8)));
+
+		List<Move> moves = board.validMoves(WHITE);
+		assertTrue(moves.toString().contains("Qg1-g7++"), moves.toString());
+		assertEquals(CHECK_MATE, Moves.find(moves, "Qg1-g7++").getStatus());
+	}
+
+
+	@Test
+	void moveCausingStaleMateIsMarkedAsStaleMate() {
+		board.process(new Move("initial setup", null,
+				WHITE_QUEEN.addTo(G1),
+				WHITE_KING.addTo(F7),
+				BLACK_KING.addTo(H8)));
+
+		List<Move> moves = board.validMoves(WHITE);
+		assertTrue(moves.toString().contains("Qg1-g6"), moves.toString());
+		assertEquals(STALE_MATE, Moves.find(moves, "Qg1-g6").getStatus());
+	}
 }

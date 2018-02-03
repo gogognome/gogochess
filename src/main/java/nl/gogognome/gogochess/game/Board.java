@@ -1,5 +1,6 @@
 package nl.gogognome.gogochess.game;
 
+import static nl.gogognome.gogochess.game.Move.Status.*;
 import static nl.gogognome.gogochess.game.Player.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
@@ -166,7 +167,15 @@ public class Board {
 				AtomicBoolean attacksKing = new AtomicBoolean();
 				forEachPlayerPiece(player, (playerPiece, square) -> attacksKing.set(attacksKing.get() || playerPiece.attacks(square, oppositeKingSquare, this)));
 				if (attacksKing.get()) {
-					move.setCheck();
+					move.setStatus(CHECK);
+				}
+
+				List<Move> followingMoves = new ArrayList<>();
+				addMovesIgnoringCheck(player.other(), followingMoves);
+				removeMovesCausingCheckForOwnPlayer(player.other(), followingMoves);
+				move.setFollowingMoves(followingMoves);
+				if (followingMoves.isEmpty()) {
+					move.setStatus(move.getStatus() == CHECK ? CHECK_MATE : STALE_MATE);
 				}
 			}
 

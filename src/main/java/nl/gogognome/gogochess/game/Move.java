@@ -2,13 +2,20 @@ package nl.gogognome.gogochess.game;
 
 import static java.util.Arrays.*;
 import static nl.gogognome.gogochess.game.Board.*;
+import static nl.gogognome.gogochess.game.Move.Status.*;
 import static nl.gogognome.gogochess.game.Squares.*;
 import java.util.*;
 
 public class Move {
 
-	private boolean check;
-	private boolean mate;
+	public enum Status {
+		NORMAL,
+		CHECK,
+		CHECK_MATE,
+		STALE_MATE
+	}
+
+	private Status status = NORMAL;
 	private int depthInTree;
 	private final Move precedingMove;
 	private List<BoardMutation> boardMutations;
@@ -35,7 +42,13 @@ public class Move {
 	}
 
 	public String getDescription() {
-		return description;
+		String postfix = "";
+		if (status == CHECK_MATE) {
+			postfix = "++";
+		} else if (status == CHECK) {
+			postfix = "+";
+		}
+		return description + postfix;
 	}
 
 	public boolean hasFollowingMoves() {
@@ -67,39 +80,21 @@ public class Move {
 		return left;
 	}
 
-	public void setCheck() {
-		check = true;
+	public void setStatus(Status status) {
+		this.status = status;
 	}
 
-	public boolean isCheck() {
-		return check;
+	public Status getStatus() {
+		return status;
 	}
 
-	public void setMate() {
-		this.mate = true;
-	}
-
-	public boolean isMate() {
-		return mate;
-	}
-
-	public boolean isCheckMate() {
-		return isCheck() && isMate();
-	}
-
-	public boolean isStaleMate() {
-		return !isCheck() && isMate();
+	public boolean isMateChecked() {
+		return followingMoves != null;
 	}
 
 	@Override
 	public String toString() {
-		String postfix = "";
-		if (isCheckMate()) {
-			postfix = "++";
-		} else if (isCheck()) {
-			postfix = "+";
-		}
-		return description + postfix;
+		return getDescription();
 	}
 
 	public final static Move INITIAL_BOARD = new Move("initial board", null,
