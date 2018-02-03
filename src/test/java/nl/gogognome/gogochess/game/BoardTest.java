@@ -2,10 +2,10 @@ package nl.gogognome.gogochess.game;
 
 import static nl.gogognome.gogochess.game.Board.*;
 import static nl.gogognome.gogochess.game.BoardMutation.Mutation.*;
-import static nl.gogognome.gogochess.game.Move.Status.*;
 import static nl.gogognome.gogochess.game.Moves.*;
 import static nl.gogognome.gogochess.game.Player.*;
 import static nl.gogognome.gogochess.game.Squares.*;
+import static nl.gogognome.gogochess.game.Status.*;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.*;
 import org.junit.jupiter.api.*;

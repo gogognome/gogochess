@@ -1,6 +1,6 @@
 package nl.gogognome.gogochess.game;
 
-import static nl.gogognome.gogochess.game.Move.Status.*;
+import static nl.gogognome.gogochess.game.Status.*;
 import static nl.gogognome.gogochess.game.Player.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
@@ -127,9 +127,9 @@ public class Board {
 			List<Move> moves = new ArrayList<>(40);
 			addMovesIgnoringCheck(player, moves);
 			removeMovesCausingCheckForOwnPlayer(player, moves);
-			determineCheck(player, moves);
 			lastMove.setFollowingMoves(moves);
 		}
+		determineCheckAndMate(player, lastMove.getFollowingMoves());
 		return lastMove.getFollowingMoves();
 	}
 
@@ -158,29 +158,35 @@ public class Board {
 		}
 	}
 
-	private void determineCheck(Player player, List<Move> moves) {
+	private void determineCheckAndMate(Player player, List<Move> moves) {
 		for (Move move : moves) {
-			processSingleMove(move);
+			if (!move.isMateChecked()) {
+				determineCheckAndMate(player, move);
+			}
+		}
+	}
 
-			Square oppositeKingSquare = squareOf(new King(player.other()));
-			if (oppositeKingSquare != null) {
-				AtomicBoolean attacksKing = new AtomicBoolean();
-				forEachPlayerPiece(player, (playerPiece, square) -> attacksKing.set(attacksKing.get() || playerPiece.attacks(square, oppositeKingSquare, this)));
-				if (attacksKing.get()) {
-					move.setStatus(CHECK);
-				}
+	private void determineCheckAndMate(Player player, Move move) {
+		processSingleMove(move);
 
-				List<Move> followingMoves = new ArrayList<>();
-				addMovesIgnoringCheck(player.other(), followingMoves);
-				removeMovesCausingCheckForOwnPlayer(player.other(), followingMoves);
-				move.setFollowingMoves(followingMoves);
-				if (followingMoves.isEmpty()) {
-					move.setStatus(move.getStatus() == CHECK ? CHECK_MATE : STALE_MATE);
-				}
+		Square oppositeKingSquare = squareOf(new King(player.other()));
+		if (oppositeKingSquare != null) {
+			AtomicBoolean attacksKing = new AtomicBoolean();
+			forEachPlayerPiece(player, (playerPiece, square) -> attacksKing.set(attacksKing.get() || playerPiece.attacks(square, oppositeKingSquare, this)));
+			if (attacksKing.get()) {
+				move.setStatus(CHECK);
 			}
 
-			undoSingleMove(move);
+			List<Move> followingMoves = new ArrayList<>();
+			addMovesIgnoringCheck(player.other(), followingMoves);
+			removeMovesCausingCheckForOwnPlayer(player.other(), followingMoves);
+			move.setFollowingMoves(followingMoves);
+			if (followingMoves.isEmpty()) {
+				move.setStatus(move.getStatus() == CHECK ? CHECK_MATE : STALE_MATE);
+			}
 		}
+
+		undoSingleMove(move);
 	}
 
 	private void forEachPlayerPiece(Player player, BiConsumer<PlayerPiece, Square> action) {

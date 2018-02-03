@@ -2,18 +2,11 @@ package nl.gogognome.gogochess.game;
 
 import static java.util.Arrays.*;
 import static nl.gogognome.gogochess.game.Board.*;
-import static nl.gogognome.gogochess.game.Move.Status.*;
 import static nl.gogognome.gogochess.game.Squares.*;
+import static nl.gogognome.gogochess.game.Status.*;
 import java.util.*;
 
 public class Move {
-
-	public enum Status {
-		NORMAL,
-		CHECK,
-		CHECK_MATE,
-		STALE_MATE
-	}
 
 	private Status status = NORMAL;
 	private int depthInTree;
@@ -21,6 +14,7 @@ public class Move {
 	private List<BoardMutation> boardMutations;
 	private String description;
 	private List<Move> followingMoves;
+	private int value;
 
 	public Move(String description, Move precedingMove, BoardMutation... boardMutations) {
 		this(description, precedingMove, asList(boardMutations));
@@ -90,6 +84,14 @@ public class Move {
 
 	public boolean isMateChecked() {
 		return followingMoves != null;
+	}
+
+	public int getValue() {
+		return value;
+	}
+
+	public void setValue(int value) {
+		this.value = value;
 	}
 
 	@Override
