@@ -126,4 +126,16 @@ class BoardTest {
 		String moves = board.validMoves(WHITE).toString();
 		assertTrue(moves.contains("e6-e7+"), moves);
 	}
+
+	@Test
+	void moveCausingCheckForOwnPlayerIsNotValid() {
+		board.process(new Move("initial setup", null,
+				WHITE_PAWN.addTo(E6),
+				WHITE_KING.addTo(A6),
+				BLACK_QUEEN.addTo(H6)));
+
+		String moves = board.validMoves(WHITE).toString();
+		assertFalse(moves.contains("e6-e7"), moves);
+	}
+
 }

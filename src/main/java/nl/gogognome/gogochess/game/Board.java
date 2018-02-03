@@ -125,6 +125,7 @@ public class Board {
 		if (!lastMove.hasFollowingMoves()) {
 			List<Move> moves = new ArrayList<>(40);
 			addMovesIgnoringCheck(player, moves);
+			removeMovesCausingCheckForOwnPlayer(player, moves);
 			determineCheck(player, moves);
 			lastMove.setFollowingMoves(moves);
 		}
@@ -135,15 +136,36 @@ public class Board {
 		forEachPlayerPiece(player, (playerPiece, square) -> playerPiece.addPossibleMoves(moves, square, this));
 	}
 
+	private void removeMovesCausingCheckForOwnPlayer(Player player, List<Move> moves) {
+		int index = 0;
+		while (index < moves.size()) {
+			processSingleMove(moves.get(index));
+
+			AtomicBoolean attacksKing = new AtomicBoolean();
+			Square kingSquare = squareOf(new King(player));
+			if (kingSquare != null) {
+				forEachPlayerPiece(player.other(), (playerPiece, square) -> attacksKing.set(attacksKing.get() || playerPiece.attacks(square, kingSquare, this)));
+			}
+
+			undoSingleMove(moves.get(index));
+
+			if (attacksKing.get()) {
+				moves.remove(index);
+			} else {
+				index++;
+			}
+		}
+	}
+
 	private void determineCheck(Player player, List<Move> moves) {
 		for (Move move : moves) {
 			processSingleMove(move);
 
 			Square oppositeKingSquare = squareOf(new King(player.other()));
 			if (oppositeKingSquare != null) {
-				AtomicBoolean chess = new AtomicBoolean();
-				forEachPlayerPiece(player, (playerPiece, square) -> chess.set(chess.get() || playerPiece.attacks(square, oppositeKingSquare, this)));
-				if (chess.get()) {
+				AtomicBoolean attacksKing = new AtomicBoolean();
+				forEachPlayerPiece(player, (playerPiece, square) -> attacksKing.set(attacksKing.get() || playerPiece.attacks(square, oppositeKingSquare, this)));
+				if (attacksKing.get()) {
 					move.setCheck();
 				}
 			}
