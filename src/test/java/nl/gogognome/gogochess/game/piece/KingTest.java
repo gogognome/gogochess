@@ -19,7 +19,7 @@ class KingTest {
 
 	@Test
 	void validMovesForKingOnMiddleOfBoard() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", WHITE,
 				new BoardMutation(BLACK_KING, E4, ADD));
 		board.process(setup);
 
@@ -42,7 +42,7 @@ class KingTest {
 
 	@Test
 	void kingCannotCapturePieceOfOwnPlayer() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", WHITE,
 				new BoardMutation(BLACK_KING, E4, ADD),
 				new BoardMutation(BLACK_ROOK, E5, ADD));
 		board.process(setup);
@@ -54,7 +54,7 @@ class KingTest {
 
 	@Test
 	void kingCanCapturePieceOfOtherPlayer() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", WHITE,
 				new BoardMutation(BLACK_KING, E4, ADD),
 				new BoardMutation(WHITE_ROOK, E5, ADD));
 		board.process(setup);
@@ -71,7 +71,7 @@ class KingTest {
 
 	@Test
 	void kingAttacksSquareContainingOPiece() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", WHITE,
 				new BoardMutation(BLACK_KING, E4, ADD),
 				new BoardMutation(BLACK_ROOK, E5, ADD));
 		board.process(setup);
@@ -81,7 +81,7 @@ class KingTest {
 
 	@Test
 	void kingAttacksSquareContainingOtherPlayersPiece() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", WHITE,
 				new BoardMutation(BLACK_KING, E4, ADD),
 				new BoardMutation(WHITE_ROOK, E5, ADD));
 		board.process(setup);
@@ -91,7 +91,7 @@ class KingTest {
 
 	@Test
 	void kingDoesNotAttackUnreachableSquare() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", WHITE,
 				new BoardMutation(BLACK_KING, E4, ADD));
 		board.process(setup);
 

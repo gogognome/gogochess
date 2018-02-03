@@ -10,6 +10,7 @@ import static nl.gogognome.gogochess.game.Board.WHITE_PAWN;
 import static nl.gogognome.gogochess.game.BoardMutation.Mutation.ADD;
 import static nl.gogognome.gogochess.game.BoardMutation.Mutation.REMOVE;
 import static nl.gogognome.gogochess.game.Moves.assertMovesContain;
+import static nl.gogognome.gogochess.game.Player.BLACK;
 import static nl.gogognome.gogochess.game.Player.WHITE;
 import static nl.gogognome.gogochess.game.Squares.*;
 import static nl.gogognome.gogochess.game.Squares.A8;
@@ -24,7 +25,7 @@ class PawnTest {
 
 	@Test
 	void validMovesForPawnAtInitialPosition() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", BLACK,
 				new BoardMutation(WHITE_PAWN, A2, ADD));
 		board.process(setup);
 
@@ -41,7 +42,7 @@ class PawnTest {
 
 	@Test
 	void validMovesForPawnThatCannotMoveForward() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", BLACK,
 				new BoardMutation(WHITE_PAWN, A2, ADD),
 				new BoardMutation(BLACK_PAWN, A3, ADD));
 		board.process(setup);
@@ -57,7 +58,7 @@ class PawnTest {
 
 	@Test
 	void validMovesForPawnAtInitialPositionThatCannotMoveForwardOneStepButNotTwo() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", BLACK,
 				new BoardMutation(WHITE_PAWN, A2, ADD),
 				new BoardMutation(BLACK_PAWN, A4, ADD));
 		board.process(setup);
@@ -74,7 +75,7 @@ class PawnTest {
 
 	@Test
 	void validMovesForPawnThatCanCaptureAnotherPiece() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", BLACK,
 				new BoardMutation(WHITE_PAWN, B2, ADD),
 				new BoardMutation(BLACK_PAWN, A3, ADD));
 		board.process(setup);
@@ -90,7 +91,7 @@ class PawnTest {
 
 	@Test
 	void validMovesForPawnThatCanCaptureAnotherPawnEnPassant() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", BLACK,
 				new BoardMutation(WHITE_PAWN, B5, ADD),
 				new BoardMutation(BLACK_PAWN, A7, ADD));
 		board.process(setup);
@@ -110,7 +111,7 @@ class PawnTest {
 
 	@Test
 	void validMovesForPawnThatCannotCaptureAnotherPawnEnPassantBeacuseOtherPawnDidNotMoveTwoStepsInPreviousMove() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", BLACK,
 				new BoardMutation(WHITE_PAWN, B5, ADD),
 				new BoardMutation(BLACK_PAWN, A6, ADD));
 		board.process(setup);
@@ -126,7 +127,7 @@ class PawnTest {
 
 	@Test
 	void validMovesForPawnThatCanMoveAndPromote() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", BLACK,
 				new BoardMutation(WHITE_PAWN, B7, ADD));
 		board.process(setup);
 
@@ -143,7 +144,7 @@ class PawnTest {
 
 	@Test
 	void validMovesForPawnThatCanCaptureAnotherPieceAndPromote() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", BLACK,
 				new BoardMutation(WHITE_PAWN, B7, ADD),
 				new BoardMutation(BLACK_ROOK, A8, ADD));
 		board.process(setup);
@@ -161,7 +162,7 @@ class PawnTest {
 
 	@Test
 	void pawnAttacksForwardLeftAndForwardRightSquares() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", BLACK,
 				new BoardMutation(WHITE_PAWN, B7, ADD),
 				new BoardMutation(BLACK_ROOK, A8, ADD));
 		board.process(setup);
@@ -172,7 +173,7 @@ class PawnTest {
 
 	@Test
 	void pawnDoesNotAttacksUnreachableSquare() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", BLACK,
 				new BoardMutation(WHITE_PAWN, B7, ADD));
 		board.process(setup);
 

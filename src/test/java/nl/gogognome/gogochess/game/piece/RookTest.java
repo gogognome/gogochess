@@ -19,7 +19,7 @@ class RookTest {
 
 	@Test
 	void validMovesForRookOnMiddleOfBoard() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", WHITE,
 				new BoardMutation(BLACK_ROOK, E4, ADD));
 		board.process(setup);
 
@@ -48,7 +48,7 @@ class RookTest {
 
 	@Test
 	void rookCannotCapturePieceOfOwnPlayer() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", WHITE,
 				new BoardMutation(BLACK_ROOK, E4, ADD),
 				new BoardMutation(BLACK_BISHOP, E5, ADD));
 		board.process(setup);
@@ -61,7 +61,7 @@ class RookTest {
 
 	@Test
 	void rookCanCapturePieceOfOtherPlayer() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", WHITE,
 				new BoardMutation(BLACK_ROOK, E4, ADD),
 				new BoardMutation(WHITE_BISHOP, E5, ADD));
 		board.process(setup);
@@ -78,7 +78,7 @@ class RookTest {
 
 	@Test
 	void rookDoesNotAttacksSquareItCannotReach() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", WHITE,
 				new BoardMutation(WHITE_ROOK, E4, ADD));
 		board.process(setup);
 
@@ -90,7 +90,7 @@ class RookTest {
 
 	@Test
 	void rookAttacksSquareContainingOwnPiece() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", WHITE,
 				new BoardMutation(WHITE_ROOK, E4, ADD),
 				new BoardMutation(WHITE_QUEEN, E5, ADD));
 		board.process(setup);
@@ -101,7 +101,7 @@ class RookTest {
 
 	@Test
 	void rookAttacksSquareContainingOtherPlayersPiece() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", WHITE,
 				new BoardMutation(WHITE_ROOK, E4, ADD),
 				new BoardMutation(BLACK_QUEEN, E5, ADD));
 		board.process(setup);

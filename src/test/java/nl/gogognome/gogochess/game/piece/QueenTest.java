@@ -18,7 +18,7 @@ class QueenTest {
 
 	@Test
 	void validMovesForQueenOnMiddleOfBoard() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", BLACK,
 				new BoardMutation(WHITE_QUEEN, E4, ADD));
 		board.process(setup);
 
@@ -38,7 +38,7 @@ class QueenTest {
 
 	@Test
 	void queenCannotCapturePieceOfOwnPlayer() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", BLACK,
 				new BoardMutation(WHITE_QUEEN, E4, ADD),
 				new BoardMutation(WHITE_ROOK, E5, ADD));
 		board.process(setup);
@@ -51,7 +51,7 @@ class QueenTest {
 
 	@Test
 	void queenCanCapturePieceOfOtherPlayer() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", BLACK,
 				new BoardMutation(WHITE_QUEEN, E4, ADD),
 				new BoardMutation(BLACK_ROOK, E5, ADD));
 		board.process(setup);

@@ -14,7 +14,7 @@ class OneMoveLookAheadArtificialIntelligenceTest {
 
 	@Test
 	void aiFindsMoveLeadingToCheckMate() {
-		board.process(new Move("initial setup", null,
+		board.process(new Move("initial setup", BLACK,
 				WHITE_QUEEN.addTo(G1),
 				WHITE_KING.addTo(F7),
 				BLACK_KING.addTo(H8)));

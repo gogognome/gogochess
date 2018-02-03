@@ -19,7 +19,7 @@ class BishopTest {
 
 	@Test
 	void validMovesForBishopOnMiddleOfBoard() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", BLACK,
 				new BoardMutation(WHITE_BISHOP, E4, ADD));
 		board.process(setup);
 
@@ -47,7 +47,7 @@ class BishopTest {
 
 	@Test
 	void bishopCannotCapturePieceOfOwnPlayer() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", BLACK,
 				new BoardMutation(WHITE_BISHOP, E4, ADD),
 				new BoardMutation(WHITE_QUEEN, F5, ADD));
 		board.process(setup);
@@ -60,7 +60,7 @@ class BishopTest {
 
 	@Test
 	void bishopCanCapturePieceOfOtherPlayer() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", BLACK,
 				new BoardMutation(WHITE_BISHOP, E4, ADD),
 				new BoardMutation(BLACK_QUEEN, F5, ADD));
 		board.process(setup);
@@ -77,7 +77,7 @@ class BishopTest {
 
 	@Test
 	void bishopDoesNotAttacksSquareItCannotReach() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", BLACK,
 				new BoardMutation(WHITE_BISHOP, E4, ADD));
 		board.process(setup);
 
@@ -89,7 +89,7 @@ class BishopTest {
 
 	@Test
 	void bishopAttacksSquareContainingOwnPiece() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", BLACK,
 				new BoardMutation(WHITE_BISHOP, E4, ADD),
 				new BoardMutation(WHITE_QUEEN, F5, ADD));
 		board.process(setup);
@@ -100,7 +100,7 @@ class BishopTest {
 
 	@Test
 	void bishopAttacksSquareContainingOtherPlayersPiece() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", BLACK,
 				new BoardMutation(WHITE_BISHOP, E4, ADD),
 				new BoardMutation(BLACK_QUEEN, F5, ADD));
 		board.process(setup);
@@ -111,7 +111,7 @@ class BishopTest {
 
 	@Test
 	void bishopDoesNotAttacksUnreachableSquare() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", BLACK,
 				new BoardMutation(WHITE_BISHOP, E4, ADD));
 		board.process(setup);
 

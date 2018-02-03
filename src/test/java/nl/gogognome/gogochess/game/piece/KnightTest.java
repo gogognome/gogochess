@@ -19,7 +19,7 @@ class KnightTest {
 
 	@Test
 	void validMovesForKnightAtMiddleOfBoard() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", WHITE,
 				new BoardMutation(BLACK_KNIGHT, E4, ADD));
 		board.process(setup);
 
@@ -43,7 +43,7 @@ class KnightTest {
 
 	@Test
 	void validMovesForKnightAtCornerOfBoard() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", WHITE,
 				new BoardMutation(BLACK_KNIGHT, A1, ADD));
 		board.process(setup);
 
@@ -60,7 +60,7 @@ class KnightTest {
 
 	@Test
 	void knightCannotCapturePieceOfOwnPlayer() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", WHITE,
 				new BoardMutation(BLACK_KNIGHT, E4, ADD),
 				new BoardMutation(BLACK_BISHOP, D2, ADD));
 		board.process(setup);
@@ -72,7 +72,7 @@ class KnightTest {
 
 	@Test
 	void knightCanCapturePieceOfOtherPlayer() {
-		Move setup = new Move("setup", null,
+		Move setup = new Move("setup", WHITE,
 				new BoardMutation(BLACK_KNIGHT, E4, ADD),
 				new BoardMutation(WHITE_BISHOP, D2, ADD));
 		board.process(setup);

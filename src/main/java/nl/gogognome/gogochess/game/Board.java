@@ -30,13 +30,11 @@ public class Board {
 		Move commonAncestor = Move.findCommonAncestor(lastMove, move);
 		undoUntil(commonAncestor);
 		processForwardUntil(move, commonAncestor);
-		lastMove = move;
 	}
 
 	private void undoUntil(Move commonAncestor) {
 		while (lastMove != commonAncestor) {
 			undoSingleMove(lastMove);
-			lastMove = lastMove.getPrecedingMove();
 		}
 	}
 
@@ -55,6 +53,7 @@ public class Board {
 		for (BoardMutation boardMutation : move.getBoardMutations()) {
 			process(boardMutation);
 		}
+		lastMove = move;
 	}
 
 	private void undoSingleMove(Move move) {
@@ -62,6 +61,7 @@ public class Board {
 		for (int i=boardMutations.size() - 1; i >=0; i--) {
 			undo(boardMutations.get(i));
 		}
+		lastMove = move.getPrecedingMove();
 	}
 
 	void process(BoardMutation mutation) {

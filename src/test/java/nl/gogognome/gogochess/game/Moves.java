@@ -13,11 +13,4 @@ public class Moves {
 				actualMoves.toString());
 	}
 
-
-	public static Move find(List<Move> moves, String moveDescription) {
-		return moves.stream()
-				.filter(m -> m.getDescription().equals(moveDescription))
-				.findFirst()
-				.orElseThrow(() -> new IllegalArgumentException("could not find move " + moveDescription + " in moves " + moves));
-	}
 }

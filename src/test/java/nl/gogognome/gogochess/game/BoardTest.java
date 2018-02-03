@@ -2,7 +2,7 @@ package nl.gogognome.gogochess.game;
 
 import static nl.gogognome.gogochess.game.Board.*;
 import static nl.gogognome.gogochess.game.BoardMutation.Mutation.*;
-import static nl.gogognome.gogochess.game.Moves.*;
+import static nl.gogognome.gogochess.game.Move.*;
 import static nl.gogognome.gogochess.game.Player.*;
 import static nl.gogognome.gogochess.game.Squares.*;
 import static nl.gogognome.gogochess.game.Status.*;
@@ -120,18 +120,18 @@ class BoardTest {
 
 	@Test
 	void moveCausingCheckIsMarkedAsCheck() {
-		board.process(new Move("initial setup", null,
+		board.process(new Move("initial setup", BLACK,
 				WHITE_PAWN.addTo(E6),
 				BLACK_KING.addTo(F8)));
 
 		List<Move> moves = board.validMoves(WHITE);
 		assertTrue(moves.toString().contains("e6-e7+"), moves.toString());
-		assertEquals(CHECK, Moves.find(moves, "e6-e7+").getStatus());
+		assertEquals(CHECK, find(moves, "e6-e7+").getStatus());
 	}
 
 	@Test
 	void moveCausingCheckForOwnPlayerIsNotValid() {
-		board.process(new Move("initial setup", null,
+		board.process(new Move("initial setup", BLACK,
 				WHITE_PAWN.addTo(E6),
 				WHITE_KING.addTo(A6),
 				BLACK_QUEEN.addTo(H6)));
@@ -142,26 +142,26 @@ class BoardTest {
 
 	@Test
 	void moveCausingCheckMateIsMarkedAsCheckMate() {
-		board.process(new Move("initial setup", null,
+		board.process(new Move("initial setup", BLACK,
 				WHITE_QUEEN.addTo(G1),
 				WHITE_KING.addTo(F7),
 				BLACK_KING.addTo(H8)));
 
 		List<Move> moves = board.validMoves(WHITE);
 		assertTrue(moves.toString().contains("Qg1-g7++"), moves.toString());
-		assertEquals(CHECK_MATE, Moves.find(moves, "Qg1-g7++").getStatus());
+		assertEquals(CHECK_MATE, find(moves, "Qg1-g7++").getStatus());
 	}
 
 
 	@Test
 	void moveCausingStaleMateIsMarkedAsStaleMate() {
-		board.process(new Move("initial setup", null,
+		board.process(new Move("initial setup", BLACK,
 				WHITE_QUEEN.addTo(G1),
 				WHITE_KING.addTo(F7),
 				BLACK_KING.addTo(H8)));
 
 		List<Move> moves = board.validMoves(WHITE);
 		assertTrue(moves.toString().contains("Qg1-g6"), moves.toString());
-		assertEquals(STALE_MATE, Moves.find(moves, "Qg1-g6").getStatus());
+		assertEquals(STALE_MATE, find(moves, "Qg1-g6").getStatus());
 	}
 }

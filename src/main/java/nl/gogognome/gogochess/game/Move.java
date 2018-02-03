@@ -2,8 +2,10 @@ package nl.gogognome.gogochess.game;
 
 import static java.util.Arrays.*;
 import static nl.gogognome.gogochess.game.Board.*;
+import static nl.gogognome.gogochess.game.Player.*;
 import static nl.gogognome.gogochess.game.Squares.*;
 import static nl.gogognome.gogochess.game.Status.*;
+import java.util.ArrayList;
 import java.util.*;
 
 public class Move {
@@ -11,17 +13,23 @@ public class Move {
 	private Status status = NORMAL;
 	private int depthInTree;
 	private final Move precedingMove;
-	private List<BoardMutation> boardMutations;
-	private String description;
+	private final List<BoardMutation> boardMutations;
+	private final String description;
+	private final Player player;
 	private List<Move> followingMoves;
 	private int value;
 
 	public Move(String description, Move precedingMove, BoardMutation... boardMutations) {
-		this(description, precedingMove, asList(boardMutations));
+		this(description, precedingMove, precedingMove.player.other(), asList(boardMutations));
 	}
 
-	public Move(String description, Move precedingMove, List<BoardMutation> boardMutations) {
+	public Move(String description, Player player, BoardMutation... boardMutations) {
+		this(description, null, player, asList(boardMutations));
+	}
+
+	public Move(String description, Move precedingMove, Player player, List<BoardMutation> boardMutations) {
 		this.precedingMove = precedingMove;
+		this.player = player;
 		this.boardMutations = Collections.unmodifiableList(boardMutations);
 		this.description = description;
 		this.depthInTree = precedingMove == null ? 0 : precedingMove.depthInTree + 1;
@@ -94,12 +102,51 @@ public class Move {
 		this.value = value;
 	}
 
+	public List<Move> pathFromBegin() {
+		LinkedList<Move> moves = new LinkedList<>();
+		Move move = this;
+		do {
+			moves.addFirst(move);
+			move = move.getPrecedingMove();
+		} while (move != null);
+		return moves;
+	}
+
+	public static List<Move> bestMovesForward(Move lastMove) {
+		List<Move> moves = new ArrayList<>();
+		List<Move> followingMoves = lastMove.getFollowingMoves();
+		Player player = lastMove.player.other();
+		int bestValue = MoveValues.minValue(player);
+		Move bestFollowingMove = null;
+		if (followingMoves != null) {
+			for (Move followingMove : followingMoves) {
+				if (MoveValues.compareTo(followingMove.getValue(), bestValue, player) > 0) {
+					bestValue = followingMove.getValue();
+					bestFollowingMove = followingMove;
+				}
+			}
+		}
+		if (bestFollowingMove != null) {
+			moves.add(bestFollowingMove);
+			moves.addAll(bestMovesForward(bestFollowingMove));
+		}
+
+		return moves;
+	}
+
+	public static Move find(List<Move> moves, String moveDescription) {
+		return moves.stream()
+				.filter(m -> m.getDescription().equals(moveDescription))
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("could not find move " + moveDescription + " in moves " + moves));
+	}
+
 	@Override
 	public String toString() {
 		return getDescription();
 	}
 
-	public final static Move INITIAL_BOARD = new Move("initial board", null,
+	public final static Move INITIAL_BOARD = new Move("initial board", BLACK,
 			WHITE_ROOK.addTo(A1),
 			WHITE_KNIGHT.addTo(B1),
 			WHITE_BISHOP.addTo(C1),
