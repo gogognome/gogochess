@@ -19,7 +19,7 @@ public class OneMoveLookAheadArtificialIntelligence {
 
 		for (Move move : moves) {
 			board.process(move);
-			move.setValue(boardEvaluator.value(board, move.getStatus(), player));
+			move.setValue(boardEvaluator.value(board, move.getStatus()));
 			int signum = compareTo(move.getValue(), bestValue, player);
 			if (signum > 0) {
 				bestValue = move.getValue();

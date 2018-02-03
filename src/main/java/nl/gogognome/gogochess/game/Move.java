@@ -53,6 +53,10 @@ public class Move {
 		return description + postfix;
 	}
 
+	public Player getPlayer() {
+		return player;
+	}
+
 	public boolean hasFollowingMoves() {
 		return followingMoves != null;
 	}
