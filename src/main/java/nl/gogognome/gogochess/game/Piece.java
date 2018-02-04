@@ -13,4 +13,8 @@ public enum Piece {
 	Piece(int value) {
 		this.value = value;
 	}
+
+	public int value() {
+		return value;
+	}
 }

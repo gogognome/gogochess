@@ -57,6 +57,10 @@ public class Move {
 		return player;
 	}
 
+	public int depthInTree() {
+		return depthInTree;
+	}
+
 	public boolean hasFollowingMoves() {
 		return followingMoves != null;
 	}

@@ -189,7 +189,7 @@ public class Board {
 		undoSingleMove(move);
 	}
 
-	private void forEachPlayerPiece(Player player, BiConsumer<PlayerPiece, Square> action) {
+	public void forEachPlayerPiece(Player player, BiConsumer<PlayerPiece, Square> action) {
 		for (int index = 0; index < playerPiecesPerSquare.length; index++) {
 			PlayerPiece playerPiece = playerPiecesPerSquare[index];
 			if (playerPiece != null && playerPiece.getPlayer() == player) {

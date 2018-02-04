@@ -2,6 +2,8 @@ package nl.gogognome.gogochess.game;
 
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Integer.MIN_VALUE;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 import static nl.gogognome.gogochess.game.Player.WHITE;
 
 public class MoveValues {
@@ -23,10 +25,14 @@ public class MoveValues {
 	}
 
 	public static int add(int value, int delta, Player player) {
-		return value + (player == WHITE ? delta : -delta);
+		long result = value;
+		result += player == WHITE ? delta : -delta;
+		result = max(MIN_VALUE, result);
+		result = min(MAX_VALUE, result);
+		return (int) result;
 	}
 
 	public static int reduce(int value, int amountToReduce) {
-		return value > 0 ? Math.max(0, value - amountToReduce) : Math.min(0, value + amountToReduce);
+		return value > 0 ? max(0, value - amountToReduce) : min(0, value + amountToReduce);
 	}
 }

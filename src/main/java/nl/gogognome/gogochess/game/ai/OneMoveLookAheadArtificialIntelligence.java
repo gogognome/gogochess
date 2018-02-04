@@ -9,7 +9,7 @@ import nl.gogognome.gogochess.game.*;
 public class OneMoveLookAheadArtificialIntelligence {
 
 	private final Random random = new Random(System.currentTimeMillis());
-	private final BoardEvaluator boardEvaluator = new CheckMateBoardEvaluator();
+	private final BoardEvaluator boardEvaluator = ComplexBoardEvaluator.newInstance();
 
 	public Move nextMove(Board board, Player player) {
 		List<Move> moves = board.validMoves(player);
@@ -19,7 +19,7 @@ public class OneMoveLookAheadArtificialIntelligence {
 
 		for (Move move : moves) {
 			board.process(move);
-			move.setValue(boardEvaluator.value(board, move.getStatus()));
+			move.setValue(boardEvaluator.value(board));
 			int signum = compareTo(move.getValue(), bestValue, player);
 			if (signum > 0) {
 				bestValue = move.getValue();

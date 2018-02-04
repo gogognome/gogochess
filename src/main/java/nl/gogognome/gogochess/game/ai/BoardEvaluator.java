@@ -4,5 +4,5 @@ import nl.gogognome.gogochess.game.*;
 
 public interface BoardEvaluator {
 
-	int value(Board board, Status status);
+	int value(Board board);
 }
