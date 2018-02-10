@@ -62,9 +62,10 @@ public class Pawn extends PlayerPiece {
 	}
 
 	private boolean canCaptureEnPassant(Board board, Square capturedPawnSquare, PlayerPiece capturedPiece) {
+		Square previousMoveStartSquare = capturedPawnSquare.addRow(2 * forwardRowDelta);
 		return capturedPiece != null && capturedPiece.getPlayer() == getPlayer().other() && capturedPiece.getPiece() == PAWN
 				&& board.lastMove().getBoardMutations().contains(capturedPiece.addTo(capturedPawnSquare))
-				&& board.lastMove().getBoardMutations().contains(capturedPiece.removeFrom(capturedPawnSquare.addRow(2*forwardRowDelta)));
+				&& previousMoveStartSquare != null && board.lastMove().getBoardMutations().contains(capturedPiece.removeFrom(previousMoveStartSquare));
 	}
 
 	private void addMoveIncludingPromotions(List<Move> moves, Move move) {

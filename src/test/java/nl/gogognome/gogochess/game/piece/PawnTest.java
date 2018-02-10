@@ -110,7 +110,7 @@ class PawnTest {
 	}
 
 	@Test
-	void validMovesForPawnThatCannotCaptureAnotherPawnEnPassantBeacuseOtherPawnDidNotMoveTwoStepsInPreviousMove() {
+	void validMovesForPawnThatCannotCaptureAnotherPawnEnPassantBecauseOtherPawnDidNotMoveTwoStepsInPreviousMove() {
 		Move setup = new Move("setup", BLACK,
 				new BoardMutation(WHITE_PAWN, B5, ADD),
 				new BoardMutation(BLACK_PAWN, A6, ADD));
@@ -123,6 +123,30 @@ class PawnTest {
 		List<Move> moves = board.validMoves(WHITE);
 
 		assertFalse(moves.toString().contains("b5xa6"), "actual moves: " + moves);
+	}
+
+	@Test
+	void validMovesForPawnThatCannotCaptureAnotherPawnEnPassantBecausePawnIsStillAtInitialPosition() {
+		Move setup = new Move("setup", BLACK,
+				new BoardMutation(WHITE_PAWN, A2, ADD),
+				new BoardMutation(BLACK_PAWN, B2, ADD));
+		board.process(setup);
+
+		List<Move> moves = board.validMoves(WHITE);
+
+		assertFalse(moves.toString().contains("x"), "actual moves: " + moves);
+	}
+
+	@Test
+	void validMovesForPawnThatCannotCaptureAnotherPawnEnPassantBecausePawnIsOneRowFromPromotion() {
+		Move setup = new Move("setup", BLACK,
+				new BoardMutation(WHITE_PAWN, A7, ADD),
+				new BoardMutation(BLACK_PAWN, B7, ADD));
+		board.process(setup);
+
+		List<Move> moves = board.validMoves(WHITE);
+
+		assertFalse(moves.toString().contains("x"), "actual moves: " + moves);
 	}
 
 	@Test
