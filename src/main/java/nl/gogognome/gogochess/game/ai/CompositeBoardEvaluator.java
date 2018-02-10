@@ -16,7 +16,7 @@ public class CompositeBoardEvaluator implements BoardEvaluator {
 	public int value(Board board) {
 		int value = 0;
 		for (int i=0; i<evaluators.size(); i++) {
-			value = MoveValues.add(value, evaluators.get(i).value(board), board.lastMove().getPlayer());
+			value = MoveValues.add(value, evaluators.get(i).value(board));
 		}
 		return value;
 	}

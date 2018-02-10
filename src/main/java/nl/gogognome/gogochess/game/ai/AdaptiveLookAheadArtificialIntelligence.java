@@ -6,7 +6,7 @@ import static nl.gogognome.gogochess.game.Player.WHITE;
 import java.util.*;
 import nl.gogognome.gogochess.game.*;
 
-public class AdaptiveLookAheadArtificialIntelligence {
+public class AdaptiveLookAheadArtificialIntelligence implements ArtificialIntelligence {
 
 	private final Random random = new Random(System.currentTimeMillis());
 	private final BoardEvaluator boardEvaluator = ComplexBoardEvaluator.newInstance();

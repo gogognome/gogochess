@@ -9,7 +9,7 @@ public class NumberOfPossibleMovesEvaluator implements BoardEvaluator {
 	public int value(Board board) {
 		List<Move> followingMoves = board.lastMove().getFollowingMoves();
 		if (followingMoves != null) {
-			return MoveValues.add(0, followingMoves.size(), board.lastMove().getPlayer());
+			return MoveValues.negateForBlack(followingMoves.size(), board.lastMove().getPlayer());
 		}
 		return 0;
 	}

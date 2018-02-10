@@ -6,6 +6,7 @@ public class ComplexBoardEvaluator {
 		return new CompositeBoardEvaluator(
 				new CheckMateBoardEvaluator(),
 				new PieceValueEvaluator(1000),
-				new NumberOfPossibleMovesEvaluator());
+				new NumberOfPossibleMovesEvaluator(),
+				new PiecePositionEvaluator());
 	}
 }

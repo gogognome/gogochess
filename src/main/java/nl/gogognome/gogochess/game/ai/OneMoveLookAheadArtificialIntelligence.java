@@ -6,7 +6,7 @@ import static nl.gogognome.gogochess.game.Player.WHITE;
 import java.util.*;
 import nl.gogognome.gogochess.game.*;
 
-public class OneMoveLookAheadArtificialIntelligence {
+public class OneMoveLookAheadArtificialIntelligence implements ArtificialIntelligence {
 
 	private final Random random = new Random(System.currentTimeMillis());
 	private final BoardEvaluator boardEvaluator = ComplexBoardEvaluator.newInstance();

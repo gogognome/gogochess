@@ -3,7 +3,7 @@ package nl.gogognome.gogochess.game.ai;
 import java.util.*;
 import nl.gogognome.gogochess.game.*;
 
-public class ConfigurableLookAheadArtificialIntelligence {
+public class ConfigurableLookAheadArtificialIntelligence implements ArtificialIntelligence {
 
 	private final int maxRecursionLevel;
 	private final Random random = new Random(System.currentTimeMillis());

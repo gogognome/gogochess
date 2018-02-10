@@ -1,10 +1,9 @@
 package nl.gogognome.gogochess.game;
 
-import static java.lang.Integer.MAX_VALUE;
-import static java.lang.Integer.MIN_VALUE;
+import static java.lang.Integer.*;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
-import static nl.gogognome.gogochess.game.Player.WHITE;
+import static nl.gogognome.gogochess.game.Player.*;
 
 public class MoveValues {
 
@@ -24,9 +23,12 @@ public class MoveValues {
 		return player == WHITE ? MIN_VALUE : MAX_VALUE;
 	}
 
-	public static int add(int value, int delta, Player player) {
-		long result = value;
-		result += player == WHITE ? delta : -delta;
+	public static int negateForBlack(int value, Player player) {
+		return player == WHITE ? value : -value;
+	}
+
+	public static int add(int value, int delta) {
+		long result = (long) value + (long) delta;
 		result = max(MIN_VALUE, result);
 		result = min(MAX_VALUE, result);
 		return (int) result;

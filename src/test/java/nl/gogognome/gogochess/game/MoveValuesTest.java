@@ -46,12 +46,10 @@ class MoveValuesTest {
 
 	@Test
 	void add() {
-		assertEquals(100, MoveValues.add(90, 10, WHITE));
-		assertEquals(80, MoveValues.add(90, 10, BLACK));
-		assertEquals(-100, MoveValues.add(-90, -10, WHITE));
-		assertEquals(-80, MoveValues.add(-90, -10, BLACK));
-		assertEquals(MAX_VALUE, MoveValues.add(MAX_VALUE - 1, 10, WHITE));
-		assertEquals(MIN_VALUE, MoveValues.add(MIN_VALUE + 1, -10, WHITE));
+		assertEquals(100, MoveValues.add(90, 10));
+		assertEquals(-100, MoveValues.add(-90, -10));
+		assertEquals(MAX_VALUE, MoveValues.add(MAX_VALUE - 1, 10));
+		assertEquals(MIN_VALUE, MoveValues.add(MIN_VALUE + 1, -10));
 	}
 
 }
