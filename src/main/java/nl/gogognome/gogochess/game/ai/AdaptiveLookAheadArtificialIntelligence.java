@@ -1,18 +1,21 @@
 package nl.gogognome.gogochess.game.ai;
 
-import static java.util.stream.Collectors.toList;
-import static nl.gogognome.gogochess.game.Player.BLACK;
-import static nl.gogognome.gogochess.game.Player.WHITE;
+import static java.util.stream.Collectors.*;
 import java.util.*;
 import nl.gogognome.gogochess.game.*;
 
 public class AdaptiveLookAheadArtificialIntelligence implements ArtificialIntelligence {
 
 	private final Random random = new Random(System.currentTimeMillis());
+	// TODO: use DI framework
 	private final BoardEvaluator boardEvaluator = ComplexBoardEvaluator.newInstance();
+	private final MoveSort moveSort = new MoveSort();
 
 	private final int maxThinkTimeMs;
 	private final int maxNrMoves;
+	private int nextMoveDepthInTree;
+
+	/** Key is a node. Value is a list of leave nodes of the subtree with the key node as root. */
 	private final Map<Move, List<Move>> nextMoveToLeaveMoves = new HashMap<>();
 
 	public AdaptiveLookAheadArtificialIntelligence(int maxThinkTimeMs, int maxNrMoves) {
@@ -23,6 +26,8 @@ public class AdaptiveLookAheadArtificialIntelligence implements ArtificialIntell
 	public Move nextMove(Board board, Player player) {
 		long endTime = System.currentTimeMillis() + maxThinkTimeMs;
 		List<Move> moves = board.validMoves(player);
+		nextMoveDepthInTree = moves.get(0).depthInTree();
+		checkInvariant(moves);
 		sortMovesOnValue(moves, board);
 
 		fillNextMoveToLeaveMoves(moves);
@@ -41,7 +46,8 @@ public class AdaptiveLookAheadArtificialIntelligence implements ArtificialIntell
 					Move leaveMoveToBeFurtherInvestigated = leaveMoves.remove(index);
 
 					replaceLeaveMoveWithDeeperLeaveMove(board, leaveMoves, leaveMoveToBeFurtherInvestigated);
-					updateValuesInPrecedingMoves(moveToFurtherInvestigate, leaveMoveToBeFurtherInvestigated);
+					updateValuesInPrecedingMoves(leaveMoveToBeFurtherInvestigated);
+					checkInvariant(moves);
 				}
 			}
 
@@ -59,8 +65,22 @@ public class AdaptiveLookAheadArtificialIntelligence implements ArtificialIntell
 		return moves.get(random.nextInt(index));
 	}
 
-	private void replaceLeaveMoveWithDeeperLeaveMove(
-			Board board, List<Move> leaveMoves, Move leaveMoveToBeFurtherInvestigated) {
+	private void checkInvariant(List<Move> moves) {
+		for (Move move : moves) {
+			if (move.getFollowingMoves() == null) {
+				continue;
+			}
+			if (move.getFollowingMoves().stream().noneMatch(fm -> fm.getValue() == move.getValue())) {
+				if (move.getFollowingMoves().stream().anyMatch(fm -> fm.getValue() != 0 && fm.getValue() != Integer.MIN_VALUE && fm.getValue() != Integer.MAX_VALUE )) {
+					throw new IllegalStateException("move " + System.identityHashCode(move) + " " +  move.getDescription() + " (" + move.getValue() + ") at depth " + move.depthInTree() + " has following moves with different values: " +
+							move.getFollowingMoves().stream().map(fm -> fm.getDescription() + " (" + fm.getValue() + ")").collect(toList()));
+				}
+			}
+			checkInvariant(move.getFollowingMoves());
+		}
+	}
+
+	private void replaceLeaveMoveWithDeeperLeaveMove(Board board, List<Move> leaveMoves, Move leaveMoveToBeFurtherInvestigated) {
 		board.process(leaveMoveToBeFurtherInvestigated);
 		Player investigatePlayer = leaveMoveToBeFurtherInvestigated.getPlayer().other();
 		List<Move> validMoves = board.validMoves(investigatePlayer);
@@ -68,21 +88,26 @@ public class AdaptiveLookAheadArtificialIntelligence implements ArtificialIntell
 		for (Move move : validMoves) {
 			board.process(move);
 			move.setValue(boardEvaluator.value(board));
+			updateValuesInPrecedingMoves(move);
 			leaveMoves.add(move);
 		}
 	}
 
-	private void updateValuesInPrecedingMoves(Move parentMove, Move childMove) {
+	private void updateValuesInPrecedingMoves(Move move) {
 		do {
-			int bestValue = MoveValues.minValue(childMove.getPlayer().other());
-			for (Move followingMove : childMove.getFollowingMoves()) {
-				if (MoveValues.compareTo(followingMove.getValue(), bestValue, childMove.getPlayer().other()) > 0) {
+			Player player = move.getPlayer().other();
+			int bestValue = MoveValues.minValue(player);
+			for (Move followingMove : move.getFollowingMoves()) {
+				if (MoveValues.compareTo(followingMove.getValue(), bestValue, player) > 0) {
 					bestValue = followingMove.getValue();
 				}
 			}
-			childMove.setValue(bestValue);
-			childMove = childMove.getPrecedingMove();
-		} while (parentMove.depthInTree() <= childMove.depthInTree());
+			if (move.getValue() != bestValue) {
+//				System.out.println("changing value of " + System.identityHashCode(move) + " " + move.getDescription() + " from " + move.getValue() + " to " + bestValue +  " (level " + move.depthInTree() + ")");
+			}
+			move.setValue(bestValue);
+			move = move.getPrecedingMove();
+		} while (nextMoveDepthInTree <= move.depthInTree());
 	}
 
 	private int nrLeaveMoves() {
@@ -132,22 +157,26 @@ public class AdaptiveLookAheadArtificialIntelligence implements ArtificialIntell
 			List<Move> movesToLog = new ArrayList<>();
 			movesToLog.add(move);
 			movesToLog.addAll(Move.bestMovesForward(move));
-			System.out.println(movesToLog.stream().map(m -> m.getDescription() + " " + m.getValue()).collect(toList()).toString());
+//			System.out.println(movesToLog.stream().map(m -> m.getDescription() + " " + m.getValue()).collect(toList()).toString());
 		}
 	}
 
 	private void sortMovesOnValue(List<Move> moves, Board board) {
+		evaluateMoves(moves, board);
+		updateValuesInPrecedingMoves(moves);
+		moveSort.sort(moves);
+	}
+
+	private void updateValuesInPrecedingMoves(List<Move> moves) {
+		for (Move move : moves) {
+			updateValuesInPrecedingMoves(move);
+		}
+	}
+
+	private void evaluateMoves(List<Move> moves, Board board) {
 		for (Move move : moves) {
 			board.process(move);
 			move.setValue(boardEvaluator.value(board));
-		}
-
-		if (!moves.isEmpty()) {
-			if (moves.get(0).getPlayer() == WHITE) {
-				moves.sort((m1, m2) -> MoveValues.compareTo(m2.getValue(), m1.getValue(), WHITE));
-			} else {
-				moves.sort((m1, m2) -> MoveValues.compareTo(m1.getValue(), m2.getValue(), BLACK));
-			}
 		}
 	}
 

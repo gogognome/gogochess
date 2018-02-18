@@ -4,6 +4,6 @@ class AdaptiveLookAheadArtificialIntelligenceTest extends ArtificalIntelligenceT
 
 	@Override
 	protected ArtificialIntelligence buildAI() {
-		return new AdaptiveLookAheadArtificialIntelligence(10000, 1000000);
+		return new AdaptiveLookAheadArtificialIntelligence(20000, 2000000);
 	}
 }
