@@ -6,16 +6,17 @@ import nl.gogognome.gogochess.game.*;
 public class MiniMaxAlphaBetaPruningArtificialIntelligence implements ArtificialIntelligence {
 
 	private final int maxDepth;
+	private final int minPruneDepth;
 	private final int pruneFactor;
 
 	// TODO: introduce DI framework
 	private final BoardEvaluator boardEvaluator = ComplexBoardEvaluator.newInstance();
 	private final MiniMax miniMax = new MiniMax();
 	private final MoveSort moveSort = new MoveSort();
-	private final Random random = new Random();
 
-	public MiniMaxAlphaBetaPruningArtificialIntelligence(int maxDepth, int pruneFactor) {
+	public MiniMaxAlphaBetaPruningArtificialIntelligence(int maxDepth, int minPruneDepth, int pruneFactor) {
 		this.maxDepth = maxDepth;
+		this.minPruneDepth = minPruneDepth;
 		this.pruneFactor = pruneFactor;
 	}
 
@@ -38,15 +39,8 @@ public class MiniMaxAlphaBetaPruningArtificialIntelligence implements Artificial
 				moveSort.sort(followingMoves);
 
 				if (!followingMoves.isEmpty()) {
-					int currentPruneFactor = pruneFactor;
-					Player player = followingMoves.get(0).getPlayer();
-					int value = followingMoves.get(0).getValue();
-					int lastIndex = 1;
-					while (lastIndex < followingMoves.size() && Math.abs(followingMoves.get(lastIndex).getValue() - MoveValues.negateForBlack(value, player)) <= currentPruneFactor) {
-						lastIndex++;
-						currentPruneFactor = Math.max(currentPruneFactor-1, 0);
-					}
-					miniMaxAlphaBetaPruning(board, followingMoves.subList(0, lastIndex), lastMove, depth + 1);
+					List<Move> prunedFollowingMoves = depth >= minPruneDepth ? prune(followingMoves) : followingMoves;
+					miniMaxAlphaBetaPruning(board, prunedFollowingMoves, lastMove, depth + 1);
 				}
 			}
 		} else {
@@ -54,6 +48,20 @@ public class MiniMaxAlphaBetaPruningArtificialIntelligence implements Artificial
 				miniMax.updateValuesInPrecedingMoves(move, lastMove);
 			}
 		}
+	}
+
+	private List<Move> prune(List<Move> moves) {
+		List<Move> prunedFollowingMoves;
+		int currentPruneFactor = pruneFactor;
+		Player player = moves.get(0).getPlayer();
+		int value = moves.get(0).getValue();
+		int lastIndex = 1;
+		while (lastIndex < moves.size() && Math.abs(moves.get(lastIndex).getValue() - MoveValues.negateForBlack(value, player)) <= currentPruneFactor) {
+			lastIndex++;
+			currentPruneFactor = Math.max(currentPruneFactor - 1, 0);
+		}
+		prunedFollowingMoves = moves.subList(0, lastIndex);
+		return prunedFollowingMoves;
 	}
 
 	private void evaluateMoves(Board board, List<Move> followingMoves) {
