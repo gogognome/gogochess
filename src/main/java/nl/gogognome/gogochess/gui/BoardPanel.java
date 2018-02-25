@@ -13,11 +13,32 @@ import nl.gogognome.gogochess.logic.piece.*;
 
 public class BoardPanel extends JPanel {
 
+	public static class DragData {
+		private final Square startSquare;
+		private final int deltaX;
+		private final int deltaY;
+
+		public DragData(Square startSquare, int deltaX, int deltaY) {
+			this.startSquare = startSquare;
+			this.deltaX = deltaX;
+			this.deltaY = deltaY;
+		}
+
+		public Square getStartSquare() {
+			return startSquare;
+		}
+
+		public DragData dragTo(int currentX, int currentY) {
+			return new DragData(startSquare, currentX - deltaX, currentY - deltaY);
+		}
+	}
+
 	private final int squareSize;
 	private final static Color[] SQUARE_COLORS = new Color[] { new Color(148, 170, 255 ), new Color(255, 255, 	173) };
 	private final BufferedImage piecesImage;
 	private final static Piece[] PIECES_IN_IMAGE = new Piece[] { KING, QUEEN, BISHOP, KNIGHT, ROOK, PAWN };
 	private Map<Square, PlayerPiece> squareToPlayerPiece = new HashMap<>();
+	private DragData dragData;
 
 	public BoardPanel(Board board, int squareSize) {
 		this.squareSize = squareSize;
@@ -31,7 +52,12 @@ public class BoardPanel extends JPanel {
 	}
 
 	public void updateBoard(Board board) {
+		updateBoard(board, null);
+	}
+
+	public void updateBoard(Board board, DragData dragData) {
 		initSquareToPlayerPiece(board);
+		this.dragData = dragData;
 		repaint();
 	}
 
@@ -57,15 +83,27 @@ public class BoardPanel extends JPanel {
 				g.setColor(SQUARE_COLORS[(x+y) % 2]);
 				g.fillRect(left(x), top(y), squareSize, squareSize);
 
-				PlayerPiece playerPiece = squareToPlayerPiece.get(new Square(x, y));
-				if (playerPiece != null) {
-					g.drawImage(
-							piecesImage,
-							left(x), top(y), left(x+1), top(y-1),
-							pieceLeft(playerPiece), pieceTop(playerPiece), pieceRight(playerPiece), pieceBottom(playerPiece),
-							null);
+				Square square = new Square(x, y);
+				if (dragData != null && dragData.startSquare.equals(square)) {
+					continue;
 				}
+				drawPieceAtSquare(g, square, 0, 0);
 			}
+		}
+
+		if (dragData != null) {
+			drawPieceAtSquare(g, dragData.startSquare, dragData.deltaX, dragData.deltaY);
+		}
+	}
+
+	private void drawPieceAtSquare(Graphics g, Square square, int deltaX, int deltaY) {
+		PlayerPiece playerPiece = squareToPlayerPiece.get(square);
+		if (playerPiece != null) {
+			g.drawImage(
+					piecesImage,
+					left(square.column()) + deltaX, top(square.row()) + deltaY, left(square.column()+1) + deltaX, top(square.row()-1) + deltaY,
+					pieceLeft(playerPiece), pieceTop(playerPiece), pieceRight(playerPiece), pieceBottom(playerPiece),
+					null);
 		}
 	}
 
@@ -102,4 +140,9 @@ public class BoardPanel extends JPanel {
 	private int top(int y) {
 		return (7 - y) * squareSize;
 	}
+
+	public Square getSquare(int x, int y) {
+		return new Square(x / squareSize, 7 - y/squareSize);
+	}
+
 }

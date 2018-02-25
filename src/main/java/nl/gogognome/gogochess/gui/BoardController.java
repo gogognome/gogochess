@@ -1,20 +1,40 @@
 package nl.gogognome.gogochess.gui;
 
-import static nl.gogognome.gogochess.logic.Status.*;
-import java.io.*;
+import java.awt.event.*;
 import java.util.*;
+import java.util.concurrent.*;
+import javax.swing.*;
+import nl.gogognome.gogochess.gui.BoardPanel.*;
 import nl.gogognome.gogochess.logic.*;
 import nl.gogognome.gogochess.logic.ai.*;
+import nl.gogognome.gogochess.logic.piece.*;
 
 public class BoardController {
 
+	private enum State {
+		COMPUTER_THINKING,
+		WAITING_FOR_DRAG,
+		DRAGGING,
+		GAME_OVER
+	}
+
 	private final Board board = new Board();
 	private final BoardPanel boardPanel;
+
 	private final Player computerPlayer;
+	private State state;
+	private ExecutorService executorService = Executors.newFixedThreadPool(1);
+	private MiniMaxAlphaBetaPruningArtificialIntelligence ai = new MiniMaxAlphaBetaPruningArtificialIntelligence(5, 2, 0);
+
+	private DragData dragData;
 
 	public BoardController(Player computerPlayer) {
 		this.computerPlayer = computerPlayer;
 		boardPanel = new BoardPanel(board, 100);
+		MouseListener mouseListener = new MouseListener();
+		boardPanel.addMouseListener(mouseListener);
+		boardPanel.addMouseMotionListener(mouseListener);
+		state = computerPlayer == Player.WHITE ? State.COMPUTER_THINKING : State.WAITING_FOR_DRAG;
 	}
 
 	public BoardPanel getBoardPanel() {
@@ -22,43 +42,77 @@ public class BoardController {
 	}
 
 	public void playGame() {
-		MiniMaxAlphaBetaPruningArtificialIntelligence ai = new MiniMaxAlphaBetaPruningArtificialIntelligence(5, 2, 0);
-		board.process(Move.INITIAL_BOARD);
-		Move move;
-		do {
-
-			Player player = board.lastMove().getPlayer().other();
-			if (player == computerPlayer) {
-				move = ai.nextMove(board, player);
-			} else {
-				move = enterMove(board.validMoves(player));
-			}
-			board.process(move);
-			System.out.println(move);
-			boardPanel.updateBoard(board);
-		} while (move.getStatus() != CHECK_MATE && move.getStatus() != STALE_MATE);
+		onMove(Move.INITIAL_BOARD);
 	}
 
-	private Move enterMove(List<Move> moves) {
-		System.out.println("Enter your move:");
-		try {
-			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-			Optional<Move> move;
-			do {
-				try {
-					String line = br.readLine().toLowerCase();
-					String from = line.substring(0, 2);
-					String to = line.substring(3, 5);
-					move = moves.stream()
-							.filter(m -> m.toString().contains(from) && m.toString().contains(to))
-							.findFirst();
-				} catch (StringIndexOutOfBoundsException e) {
-					move = Optional.empty();
-				}
-			} while (!move.isPresent());
-			return move.get();
-		} catch (IOException e) {
-			throw new RuntimeException("Could not read line from System.in: " + e.getMessage(), e);
+	private void computerThinking() {
+		Move move = ai.nextMove(board, board.currentPlayer());
+		SwingUtilities.invokeLater(() -> onMove(move));
+	}
+
+	private void onPlayerMove(Square startSquare, Square targetSquare) {
+		Optional<Move> move = board.validMoves().stream()
+				.filter(m -> m.toString().contains(startSquare.toString()) && m.toString().contains(targetSquare.toString()))
+				.findFirst();
+		if (move.isPresent()) {
+			onMove(move.get());
+		} else {
+			onInvalidMove();
 		}
 	}
+
+	private void onInvalidMove() {
+		state = State.WAITING_FOR_DRAG;
+		boardPanel.updateBoard(board);
+	}
+
+	private void onMove(Move move) {
+		board.process(move);
+		if (move.getStatus().isGameOver()) {
+			state = State.GAME_OVER;
+		} else {
+			if (board.currentPlayer() == computerPlayer) {
+				state = State.COMPUTER_THINKING;
+				executorService.submit(() -> computerThinking());
+			} else {
+				state = State.WAITING_FOR_DRAG;
+			}
+		}
+		boardPanel.updateBoard(board);
+	}
+
+	private void onStartDragPiece(int x, int y) {
+		Square square = boardPanel.getSquare(x, y);
+		PlayerPiece playerPiece = board.pieceAt(square);
+		if (playerPiece != null && playerPiece.getPlayer() == board.currentPlayer()) {
+			dragData = new DragData(square, x, y);
+			state = State.DRAGGING;
+			boardPanel.updateBoard(board, dragData.dragTo(x, y));
+		}
+	}
+
+	private class MouseListener extends MouseAdapter {
+		@Override
+		public void mousePressed(MouseEvent e) {
+			if (state == State.WAITING_FOR_DRAG) {
+				onStartDragPiece(e.getX(), e.getY());
+			}
+		}
+
+		@Override
+		public void mouseDragged(MouseEvent e) {
+			if (state == State.DRAGGING) {
+				boardPanel.updateBoard(board, dragData.dragTo(e.getX(), e.getY()));
+			}
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			if (state == State.DRAGGING) {
+				Square targetSquare = boardPanel.getSquare(e.getX(), e.getY());
+				onPlayerMove(dragData.getStartSquare(), targetSquare);
+			}
+		}
+	}
+
 }

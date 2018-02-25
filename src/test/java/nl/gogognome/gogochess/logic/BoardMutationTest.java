@@ -11,23 +11,23 @@ public class BoardMutationTest {
 	@Test
 	public void testEquals() {
 		assertEquals(
-				new BoardMutation(new Pawn(WHITE), new Square("A2"), ADD),
-				new BoardMutation(new Pawn(WHITE), new Square("A2"), ADD));
+				new BoardMutation(new Pawn(WHITE), new Square("a2"), ADD),
+				new BoardMutation(new Pawn(WHITE), new Square("a2"), ADD));
 
 		assertNotEquals(
-				new BoardMutation(new Pawn(WHITE), new Square("A2"), ADD),
-				new BoardMutation(new Pawn(BLACK), new Square("A2"), ADD));
+				new BoardMutation(new Pawn(WHITE), new Square("a2"), ADD),
+				new BoardMutation(new Pawn(BLACK), new Square("a2"), ADD));
 
 		assertNotEquals(
-				new BoardMutation(new Pawn(WHITE), new Square("A2"), ADD),
-				new BoardMutation(new Knight(WHITE), new Square("A2"), ADD));
+				new BoardMutation(new Pawn(WHITE), new Square("a2"), ADD),
+				new BoardMutation(new Knight(WHITE), new Square("a2"), ADD));
 
 		assertNotEquals(
-				new BoardMutation(new Pawn(WHITE), new Square("A2"), ADD),
-				new BoardMutation(new Pawn(WHITE), new Square("A3"), ADD));
+				new BoardMutation(new Pawn(WHITE), new Square("a2"), ADD),
+				new BoardMutation(new Pawn(WHITE), new Square("a3"), ADD));
 
 		assertNotEquals(
-				new BoardMutation(new Pawn(WHITE), new Square("A2"), ADD),
-				new BoardMutation(new Pawn(WHITE), new Square("A2"), REMOVE));
+				new BoardMutation(new Pawn(WHITE), new Square("a2"), ADD),
+				new BoardMutation(new Pawn(WHITE), new Square("a2"), REMOVE));
 	}
 }
