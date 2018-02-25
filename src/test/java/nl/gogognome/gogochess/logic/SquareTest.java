@@ -13,18 +13,18 @@ class SquareTest {
 
 	@Test
 	void createSquareWithValidBoardIndex() {
-		assertEquals(new Square("A1"), new Square(0));
-		assertEquals(new Square("A2"), new Square(1));
-		assertEquals(new Square("A8"), new Square(7));
-		assertEquals(new Square("B1"), new Square(8));
-		assertEquals(new Square("H8"), new Square(63));
+		assertEquals(new Square("a1"), new Square(0));
+		assertEquals(new Square("a2"), new Square(1));
+		assertEquals(new Square("a8"), new Square(7));
+		assertEquals(new Square("b1"), new Square(8));
+		assertEquals(new Square("h8"), new Square(63));
 	}
 
 	@Test
 	void createWithValidString() {
-		assertEquals("A1", new Square("A1").toString());
-		assertEquals("C6", new Square("C6").toString());
-		assertEquals("H7", new Square("H7").toString());
+		assertEquals("a1", new Square("a1").toString());
+		assertEquals("c6", new Square("c6").toString());
+		assertEquals("h7", new Square("h7").toString());
 	}
 
 	@Test
@@ -33,9 +33,9 @@ class SquareTest {
 		assertInvalidSquare("X");
 		assertInvalidSquare("XXX");
 		assertInvalidSquare("@1");
-		assertInvalidSquare("A9");
-		assertInvalidSquare("H0");
-		assertInvalidSquare("H9");
+		assertInvalidSquare("a9");
+		assertInvalidSquare("h0");
+		assertInvalidSquare("h9");
 	}
 
 	private void assertInvalidSquare(String square) {
@@ -57,12 +57,12 @@ class SquareTest {
 
 	@Test
 	void toStringFormatsColumnAsLetter() {
-		assertToString(0, 0, "A1");
-		assertToString(0, 1, "A2");
-		assertToString(0, 7, "A8");
-		assertToString(1, 4, "B5");
-		assertToString(7, 0, "H1");
-		assertToString(7, 7, "H8");
+		assertToString(0, 0, "a1");
+		assertToString(0, 1, "a2");
+		assertToString(0, 7, "a8");
+		assertToString(1, 4, "b5");
+		assertToString(7, 0, "h1");
+		assertToString(7, 7, "h8");
 	}
 
 	private void assertToString(int column, int row, String expectedValue) {
@@ -85,12 +85,12 @@ class SquareTest {
 
 	@Test
 	void boardIndexReturnsValueInRange0_63() {
-		assertBoardIndex("A1", 0);
-		assertBoardIndex("A2", 1);
-		assertBoardIndex("A8", 7);
-		assertBoardIndex("B1", 8);
-		assertBoardIndex("C1", 16);
-		assertBoardIndex("H8", 63);
+		assertBoardIndex("a1", 0);
+		assertBoardIndex("a2", 1);
+		assertBoardIndex("a8", 7);
+		assertBoardIndex("b1", 8);
+		assertBoardIndex("c1", 16);
+		assertBoardIndex("h8", 63);
 	}
 
 	private void assertBoardIndex(String square, int expectedIndex) {
@@ -99,9 +99,9 @@ class SquareTest {
 
 	@Test
 	void testEqualsAndHashCode() {
-		Square A1_1 = new Square("A1");
-		Square A1_2 = new Square("A1");
-		Square A2 = new Square("A2");
+		Square A1_1 = new Square("a1");
+		Square A1_2 = new Square("a1");
+		Square A2 = new Square("a2");
 
 		assertEquals(A1_1, A1_1);
 		assertEquals(A1_1, A1_2);

@@ -10,7 +10,7 @@ public class Square {
 		if (square == null || square.length() != 2) {
 			throw new IllegalArgumentException("Square must be a string of length 2 like B6");
 		}
-		int column = square.charAt(0) - 'A';
+		int column = square.charAt(0) - 'a';
 		int row = square.charAt(1) - '1';
 		validateColumnAndRow(column, row);
 		boardIndex = column * 8 + row;
@@ -54,7 +54,7 @@ public class Square {
 
 	@Override
 	public String toString() {
-		return Character.toString((char)('A' + column())) + (row() + 1);
+		return Character.toString((char)('a' + column())) + (row() + 1);
 	}
 
 	int boardIndex() {
