@@ -119,6 +119,11 @@ public class Board {
 		return pieceAt(square) == null;
 	}
 
+	public List<Move> validMoves() {
+		return validMoves(currentPlayer());
+	}
+
+	// TODO: inline this method
 	public List<Move> validMoves(Player player) {
 		if (lastMove == null) {
 			throw new IllegalStateException("No moves can be determined when the board is empty");
@@ -209,6 +214,10 @@ public class Board {
 
 	public Move lastMove() {
 		return lastMove;
+	}
+
+	public Player currentPlayer() {
+		return lastMove().getPlayer().other();
 	}
 
 	@Override
