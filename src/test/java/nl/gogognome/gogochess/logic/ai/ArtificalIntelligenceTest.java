@@ -25,7 +25,7 @@ abstract class ArtificalIntelligenceTest {
 				BLACK_KING.addTo(H8)));
 
 		ArtificialIntelligence ai = buildAI();
-		Move move = ai.nextMove(board, WHITE);
+		Move move = ai.nextMove(board, WHITE, new ProgressListener(i -> {}));
 
 		assertTrue("Qg1-h1++, Qg1-h2++, Qg1-g7++, Qg1-g8++".contains(move.getDescription()), move.getDescription());
 		assertEquals(CHECK_MATE, move.getStatus());
@@ -90,7 +90,7 @@ abstract class ArtificalIntelligenceTest {
 	private void assertNextMoves(Player player, String... expectedMoves) {
 		ArtificialIntelligence ai = buildAI();
 
-		Move move = ai.nextMove(board, player);
+		Move move = ai.nextMove(board, player, new ProgressListener(i -> {}));
 		assertNotNull(move);
 
 		List<Move> actualMoves = Move.bestMovesForward(move.getPrecedingMove());

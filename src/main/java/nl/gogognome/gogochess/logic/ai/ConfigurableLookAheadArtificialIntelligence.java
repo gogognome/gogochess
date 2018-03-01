@@ -13,19 +13,22 @@ public class ConfigurableLookAheadArtificialIntelligence implements ArtificialIn
 		this.maxRecursionLevel = maxRecursionLevel;
 	}
 
-	public Move nextMove(Board board, Player player) {
-		return nextMove(board, player, maxRecursionLevel);
+	public Move nextMove(Board board, Player player, ProgressListener progressListener) {
+		return nextMove(board, player, 0, progressListener);
 	}
 
-	public Move nextMove(Board board, Player player, int remainingRecursionLevel) {
+	public Move nextMove(Board board, Player player, int currentLevel, ProgressListener progressListener) {
 		List<Move> moves = board.validMoves(player);
 		List<Move> bestMoves = new ArrayList<>();
 		int bestValue = MoveValues.minValue(player);
 
+		if (currentLevel < 2) {
+			progressListener.setNrSteps(currentLevel, moves.size());
+		}
 		for (Move move : moves) {
 			board.process(move);
-			if (remainingRecursionLevel > 0) {
-				Move nextMove = nextMove(board, player.other(), remainingRecursionLevel-1);
+			if (currentLevel < maxRecursionLevel) {
+				Move nextMove = nextMove(board, player.other(), currentLevel+1, progressListener);
 				if (nextMove != null) {
 					move.setValue(MoveValues.reduce(nextMove.getValue(), 1));
 				} else {
@@ -45,6 +48,9 @@ public class ConfigurableLookAheadArtificialIntelligence implements ArtificialIn
 
 			if (bestValue == MoveValues.maxValue(player)) {
 				break;
+			}
+			if (currentLevel < 2) {
+				progressListener.nextStep(currentLevel);
 			}
 		}
 

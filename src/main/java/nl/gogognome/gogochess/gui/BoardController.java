@@ -25,6 +25,7 @@ public class BoardController {
 	private State state;
 	private ExecutorService executorService = Executors.newFixedThreadPool(1);
 	private MiniMaxAlphaBetaPruningArtificialIntelligence ai = new MiniMaxAlphaBetaPruningArtificialIntelligence(5, 2, 0);
+	private ProgressListener progressListener;
 
 	private DragData dragData;
 
@@ -34,6 +35,8 @@ public class BoardController {
 		MouseListener mouseListener = new MouseListener();
 		boardPanel.addMouseListener(mouseListener);
 		boardPanel.addMouseMotionListener(mouseListener);
+		progressListener = new ProgressListener(percentage -> boardPanel.updatePercentage(percentage));
+
 		state = computerPlayer == Player.WHITE ? State.COMPUTER_THINKING : State.WAITING_FOR_DRAG;
 	}
 
@@ -46,7 +49,7 @@ public class BoardController {
 	}
 
 	private void computerThinking() {
-		Move move = ai.nextMove(board, board.currentPlayer());
+		Move move = ai.nextMove(board, board.currentPlayer(), progressListener);
 		SwingUtilities.invokeLater(() -> onMove(move));
 	}
 
@@ -113,6 +116,10 @@ public class BoardController {
 				onPlayerMove(dragData.getStartSquare(), targetSquare);
 			}
 		}
+	}
+
+	public void onClose() {
+		executorService.shutdownNow();
 	}
 
 }

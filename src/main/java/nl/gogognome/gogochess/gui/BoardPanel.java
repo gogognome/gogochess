@@ -34,14 +34,19 @@ public class BoardPanel extends JPanel {
 	}
 
 	private final int squareSize;
-	private final static Color[] SQUARE_COLORS = new Color[] { new Color(148, 170, 255 ), new Color(255, 255, 	173) };
+	private final int progressBarHeight;
+	private final int marginHeight;
+	private final static Color[] SQUARE_COLORS = new Color[] { new Color(148, 170, 255 ), new Color(255, 255, 173) };
 	private final BufferedImage piecesImage;
 	private final static Piece[] PIECES_IN_IMAGE = new Piece[] { KING, QUEEN, BISHOP, KNIGHT, ROOK, PAWN };
 	private Map<Square, PlayerPiece> squareToPlayerPiece = new HashMap<>();
 	private DragData dragData;
+	private int percentage;
 
 	public BoardPanel(Board board, int squareSize) {
 		this.squareSize = squareSize;
+		this.progressBarHeight = squareSize / 2;
+		this.marginHeight = progressBarHeight / 10;
 		initSquareToPlayerPiece(board);
 
 		try {
@@ -73,11 +78,17 @@ public class BoardPanel extends JPanel {
 
 	@Override
 	public Dimension getPreferredSize() {
-		return new Dimension(8 * squareSize,8 * squareSize);
+		return new Dimension(8 * squareSize,8 * squareSize + progressBarHeight + marginHeight);
 	}
 
 	@Override
 	public void paint(Graphics g) {
+		paintBoardAndPiecesExceptDraggedPiece(g);
+		paintDraggedPiece(g);
+		paintProgressBar(g);
+	}
+
+	private void paintBoardAndPiecesExceptDraggedPiece(Graphics g) {
 		for (int y=0; y<8; y++) {
 			for (int x=0; x<8; x++) {
 				g.setColor(SQUARE_COLORS[(x+y) % 2]);
@@ -87,16 +98,18 @@ public class BoardPanel extends JPanel {
 				if (dragData != null && dragData.startSquare.equals(square)) {
 					continue;
 				}
-				drawPieceAtSquare(g, square, 0, 0);
+				paintPieceAtSquare(g, square, 0, 0);
 			}
-		}
-
-		if (dragData != null) {
-			drawPieceAtSquare(g, dragData.startSquare, dragData.deltaX, dragData.deltaY);
 		}
 	}
 
-	private void drawPieceAtSquare(Graphics g, Square square, int deltaX, int deltaY) {
+	private void paintDraggedPiece(Graphics g) {
+		if (dragData != null) {
+			paintPieceAtSquare(g, dragData.startSquare, dragData.deltaX, dragData.deltaY);
+		}
+	}
+
+	private void paintPieceAtSquare(Graphics g, Square square, int deltaX, int deltaY) {
 		PlayerPiece playerPiece = squareToPlayerPiece.get(square);
 		if (playerPiece != null) {
 			g.drawImage(
@@ -105,6 +118,14 @@ public class BoardPanel extends JPanel {
 					pieceLeft(playerPiece), pieceTop(playerPiece), pieceRight(playerPiece), pieceBottom(playerPiece),
 					null);
 		}
+	}
+
+	private void paintProgressBar(Graphics g) {
+		g.setColor(Color.BLACK);
+		int boardSize = 8 * squareSize;
+		g.fillRoundRect(0, boardSize + marginHeight, boardSize, progressBarHeight, marginHeight, marginHeight);
+		g.setColor(Color.BLUE);
+		g.fillRoundRect(0, boardSize + marginHeight, boardSize * percentage / 100, progressBarHeight, marginHeight, marginHeight);
 	}
 
 	private int pieceLeft(PlayerPiece playerPiece) {
@@ -143,6 +164,11 @@ public class BoardPanel extends JPanel {
 
 	public Square getSquare(int x, int y) {
 		return new Square(x / squareSize, 7 - y/squareSize);
+	}
+
+	public void updatePercentage(int percentage) {
+		this.percentage = percentage;
+		repaint();
 	}
 
 }

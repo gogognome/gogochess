@@ -21,16 +21,19 @@ public class MiniMaxAlphaBetaPruningArtificialIntelligence implements Artificial
 	}
 
 	@Override
-	public Move nextMove(Board board, Player player) {
+	public Move nextMove(Board board, Player player, ProgressListener progressListener) {
 		List<Move> moves = board.validMoves(player);
 		evaluateMoves(board, moves);
 		moveSort.sort(moves);
-		miniMaxAlphaBetaPruning(board, moves, board.lastMove(), 1);
+		miniMaxAlphaBetaPruning(board, moves, board.lastMove(), 1, progressListener);
 		moveSort.sort(moves);
 		return moves.get(0);
 	}
 
-	private void miniMaxAlphaBetaPruning(Board board, List<Move> movesToInvestigate, Move lastMove, int depth) {
+	private void miniMaxAlphaBetaPruning(Board board, List<Move> movesToInvestigate, Move lastMove, int depth, ProgressListener progressListener) {
+		if (depth <= 2) {
+			progressListener.setNrSteps(depth - 1, movesToInvestigate.size());
+		}
 		if (depth < maxDepth) {
 			for (Move move  : movesToInvestigate) {
 				board.process(move);
@@ -40,7 +43,10 @@ public class MiniMaxAlphaBetaPruningArtificialIntelligence implements Artificial
 
 				if (!followingMoves.isEmpty()) {
 					List<Move> prunedFollowingMoves = depth >= minPruneDepth ? prune(followingMoves) : followingMoves;
-					miniMaxAlphaBetaPruning(board, prunedFollowingMoves, lastMove, depth + 1);
+					miniMaxAlphaBetaPruning(board, prunedFollowingMoves, lastMove, depth + 1, progressListener);
+				}
+				if (depth <= 2) {
+					progressListener.nextStep(depth - 1);
 				}
 			}
 		} else {

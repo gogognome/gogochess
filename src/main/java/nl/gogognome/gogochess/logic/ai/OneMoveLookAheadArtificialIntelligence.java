@@ -11,12 +11,13 @@ public class OneMoveLookAheadArtificialIntelligence implements ArtificialIntelli
 	private final Random random = new Random(System.currentTimeMillis());
 	private final BoardEvaluator boardEvaluator = ComplexBoardEvaluator.newInstance();
 
-	public Move nextMove(Board board, Player player) {
+	public Move nextMove(Board board, Player player, ProgressListener progressListener) {
 		List<Move> moves = board.validMoves(player);
 
 		List<Move> bestMoves = new ArrayList<>();
 		int bestValue = player == WHITE ? MIN_VALUE : MAX_VALUE;
 
+		progressListener.setNrSteps(0, moves.size());
 		for (Move move : moves) {
 			board.process(move);
 			move.setValue(boardEvaluator.value(board));
@@ -28,6 +29,7 @@ public class OneMoveLookAheadArtificialIntelligence implements ArtificialIntelli
 			if (signum >= 0) {
 				bestMoves.add(move);
 			}
+			progressListener.nextStep(0);
 		}
 
 		if (bestMoves.isEmpty()) {
