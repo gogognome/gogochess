@@ -19,6 +19,8 @@ public class King extends PlayerPiece {
 			Square to = square.addColumnAndRow(deltaX[i], deltaY[i]);
 			addMoveToEmptyFieldOCapture(moves, board, square, to);
 		}
+
+		// TODO: implement castling (O-O and O-O-O)
 	}
 
 	@Override
