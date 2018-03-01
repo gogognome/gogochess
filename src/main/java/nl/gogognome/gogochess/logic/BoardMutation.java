@@ -1,5 +1,6 @@
 package nl.gogognome.gogochess.logic;
 
+import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.REMOVE;
 import nl.gogognome.gogochess.logic.piece.*;
 
 public class BoardMutation {
@@ -33,6 +34,10 @@ public class BoardMutation {
 
 	public Mutation getMutation() {
 		return mutation;
+	}
+
+	public boolean isRemoveFrom(Square removeFromSquare) {
+		return mutation == REMOVE && square.equals(removeFromSquare);
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package nl.gogognome.gogochess.gui;
 
+import static java.util.stream.Collectors.*;
+import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.*;
 import java.awt.event.*;
 import java.util.*;
 import java.util.concurrent.*;
@@ -21,6 +23,7 @@ public class BoardController {
 	private final Board board = new Board();
 	private final BoardPanel boardPanel;
 
+	private final List<Move> moves = new ArrayList<>();
 	private final Player computerPlayer;
 	private State state;
 	private ExecutorService executorService = Executors.newFixedThreadPool(1);
@@ -54,8 +57,10 @@ public class BoardController {
 	}
 
 	private void onPlayerMove(Square startSquare, Square targetSquare) {
+		boardPanel.setTargets(null);
 		Optional<Move> move = board.validMoves().stream()
 				.filter(m -> m.toString().contains(startSquare.toString()) && m.toString().contains(targetSquare.toString()))
+				.filter(m -> m.toString().indexOf(startSquare.toString()) < m.toString().indexOf(targetSquare.toString()))
 				.findFirst();
 		if (move.isPresent()) {
 			onMove(move.get());
@@ -71,6 +76,7 @@ public class BoardController {
 
 	private void onMove(Move move) {
 		board.process(move);
+		moves.add(move);
 		move.keepMoveAndPrecedingMoves();
 		if (move.getStatus().isGameOver()) {
 			state = State.GAME_OVER;
@@ -91,8 +97,21 @@ public class BoardController {
 		if (playerPiece != null && playerPiece.getPlayer() == board.currentPlayer()) {
 			dragData = new DragData(square, x, y);
 			state = State.DRAGGING;
+			boardPanel.setTargets(determineTargetsForValidMoves(square));
 			boardPanel.updateBoard(board, dragData.dragTo(x, y));
 		}
+	}
+
+	private List<Square> determineTargetsForValidMoves(Square startSquare) {
+		return board.validMoves().stream()
+				// Move must remove piece from startSquare
+				.filter(m -> m.getBoardMutations().stream()
+						.anyMatch(mut -> mut.isRemoveFrom(startSquare)))
+				// Find square where piece is added
+				.map(m -> m.getBoardMutations().stream()
+						.filter(mut -> mut.getMutation() == ADD)
+						.map(mut -> mut.getSquare()).findFirst().get())
+				.collect(toList());
 	}
 
 	private class MouseListener extends MouseAdapter {

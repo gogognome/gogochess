@@ -6,12 +6,15 @@ import java.awt.*;
 import java.awt.image.*;
 import java.io.*;
 import java.util.*;
+import java.util.List;
 import javax.imageio.*;
 import javax.swing.*;
 import nl.gogognome.gogochess.logic.*;
 import nl.gogognome.gogochess.logic.piece.*;
 
 public class BoardPanel extends JPanel {
+
+	private List<Square> targets;
 
 	public static class DragData {
 		private final Square startSquare;
@@ -89,12 +92,19 @@ public class BoardPanel extends JPanel {
 	}
 
 	private void paintBoardAndPiecesExceptDraggedPiece(Graphics g) {
+		g.setColor(Color.WHITE);
+		g.fillRect(0, 0, getPreferredSize().width, getPreferredSize().height);
+
 		for (int y=0; y<8; y++) {
 			for (int x=0; x<8; x++) {
-				g.setColor(SQUARE_COLORS[(x+y) % 2]);
+				Square square = new Square(x, y);
+				Color squareColor = SQUARE_COLORS[(x + y) % 2];
+				if (targets != null && targets.contains(square)) {
+					squareColor = squareColor.darker();
+				}
+				g.setColor(squareColor);
 				g.fillRect(left(x), top(y), squareSize, squareSize);
 
-				Square square = new Square(x, y);
 				if (dragData != null && dragData.startSquare.equals(square)) {
 					continue;
 				}
@@ -164,6 +174,10 @@ public class BoardPanel extends JPanel {
 
 	public Square getSquare(int x, int y) {
 		return new Square(x / squareSize, 7 - y/squareSize);
+	}
+
+	public void setTargets(List<Square> targets) {
+		this.targets = targets;
 	}
 
 	public void updatePercentage(int percentage) {
