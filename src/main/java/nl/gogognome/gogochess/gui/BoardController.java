@@ -71,6 +71,7 @@ public class BoardController {
 
 	private void onMove(Move move) {
 		board.process(move);
+		move.keepMoveAndPrecedingMoves();
 		if (move.getStatus().isGameOver()) {
 			state = State.GAME_OVER;
 		} else {

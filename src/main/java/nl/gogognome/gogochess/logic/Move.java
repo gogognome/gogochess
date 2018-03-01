@@ -1,6 +1,7 @@
 package nl.gogognome.gogochess.logic;
 
 import static java.util.Arrays.*;
+import static java.util.Collections.singletonList;
 import static nl.gogognome.gogochess.logic.Board.*;
 import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
@@ -149,6 +150,17 @@ public class Move {
 				.orElseThrow(() -> new IllegalArgumentException("could not find move " + moveDescription + " in moves " + moves));
 	}
 
+	public void keepMoveAndPrecedingMoves() {
+		if (precedingMove != null) {
+			precedingMove.keepOnlyFollowingMove(this);
+			precedingMove.keepMoveAndPrecedingMoves();
+		}
+	}
+
+	private void keepOnlyFollowingMove(Move followingMoveToKeep) {
+		followingMoves = singletonList(followingMoveToKeep);
+	}
+
 	@Override
 	public String toString() {
 		return getDescription();
@@ -187,4 +199,5 @@ public class Move {
 			BLACK_BISHOP.addTo(F8),
 			BLACK_KNIGHT.addTo(G8),
 			BLACK_ROOK.addTo(H8));
+
 }
