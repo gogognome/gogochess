@@ -4,6 +4,7 @@ import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Integer.MIN_VALUE;
 import static nl.gogognome.gogochess.logic.Player.WHITE;
 import java.util.*;
+import java.util.function.*;
 import nl.gogognome.gogochess.logic.*;
 
 public class OneMoveLookAheadArtificialIntelligence implements ArtificialIntelligence {
@@ -11,13 +12,14 @@ public class OneMoveLookAheadArtificialIntelligence implements ArtificialIntelli
 	private final Random random = new Random(System.currentTimeMillis());
 	private final BoardEvaluator boardEvaluator = ComplexBoardEvaluator.newInstance();
 
-	public Move nextMove(Board board, Player player, ProgressListener progressListener) {
+	public Move nextMove(Board board, Player player, Consumer<Integer> progressUpdateConsumer) {
 		List<Move> moves = board.validMoves(player);
 
 		List<Move> bestMoves = new ArrayList<>();
 		int bestValue = player == WHITE ? MIN_VALUE : MAX_VALUE;
 
-		progressListener.setNrSteps(0, moves.size());
+		Progress progress = new Progress(progressUpdateConsumer);
+		Progress.Job job = progress.onStartJobWithNrSteps(moves.size());
 		for (Move move : moves) {
 			board.process(move);
 			move.setValue(boardEvaluator.value(board));
@@ -29,7 +31,7 @@ public class OneMoveLookAheadArtificialIntelligence implements ArtificialIntelli
 			if (signum >= 0) {
 				bestMoves.add(move);
 			}
-			progressListener.nextStep(0);
+			job.onNextStep();
 		}
 
 		if (bestMoves.isEmpty()) {

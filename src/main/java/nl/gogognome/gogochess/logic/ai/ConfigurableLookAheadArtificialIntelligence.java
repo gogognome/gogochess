@@ -1,6 +1,7 @@
 package nl.gogognome.gogochess.logic.ai;
 
 import java.util.*;
+import java.util.function.*;
 import nl.gogognome.gogochess.logic.*;
 
 public class ConfigurableLookAheadArtificialIntelligence implements ArtificialIntelligence {
@@ -13,22 +14,23 @@ public class ConfigurableLookAheadArtificialIntelligence implements ArtificialIn
 		this.maxRecursionLevel = maxRecursionLevel;
 	}
 
-	public Move nextMove(Board board, Player player, ProgressListener progressListener) {
-		return nextMove(board, player, 0, progressListener);
+	public Move nextMove(Board board, Player player, Consumer<Integer> progressUpdateConsumer) {
+		return nextMove(board, player, 0, new Progress(progressUpdateConsumer));
 	}
 
-	public Move nextMove(Board board, Player player, int currentLevel, ProgressListener progressListener) {
+	private Move nextMove(Board board, Player player, int currentLevel, Progress progress) {
 		List<Move> moves = board.validMoves(player);
 		List<Move> bestMoves = new ArrayList<>();
 		int bestValue = MoveValues.minValue(player);
 
+		Progress.Job job = null;
 		if (currentLevel < 2) {
-			progressListener.setNrSteps(currentLevel, moves.size());
+			job = progress.onStartJobWithNrSteps(moves.size());
 		}
 		for (Move move : moves) {
 			board.process(move);
 			if (currentLevel < maxRecursionLevel) {
-				Move nextMove = nextMove(board, player.other(), currentLevel+1, progressListener);
+				Move nextMove = nextMove(board, player.other(), currentLevel+1, progress);
 				if (nextMove != null) {
 					move.setValue(MoveValues.reduce(nextMove.getValue(), 1));
 				} else {
@@ -49,8 +51,8 @@ public class ConfigurableLookAheadArtificialIntelligence implements ArtificialIn
 			if (bestValue == MoveValues.maxValue(player)) {
 				break;
 			}
-			if (currentLevel < 2) {
-				progressListener.nextStep(currentLevel);
+			if (job != null) {
+				job.onNextStep();
 			}
 		}
 
