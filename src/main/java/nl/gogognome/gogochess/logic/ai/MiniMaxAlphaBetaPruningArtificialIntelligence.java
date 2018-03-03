@@ -9,16 +9,19 @@ public class MiniMaxAlphaBetaPruningArtificialIntelligence implements Artificial
 	private final int maxDepth;
 	private final int minPruneDepth;
 	private final int pruneFactor;
+	private final int pruneLowerBound;
 
 	// TODO: introduce DI framework
 	private final BoardEvaluator boardEvaluator = BoardEvaluatorFactory.newInstance();
 	private final MiniMax miniMax = new MiniMax();
 	private final MoveSort moveSort = new MoveSort();
 
-	public MiniMaxAlphaBetaPruningArtificialIntelligence(int maxDepth, int minPruneDepth, int pruneFactor) {
+	public MiniMaxAlphaBetaPruningArtificialIntelligence(
+			int maxDepth, int minPruneDepth, int pruneFactor, int pruneLowerBound) {
 		this.maxDepth = maxDepth;
 		this.minPruneDepth = minPruneDepth;
 		this.pruneFactor = pruneFactor;
+		this.pruneLowerBound = pruneLowerBound;
 	}
 
 	@Override
@@ -44,7 +47,7 @@ public class MiniMaxAlphaBetaPruningArtificialIntelligence implements Artificial
 				moveSort.sort(followingMoves);
 
 				if (!followingMoves.isEmpty()) {
-					List<Move> prunedFollowingMoves = depth >= minPruneDepth ? prune(followingMoves) : followingMoves;
+					List<Move> prunedFollowingMoves = depth >= minPruneDepth && followingMoves.size() > pruneLowerBound ? prune(followingMoves) : followingMoves;
 					miniMaxAlphaBetaPruning(board, prunedFollowingMoves, lastMove, depth + 1, progress);
 				}
 				if (job != null) {

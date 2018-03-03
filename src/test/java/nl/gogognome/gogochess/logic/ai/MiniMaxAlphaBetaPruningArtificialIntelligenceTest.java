@@ -6,7 +6,7 @@ class MiniMaxAlphaBetaPruningArtificialIntelligenceTest extends ArtificalIntelli
 
 	@Override
 	protected ArtificialIntelligence buildAI() {
-		return new MiniMaxAlphaBetaPruningArtificialIntelligence(7, 2, 400);
+		return new MiniMaxAlphaBetaPruningArtificialIntelligence(7, 2, 400, 5);
 	}
 
 	@Test
