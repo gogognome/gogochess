@@ -10,7 +10,7 @@ import nl.gogognome.gogochess.logic.*;
 public class OneMoveLookAheadArtificialIntelligence implements ArtificialIntelligence {
 
 	private final Random random = new Random(System.currentTimeMillis());
-	private final BoardEvaluator boardEvaluator = ComplexBoardEvaluator.newInstance();
+	private final BoardEvaluator boardEvaluator = BoardEvaluatorFactory.newInstance();
 
 	public Move nextMove(Board board, Player player, Consumer<Integer> progressUpdateConsumer) {
 		List<Move> moves = board.validMoves(player);

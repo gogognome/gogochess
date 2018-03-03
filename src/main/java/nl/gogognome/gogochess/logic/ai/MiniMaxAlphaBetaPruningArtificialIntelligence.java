@@ -11,7 +11,7 @@ public class MiniMaxAlphaBetaPruningArtificialIntelligence implements Artificial
 	private final int pruneFactor;
 
 	// TODO: introduce DI framework
-	private final BoardEvaluator boardEvaluator = ComplexBoardEvaluator.newInstance();
+	private final BoardEvaluator boardEvaluator = BoardEvaluatorFactory.newInstance();
 	private final MiniMax miniMax = new MiniMax();
 	private final MoveSort moveSort = new MoveSort();
 

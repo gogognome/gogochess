@@ -8,7 +8,7 @@ public class ConfigurableLookAheadArtificialIntelligence implements ArtificialIn
 
 	private final int maxRecursionLevel;
 	private final Random random = new Random(System.currentTimeMillis());
-	private final BoardEvaluator boardEvaluator = ComplexBoardEvaluator.newInstance();
+	private final BoardEvaluator boardEvaluator = BoardEvaluatorFactory.newInstance();
 
 	public ConfigurableLookAheadArtificialIntelligence(int maxRecursionLevel) {
 		this.maxRecursionLevel = maxRecursionLevel;

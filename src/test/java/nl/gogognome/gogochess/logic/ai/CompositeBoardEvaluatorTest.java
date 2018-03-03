@@ -37,12 +37,12 @@ class CompositeBoardEvaluatorTest {
 		board.process(new Move("setup", WHITE,
 				WHITE_PAWN.addTo(E5),
 				BLACK_PAWN.addTo(F7)));
-		int goodSituation = ComplexBoardEvaluator.newInstance().value(board);
+		int goodSituation = BoardEvaluatorFactory.newInstance().value(board);
 
 		board = new Board();
 		board.process(new Move("setup", WHITE,
 				WHITE_PAWN.addTo(E5)));
-		int badSituation = ComplexBoardEvaluator.newInstance().value(board);
+		int badSituation = BoardEvaluatorFactory.newInstance().value(board);
 
 		assertTrue(goodSituation < badSituation, goodSituation + " should be smaller than " + badSituation);
 	}

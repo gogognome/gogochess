@@ -1,6 +1,6 @@
 package nl.gogognome.gogochess.logic.ai;
 
-public class ComplexBoardEvaluator {
+public class BoardEvaluatorFactory {
 
 	public static BoardEvaluator newInstance() {
 		return new CompositeBoardEvaluator(
