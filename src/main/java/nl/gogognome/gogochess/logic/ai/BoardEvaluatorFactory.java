@@ -7,6 +7,6 @@ public class BoardEvaluatorFactory {
 				new CheckMateBoardEvaluator(),
 				new PieceValueEvaluator(1000),
 				new NumberOfPossibleMovesEvaluator(),
-				new PiecePositionEvaluator());
+				new PiecePositionEvaluator(10));
 	}
 }
