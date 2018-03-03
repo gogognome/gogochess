@@ -30,7 +30,7 @@ public abstract class PlayerPiece {
 
 	public abstract void addPossibleMoves(List<Move> moves, Square square, Board board);
 
-	protected boolean addMoveToEmptyFieldOCapture(List<Move> moves, Board board, Square square, Square to) {
+	protected boolean addMoveToEmptyFieldOrCapture(List<Move> moves, Board board, Square square, Square to) {
 		if (to == null) {
 			return false;
 		}
@@ -56,6 +56,13 @@ public abstract class PlayerPiece {
 		return new BoardMutation(this, square, REMOVE);
 	}
 
+	/**
+	 * Checks whether this player piece attacks a specific square.
+	 * @param pieceSquare the square where this piece is located
+	 * @param attackedSquare the square that must be checked
+	 * @param board the board
+	 * @return true if this player piece attacks attackedSquare; false otherwise
+	 */
 	public abstract boolean attacks(Square pieceSquare, Square attackedSquare, Board board);
 
 	public String moveNotation(Square from, Square to) {

@@ -2,6 +2,8 @@ package nl.gogognome.gogochess.gui;
 
 import static java.util.stream.Collectors.*;
 import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.*;
+import static nl.gogognome.gogochess.logic.Player.WHITE;
+import static nl.gogognome.gogochess.logic.Squares.*;
 import java.awt.event.*;
 import java.util.*;
 import java.util.concurrent.*;
@@ -38,7 +40,7 @@ public class BoardController {
 		boardPanel.addMouseListener(mouseListener);
 		boardPanel.addMouseMotionListener(mouseListener);
 
-		state = computerPlayer == Player.WHITE ? State.COMPUTER_THINKING : State.WAITING_FOR_DRAG;
+		state = computerPlayer == WHITE ? State.COMPUTER_THINKING : State.WAITING_FOR_DRAG;
 	}
 
 	public BoardPanel getBoardPanel() {
@@ -57,14 +59,24 @@ public class BoardController {
 	private void onPlayerMove(Square startSquare, Square targetSquare) {
 		boardPanel.setTargets(null);
 		Optional<Move> move = board.validMoves().stream()
-				.filter(m -> m.toString().contains(startSquare.toString()) && m.toString().contains(targetSquare.toString()))
-				.filter(m -> m.toString().indexOf(startSquare.toString()) < m.toString().indexOf(targetSquare.toString()))
+				.filter(m -> startAndTargetSquareMatchMove(m, startSquare, targetSquare))
 				.findFirst();
 		if (move.isPresent()) {
 			onMove(move.get());
 		} else {
 			onInvalidMove();
 		}
+	}
+
+	private boolean startAndTargetSquareMatchMove(Move move, Square startSquare, Square targetSquare) {
+		String description = move.toString();
+		if (description.equals("O-O")) {
+			description = move.getPlayer() == WHITE ?  E1 + "-" + B1 : E8 + "-" + B8;
+		} else if (description.equals("O-O-O")) {
+			description = move.getPlayer() == WHITE ?  E1 + "-" + G1 : E8 + "-" + G8;
+		}
+		return description.contains(startSquare.toString()) && description.contains(targetSquare.toString())
+				&& description.indexOf(startSquare.toString()) < description.indexOf(targetSquare.toString());
 	}
 
 	private void onInvalidMove() {
@@ -81,7 +93,7 @@ public class BoardController {
 		} else {
 			if (board.currentPlayer() == computerPlayer) {
 				state = State.COMPUTER_THINKING;
-				executorService.submit(() -> computerThinking());
+				executorService.submit(this::computerThinking);
 			} else {
 				state = State.WAITING_FOR_DRAG;
 			}
@@ -108,7 +120,7 @@ public class BoardController {
 				// Find square where piece is added
 				.map(m -> m.getBoardMutations().stream()
 						.filter(mut -> mut.getMutation() == ADD)
-						.map(mut -> mut.getSquare()).findFirst().get())
+						.map(BoardMutation::getSquare).findFirst().get())
 				.collect(toList());
 	}
 

@@ -16,6 +16,14 @@ public class MoveNotation {
 		return description + '(' + pieceName(playerPiece) + ')';
 	}
 
+	public String castlingShort() {
+		return "O-O";
+	}
+
+	public String castlingLong() {
+		return "O-O-O";
+	}
+
 	private String pieceName(PlayerPiece playerPiece) {
 		switch (playerPiece.getPiece()) {
 			case PAWN: return "";

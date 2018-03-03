@@ -20,7 +20,7 @@ public abstract class MultiStepPlayerPiece extends PlayerPiece {
 			boolean toIsEmptySquare;
 			do {
 				to = to.addColumnAndRow(deltaX[i], deltaY[i]);
-				toIsEmptySquare = addMoveToEmptyFieldOCapture(moves, board, square, to);
+				toIsEmptySquare = addMoveToEmptyFieldOrCapture(moves, board, square, to);
 			} while (toIsEmptySquare);
 		}
 	}

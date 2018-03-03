@@ -115,6 +115,11 @@ public class Board {
 		return playerPiecesPerSquare[square.boardIndex()];
 	}
 
+	/**
+	 * Checks if the square is empty.
+	 * @param square the square
+	 * @return true if the square contains no piece; false if the square contains a piece
+	 */
 	public boolean empty(Square square) {
 		return pieceAt(square) == null;
 	}
@@ -220,6 +225,18 @@ public class Board {
 		return lastMove().getPlayer().other();
 	}
 
+	/**
+	 * Checks if any piece of the specified player attacks the specified square
+	 * @param player the player
+	 * @param square the square
+	 * @return true if one or more pieces of the player attack the square; false otherwise
+	 */
+	public boolean anyPieceAttacks(Player player, Square square) {
+		AtomicBoolean attacked = new AtomicBoolean();
+		forEachPlayerPiece(player, (playerPiece, pieceSquare) -> attacked.set(attacked.get() || playerPiece.attacks(pieceSquare, square, this)));
+		return attacked.get();
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(9*8);
@@ -255,4 +272,5 @@ public class Board {
 			default: throw new IllegalArgumentException("Unknown player found: " + playerPiece.getPlayer());
 		}
 	}
+
 }
