@@ -13,5 +13,4 @@ is the human player and the black player is the computer player. The human playe
 
 The following features will be implemented soon, so keep an eye on this project:
 
-* Take board position into account while evaluating moves
 * When human player promotes a pawn, let the human player select the new type of piece
