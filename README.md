@@ -9,6 +9,16 @@ resulted in a computer player that comes up with reasonble moves in a reasonable
 To make the application easy to use, I created a graphical user interface, which shows a large chess board. Currently, the white player
 is the human player and the black player is the computer player. The human player can enter moves by dragging pieces.
 
+## Build instructions
+
+Build with
+
+    mvn clean install
+    
+Start with 
+
+    java -jar target/gogochess-0.1.jar
+
 ## To be implemented
 
 The following features will be implemented soon, so keep an eye on this project:
