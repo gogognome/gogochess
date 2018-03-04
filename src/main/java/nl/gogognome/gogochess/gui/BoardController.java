@@ -29,7 +29,7 @@ public class BoardController {
 	private final Player computerPlayer;
 	private State state;
 	private ExecutorService executorService = Executors.newFixedThreadPool(1);
-	private MiniMaxAlphaBetaPruningArtificialIntelligence ai = new MiniMaxAlphaBetaPruningArtificialIntelligence(6, 2, 0, 5);
+	private MiniMaxAlphaBetaArtificialIntelligence ai = new MiniMaxAlphaBetaArtificialIntelligence(6);
 
 	private DragData dragData;
 
@@ -52,8 +52,13 @@ public class BoardController {
 	}
 
 	private void computerThinking() {
-		Move move = ai.nextMove(board, board.currentPlayer(), percentage -> boardPanel.updatePercentage(percentage));
-		SwingUtilities.invokeLater(() -> onMove(move));
+		try {
+			Move move = ai.nextMove(board, board.currentPlayer(), percentage -> boardPanel.updatePercentage(percentage));
+			SwingUtilities.invokeLater(() -> onMove(move));
+		} catch (Exception e) {
+			System.out.println(e);
+			e.printStackTrace();
+		}
 	}
 
 	private void onPlayerMove(Square startSquare, Square targetSquare) {
