@@ -3,6 +3,8 @@ package nl.gogognome.gogochess.logic;
 import static java.util.Arrays.*;
 import static java.util.Collections.singletonList;
 import static nl.gogognome.gogochess.logic.Board.*;
+import static nl.gogognome.gogochess.logic.Piece.KING;
+import static nl.gogognome.gogochess.logic.Piece.ROOK;
 import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
 import static nl.gogognome.gogochess.logic.Status.*;
@@ -119,6 +121,11 @@ public class Move {
 			move = move.getPrecedingMove();
 		} while (move != null);
 		return moves;
+	}
+
+	public boolean isCastling() {
+		return boardMutations.stream().filter(m -> m.getPlayerPiece().getPiece().equals(KING)).count() == 2
+				&& boardMutations.stream().filter(m -> m.getPlayerPiece().getPiece().equals(ROOK)).count() == 2;
 	}
 
 	public static List<Move> bestMovesForward(Move lastMove) {

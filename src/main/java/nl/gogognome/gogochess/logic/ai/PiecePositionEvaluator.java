@@ -21,6 +21,10 @@ class PiecePositionEvaluator implements BoardEvaluator {
 		AtomicInteger value = new AtomicInteger();
 		board.forEachPlayerPiece(WHITE, (playerPiece, square) -> value.addAndGet(valueOf(playerPiece, square)));
 		board.forEachPlayerPiece(BLACK, (playerPiece, square) -> value.addAndGet(valueOf(playerPiece, square)));
+
+		if (board.lastMove().isCastling()) {
+			value.addAndGet(MoveValues.negateForBlack(100, board.lastMove().getPlayer()));
+		}
 		return factor * value.get();
 	}
 
