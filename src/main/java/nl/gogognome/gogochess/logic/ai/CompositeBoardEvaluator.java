@@ -17,6 +17,9 @@ public class CompositeBoardEvaluator implements BoardEvaluator {
 		int value = 0;
 		for (int i=0; i<evaluators.size(); i++) {
 			value = MoveValues.add(value, evaluators.get(i).value(board));
+			if (value == Integer.MAX_VALUE || value == Integer.MIN_VALUE) {
+				break;
+			}
 		}
 		return value;
 	}
