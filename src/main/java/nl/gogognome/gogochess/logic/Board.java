@@ -138,8 +138,8 @@ public class Board {
 			addMovesIgnoringCheck(player, moves);
 			removeMovesCausingCheckForOwnPlayer(player, moves);
 			lastMove.setFollowingMoves(moves);
+			determineCheckAndMate(player, lastMove.getFollowingMoves());
 		}
-		determineCheckAndMate(player, lastMove.getFollowingMoves());
 		return lastMove.getFollowingMoves();
 	}
 
