@@ -14,7 +14,6 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 
 	// TODO: introduce DI framework
 	private final BoardEvaluator boardEvaluator = BoardEvaluatorFactory.newInstance();
-	private final MiniMax miniMax = new MiniMax();
 	private final MoveSort moveSort = new MoveSort();
 
 	public MiniMaxAlphaBetaArtificialIntelligence(int maxDepth) {
@@ -39,7 +38,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 
 	private int alphaBeta(Board board, Move move, int depth, int alpha, int beta, Progress progress) {
 		Progress.Job job = null;
-		if (depth == maxDepth) {
+		if (depth == maxDepth || move.getStatus().isGameOver()) {
 			return evaluateMove(board, move);
 		}
 
@@ -54,6 +53,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		if (depth <= 2) {
 			job = progress.onStartJobWithNrSteps(childMoves.size());
 		}
+		evaluateMoves(board, childMoves);
 		moveSort.sort(childMoves);
 		if (childMoves.get(0).getPlayer() == Player.WHITE) {
 			int value = Integer.MIN_VALUE;
