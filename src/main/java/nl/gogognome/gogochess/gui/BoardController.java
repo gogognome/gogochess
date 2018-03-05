@@ -29,7 +29,7 @@ public class BoardController {
 	private final Player computerPlayer;
 	private State state;
 	private ExecutorService executorService = Executors.newFixedThreadPool(1);
-	private MiniMaxAlphaBetaArtificialIntelligence ai = new MiniMaxAlphaBetaArtificialIntelligence(6);
+	private ArtificialIntelligence ai = new OpeningsDatabaseArtificialIntelligenceWrapper(new MiniMaxAlphaBetaArtificialIntelligence(6));
 
 	private DragData dragData;
 
