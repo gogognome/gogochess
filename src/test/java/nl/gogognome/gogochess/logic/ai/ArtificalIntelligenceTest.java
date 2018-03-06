@@ -87,6 +87,21 @@ abstract class ArtificalIntelligenceTest {
 		assertNextMoves(BLACK, "Nc6-d4+", "Ke2xRd1", "Ng4-e3+", "Kd1-c1", "Nd4-e2++");
 	}
 
+	@Test
+	void aiFindsMoveLeadingToCheckMateWithQueenAndRook() {
+		Move initialMove = new Move("initial setup", WHITE,
+				WHITE_KING.addTo(H5),
+				WHITE_PAWN.addTo(G5),
+				BLACK_KING.addTo(B8),
+				BLACK_PAWN.addTo(E4),
+				BLACK_PAWN.addTo(D3),
+				BLACK_QUEEN.addTo(D4),
+				BLACK_ROOK.addTo(C3));
+		board.process(initialMove);
+
+		assertNextMoves(BLACK, "Qd4-f2", "Kh5-h6", "Rc3-c7", "Kh6-g6", "Qf2-f7+", "Kg6-h6", "Qf7-h7++");
+	}
+
 	private void assertNextMoves(Player player, String... expectedMoves) {
 		ArtificialIntelligence ai = buildAI();
 

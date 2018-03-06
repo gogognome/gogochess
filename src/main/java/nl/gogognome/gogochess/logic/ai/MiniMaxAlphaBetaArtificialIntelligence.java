@@ -93,7 +93,6 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 				sb.insert(0, currentMove.getDescription() + " ");
 				currentMove = currentMove.getPrecedingMove();
 			}
-			System.out.println(move.getValue() + "\talpha: " + alpha + "\tbeta: " + beta + "\t" + sb);
 		}
 		return move.getValue();
 	}

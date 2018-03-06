@@ -14,4 +14,10 @@ class OneMoveLookAheadArtificialIntelligenceTest extends ArtificalIntelligenceTe
 	void aiFindsMoveLeadingToCheckMateInThreeMoves() {
 		// does not find solution
 	}
+
+	@Test
+	@Override
+	void aiFindsMoveLeadingToCheckMateWithQueenAndRook() {
+		// does not find solution
+	}
 }

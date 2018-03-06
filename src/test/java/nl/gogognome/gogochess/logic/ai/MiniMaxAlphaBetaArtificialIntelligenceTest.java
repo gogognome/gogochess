@@ -20,4 +20,12 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest extends ArtificalIntelligenceTe
 		initialBeta = -19000;
 		super.aiFindsMoveLeadingToCheckMateInThreeMoves();
 	}
+
+	@Test
+	@Override
+	void aiFindsMoveLeadingToCheckMateWithQueenAndRook() {
+		maxDepth = 8;
+		initialBeta = Integer.MIN_VALUE + 100;
+		super.aiFindsMoveLeadingToCheckMateWithQueenAndRook();
+	}
 }
