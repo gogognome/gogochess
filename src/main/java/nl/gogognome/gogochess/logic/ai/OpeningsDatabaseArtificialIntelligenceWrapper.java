@@ -12,8 +12,17 @@ public class OpeningsDatabaseArtificialIntelligenceWrapper implements Artificial
 			{ "e2-e4", "e7-e5", "Ng1-f3", "Nb8-c6", "Bf1-b5" }, // Ruy Lopez (Spanish)
 			{ "e2-e4", "e7-e5", "Ng1-f3", "Nb8-c6", "Bf1-c4", "Bf8-c5", "d2-d3" }, // Guioco Pianissimo
 			{ "e2-e4", "e7-e5", "Ng1-f3", "Nb8-c6", "Bf1-c4", "Bf8-c5", "b2-b4" }, // Evans Gambit
+			{ "e2-e4", "e7-e5", "d2-d4", "e5xd4", "Qd1xd4" }, // Center game
 			{ "e2-e4", "e7-e5", "f2-f4" }, // King's Gambit
-			{ "e2-e4", "c7-c5",  "Nb1-f3", "d7-d6", "d2-d4", "c5xd4", "Nf3xd4", "Ng8-f6", "Nb1-c3", "g8-g6" } // Sicilian Defense, Dragon variation
+			{ "e2-e4", "c7-c5",  "Nb1-f3", "d7-d6", "d2-d4", "c5xd4", "Nf3xd4", "Ng8-f6", "Nb1-c3", "g8-g6" }, // Sicilian Defense, Dragon variation
+			{ "e2-e4", "e7-e6", "d2-d4", "d7-d5"}, // French Defense
+			{ "e2-e4", "c7-c6" }, // Caro-Kann Defense
+			{ "e2-e4", "d7-d6" }, // Pirc Defense
+			{ "d2-d4", "d7-d5", "c2-c4" }, // Queen's Gambit
+			{ "d2-d4", "d7-d5", "e2-e4", "d5xe4", "Nb1-c3" }, // Blackmar-Diemer Gambit
+			{ "d2-d4", "Ng8-f6", }, // Indian Defense
+			{ "c2-c4", "e7-e5"}, // English Opening
+
 	};
 
 	private final Random random = new Random();
@@ -36,7 +45,7 @@ public class OpeningsDatabaseArtificialIntelligenceWrapper implements Artificial
 		}
 
 		int opening = random.nextInt(matchingOpenings.size());
-		String followingMoveDescription = OPENINGS[opening][board.lastMove().depthInTree()];
+		String followingMoveDescription = OPENINGS[matchingOpenings.get(opening)][board.lastMove().depthInTree()];
 		return board.validMoves(player).stream()
 				.filter(move -> move.getDescription().equals(followingMoveDescription))
 				.findFirst()
