@@ -39,7 +39,7 @@ public class BoardPanel extends JPanel {
 	private final int squareSize;
 	private final int progressBarHeight;
 	private final int marginHeight;
-	private final static Color[] SQUARE_COLORS = new Color[] { new Color(148, 170, 255 ), new Color(255, 255, 173) };
+	private final static Color[] SQUARE_COLORS = new Color[] { new Color(255, 206, 158), new Color(209,139, 71) };
 	private final BufferedImage piecesImage;
 	private final static Piece[] PIECES_IN_IMAGE = new Piece[] { KING, QUEEN, BISHOP, KNIGHT, ROOK, PAWN };
 	private Map<Square, PlayerPiece> squareToPlayerPiece = new HashMap<>();
@@ -133,9 +133,10 @@ public class BoardPanel extends JPanel {
 	private void paintProgressBar(Graphics g) {
 		g.setColor(Color.BLACK);
 		int boardSize = 8 * squareSize;
-		g.fillRoundRect(0, boardSize + marginHeight, boardSize, progressBarHeight, marginHeight, marginHeight);
+		int arcHeight = 2 * marginHeight;
+		g.fillRoundRect(0, boardSize + marginHeight, boardSize, progressBarHeight, arcHeight, arcHeight);
 		g.setColor(Color.BLUE);
-		g.fillRoundRect(0, boardSize + marginHeight, boardSize * percentage / 100, progressBarHeight, marginHeight, marginHeight);
+		g.fillRoundRect(0, boardSize + marginHeight, boardSize * percentage / 100, progressBarHeight, arcHeight, arcHeight);
 	}
 
 	private int pieceLeft(PlayerPiece playerPiece) {
