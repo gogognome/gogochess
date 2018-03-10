@@ -1,5 +1,6 @@
 package nl.gogognome.gogochess.logic;
 
+import static nl.gogognome.gogochess.logic.Piece.PAWN;
 import static nl.gogognome.gogochess.logic.Status.*;
 import static nl.gogognome.gogochess.logic.Player.*;
 import java.util.*;
@@ -237,6 +238,17 @@ public class Board {
 		return attacked.get();
 	}
 
+	public int numberNonPawnPieces() {
+		int count = 0;
+		for (int i=0; i<playerPiecesPerSquare.length; i++) {
+			PlayerPiece playerPiece = playerPiecesPerSquare[i];
+			if (playerPiece != null && playerPiece.getPiece() != PAWN) {
+				count++;
+			}
+		}
+		return count;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(9*8);
@@ -272,5 +284,4 @@ public class Board {
 			default: throw new IllegalArgumentException("Unknown player found: " + playerPiece.getPlayer());
 		}
 	}
-
 }
