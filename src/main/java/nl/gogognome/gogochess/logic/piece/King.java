@@ -58,6 +58,14 @@ public class King extends PlayerPiece {
 		}
 	}
 
+	private boolean areAllSquaresInBetweenEmpty(Board board, Square leftMostSquare, Square rightMostSquare) {
+		boolean squaresInBetweenEmpty = true;
+		for (int col = leftMostSquare.column() + 1; col<= rightMostSquare.column() - 1; col++) {
+			squaresInBetweenEmpty = squaresInBetweenEmpty && board.empty(new Square(col, leftMostSquare.row()));
+		}
+		return squaresInBetweenEmpty;
+	}
+
 	private boolean isAnySquareAttacked(Board board, int row, Square leftMostSquare, Square rightMostSquare) {
 		boolean blockedByAttack = false;
 		for (int col = leftMostSquare.column(); col<= rightMostSquare.column(); col++) {
@@ -79,14 +87,6 @@ public class King extends PlayerPiece {
 
 	private boolean moveContainsSquare(Move move, Square square) {
 		return move.getBoardMutations().stream().anyMatch(mutation -> mutation.getMutation() == REMOVE && mutation.getSquare().equals(square));
-	}
-
-	private boolean areAllSquaresInBetweenEmpty(Board board, Square leftMostSquare, Square rightMostSquare) {
-		boolean squaresInBetweenEmpty = true;
-		for (int col = leftMostSquare.column() + 1; col<= rightMostSquare.column() - 1; col++) {
-			squaresInBetweenEmpty = squaresInBetweenEmpty && board.empty(new Square(col, leftMostSquare.row()));
-		}
-		return squaresInBetweenEmpty;
 	}
 
 	@Override
