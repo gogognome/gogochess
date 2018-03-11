@@ -19,7 +19,7 @@ public class ConfigurableLookAheadArtificialIntelligence implements ArtificialIn
 	}
 
 	private Move nextMove(Board board, Player player, int currentLevel, Progress progress) {
-		List<Move> moves = board.validMoves(player);
+		List<Move> moves = board.validMoves();
 		List<Move> bestMoves = new ArrayList<>();
 		int bestValue = MoveValues.minValue(player);
 

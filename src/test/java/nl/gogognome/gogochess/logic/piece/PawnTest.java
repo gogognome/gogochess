@@ -1,19 +1,13 @@
 package nl.gogognome.gogochess.logic.piece;
 
-import static java.util.Arrays.asList;
+import static java.util.Arrays.*;
 import static java.util.Collections.*;
-import static java.util.Collections.singleton;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.*;
 import static nl.gogognome.gogochess.logic.Board.*;
-import static nl.gogognome.gogochess.logic.Board.WHITE_PAWN;
-import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.ADD;
-import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.REMOVE;
-import static nl.gogognome.gogochess.logic.Moves.assertMovesContain;
-import static nl.gogognome.gogochess.logic.Player.BLACK;
-import static nl.gogognome.gogochess.logic.Player.WHITE;
+import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.*;
+import static nl.gogognome.gogochess.logic.Moves.*;
+import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
-import static nl.gogognome.gogochess.logic.Squares.A8;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.*;
 import org.junit.jupiter.api.*;
@@ -29,7 +23,7 @@ class PawnTest {
 				new BoardMutation(WHITE_PAWN, A2, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(WHITE);
+		List<Move> moves = board.validMoves();
 
 		assertEquals("[a2-a3, a2-a4]", moves.toString());
 		assertEquals(singleton(setup), moves.stream().map(Move::getPrecedingMove).collect(toSet()));
@@ -47,7 +41,7 @@ class PawnTest {
 				new BoardMutation(BLACK_PAWN, A3, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(WHITE);
+		List<Move> moves = board.validMoves();
 
 		assertEquals("[]", moves.toString());
 		assertEquals(emptySet(), moves.stream().map(Move::getPrecedingMove).collect(toSet()));
@@ -63,7 +57,7 @@ class PawnTest {
 				new BoardMutation(BLACK_PAWN, A4, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(WHITE);
+		List<Move> moves = board.validMoves();
 
 		assertEquals("[a2-a3]", moves.toString());
 		assertEquals(singleton(setup), moves.stream().map(Move::getPrecedingMove).collect(toSet()));
@@ -80,7 +74,7 @@ class PawnTest {
 				new BoardMutation(BLACK_PAWN, A3, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(WHITE);
+		List<Move> moves = board.validMoves();
 
 		assertTrue(moves.toString().contains("b2xa3"), "actual moves: " + moves);
 		assertMovesContain(moves,
@@ -100,7 +94,7 @@ class PawnTest {
 				new BoardMutation(BLACK_PAWN, A5, ADD));
 		board.process(blackPawnMoves2);
 
-		List<Move> moves = board.validMoves(WHITE);
+		List<Move> moves = board.validMoves();
 
 		assertTrue(moves.toString().contains("b5xa6"), "actual moves: " + moves);
 		assertMovesContain(moves,
@@ -120,7 +114,7 @@ class PawnTest {
 				new BoardMutation(BLACK_PAWN, A5, ADD));
 		board.process(blackPawnMoves2);
 
-		List<Move> moves = board.validMoves(WHITE);
+		List<Move> moves = board.validMoves();
 
 		assertFalse(moves.toString().contains("b5xa6"), "actual moves: " + moves);
 	}
@@ -132,7 +126,7 @@ class PawnTest {
 				new BoardMutation(BLACK_PAWN, B2, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(WHITE);
+		List<Move> moves = board.validMoves();
 
 		assertFalse(moves.toString().contains("x"), "actual moves: " + moves);
 	}
@@ -144,7 +138,7 @@ class PawnTest {
 				new BoardMutation(BLACK_PAWN, B7, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(WHITE);
+		List<Move> moves = board.validMoves();
 
 		assertFalse(moves.toString().contains("x"), "actual moves: " + moves);
 	}
@@ -155,7 +149,7 @@ class PawnTest {
 				new BoardMutation(WHITE_PAWN, B7, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(WHITE);
+		List<Move> moves = board.validMoves();
 
 		assertTrue(moves.toString().contains("b7-b8(N), b7-b8(B), b7-b8(R), b7-b8(Q)"), "actual moves: " + moves);
 		List<List<BoardMutation>> actualMoves = moves.stream().map(Move::getBoardMutations).collect(toList());
@@ -173,7 +167,7 @@ class PawnTest {
 				new BoardMutation(BLACK_ROOK, A8, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(WHITE);
+		List<Move> moves = board.validMoves();
 
 		assertTrue(moves.toString().contains("b7xRa8(N), b7xRa8(B), b7xRa8(R), b7xRa8(Q)"), "actual moves: " + moves);
 		List<List<BoardMutation>> actualMoves = moves.stream().map(Move::getBoardMutations).collect(toList());

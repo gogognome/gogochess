@@ -79,7 +79,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 
 	private Move alphaBetaWithChildMoves(Board board, Move move, int depth, int alpha, int beta, Progress progress, List<Move> childMoves) {
 		Progress.Job job = null;
-		if (depth <= 2) {
+		if (depth <= 1) {
 			job = progress.onStartJobWithNrSteps(childMoves.size());
 		}
 

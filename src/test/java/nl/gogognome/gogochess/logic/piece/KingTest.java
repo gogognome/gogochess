@@ -23,7 +23,7 @@ class KingTest {
 				new BoardMutation(BLACK_KING, E4, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(BLACK);
+		List<Move> moves = board.validMoves();
 
 		assertEquals("[Ke4-f5, Ke4-f3, Ke4-d5, Ke4-d3, Ke4-f4, Ke4-d4, Ke4-e5, Ke4-e3]", moves.toString());
 		assertEquals(singleton(setup), moves.stream().map(Move::getPrecedingMove).collect(toSet()));
@@ -47,7 +47,7 @@ class KingTest {
 				new BoardMutation(BLACK_ROOK, E5, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(BLACK);
+		List<Move> moves = board.validMoves();
 
 		assertMovesDoNotContain(moves, "Ke4xRe5");
 	}
@@ -59,7 +59,7 @@ class KingTest {
 				new BoardMutation(WHITE_ROOK, E5, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(BLACK);
+		List<Move> moves = board.validMoves();
 
 		assertMovesContain(moves, "Ke4xRe5");
 		assertMovesContain(moves,
@@ -75,7 +75,7 @@ class KingTest {
 				new BoardMutation(BLACK_KING, E8, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(BLACK);
+		List<Move> moves = board.validMoves();
 
 		assertMovesContain(moves, "O-O");
 		assertMovesContain(moves,
@@ -96,7 +96,7 @@ class KingTest {
 		Move move2 = new Move("Kd8-e8", move1, BLACK_KING.removeFrom(D8), BLACK_KING.addTo(E8));
 		board.process(move2);
 
-		List<Move> moves = board.validMoves(BLACK);
+		List<Move> moves = board.validMoves();
 
 		assertMovesDoNotContain(moves, "O-O");
 	}
@@ -112,7 +112,7 @@ class KingTest {
 		Move move2 = new Move("Rb8-a8", move1, BLACK_ROOK.removeFrom(B8), BLACK_ROOK.addTo(A8));
 		board.process(move2);
 
-		List<Move> moves = board.validMoves(BLACK);
+		List<Move> moves = board.validMoves();
 
 		assertMovesDoNotContain(moves, "O-O");
 	}
@@ -125,7 +125,7 @@ class KingTest {
 				new BoardMutation(WHITE_ROOK, E1, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(BLACK);
+		List<Move> moves = board.validMoves();
 
 		assertMovesDoNotContain(moves, "O-O");
 	}
@@ -138,7 +138,7 @@ class KingTest {
 				new BoardMutation(WHITE_ROOK, D1, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(BLACK);
+		List<Move> moves = board.validMoves();
 
 		assertMovesDoNotContain(moves, "O-O");
 	}
@@ -151,7 +151,7 @@ class KingTest {
 				new BoardMutation(WHITE_ROOK, C1, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(BLACK);
+		List<Move> moves = board.validMoves();
 
 		assertMovesDoNotContain(moves, "O-O");
 	}
@@ -164,7 +164,7 @@ class KingTest {
 				new BoardMutation(WHITE_ROOK, B1, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(BLACK);
+		List<Move> moves = board.validMoves();
 
 		assertMovesDoNotContain(moves, "O-O");
 	}
@@ -177,7 +177,7 @@ class KingTest {
 				new BoardMutation(WHITE_ROOK, A1, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(BLACK);
+		List<Move> moves = board.validMoves();
 
 		assertMovesContain(moves, "O-O");
 	}
@@ -189,7 +189,7 @@ class KingTest {
 				new BoardMutation(BLACK_KING, E8, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(BLACK);
+		List<Move> moves = board.validMoves();
 
 		assertMovesContain(moves, "O-O-O");
 		assertMovesContain(moves,
@@ -210,7 +210,7 @@ class KingTest {
 		Move move2 = new Move("Kd8-e8", move1, BLACK_KING.removeFrom(D8), BLACK_KING.addTo(E8));
 		board.process(move2);
 
-		List<Move> moves = board.validMoves(BLACK);
+		List<Move> moves = board.validMoves();
 
 		assertMovesDoNotContain(moves, "O-O-O");
 	}
@@ -226,7 +226,7 @@ class KingTest {
 		Move move2 = new Move("Rg8-h8", move1, BLACK_ROOK.removeFrom(G8), BLACK_ROOK.addTo(H8));
 		board.process(move2);
 
-		List<Move> moves = board.validMoves(BLACK);
+		List<Move> moves = board.validMoves();
 
 		assertMovesDoNotContain(moves, "O-O-O");
 	}
@@ -239,7 +239,7 @@ class KingTest {
 				new BoardMutation(WHITE_ROOK, E1, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(BLACK);
+		List<Move> moves = board.validMoves();
 
 		assertMovesDoNotContain(moves, "O-O-O");
 	}
@@ -252,7 +252,7 @@ class KingTest {
 				new BoardMutation(WHITE_ROOK, F1, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(BLACK);
+		List<Move> moves = board.validMoves();
 
 		assertMovesDoNotContain(moves, "O-O-O");
 	}
@@ -265,7 +265,7 @@ class KingTest {
 				new BoardMutation(WHITE_ROOK, G1, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(BLACK);
+		List<Move> moves = board.validMoves();
 
 		assertMovesDoNotContain(moves, "O-O-O");
 	}
@@ -278,7 +278,7 @@ class KingTest {
 				new BoardMutation(WHITE_ROOK, H1, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(BLACK);
+		List<Move> moves = board.validMoves();
 
 		assertMovesContain(moves, "O-O-O");
 	}

@@ -13,7 +13,7 @@ public class OneMoveLookAheadArtificialIntelligence implements ArtificialIntelli
 	private final BoardEvaluator boardEvaluator = BoardEvaluatorFactory.newInstance();
 
 	public Move nextMove(Board board, Player player, Consumer<Integer> progressUpdateConsumer) {
-		List<Move> moves = board.validMoves(player);
+		List<Move> moves = board.validMoves();
 
 		List<Move> bestMoves = new ArrayList<>();
 		int bestValue = player == WHITE ? MIN_VALUE : MAX_VALUE;

@@ -126,17 +126,13 @@ public class Board {
 	}
 
 	public List<Move> validMoves() {
-		return validMoves(currentPlayer());
-	}
-
-	// TODO: inline this method
-	public List<Move> validMoves(Player player) {
 		if (lastMove == null) {
 			throw new IllegalStateException("No moves can be determined when the board is empty");
 		}
+		Player player = currentPlayer();
 		List<Move> moves = new ArrayList<>(40);
 		addMovesIgnoringCheck(player, moves);
-		removeMovesCausingCheckForOwnPlayerAndDetermineCheckAndMate(player, moves);
+		processCheck(player, moves, false);
 		return moves;
 	}
 
@@ -144,7 +140,8 @@ public class Board {
 		forEachPlayerPiece(player, (playerPiece, square) -> playerPiece.addPossibleMoves(moves, square, this));
 	}
 
-	private void removeMovesCausingCheckForOwnPlayerAndDetermineCheckAndMate(Player player, List<Move> moves) {
+	private void processCheck(Player player, List<Move> moves, boolean onlyCheckIfKingIsAttacked) {
+		Square oppositeKingSquare = squareOf(new King(player.other()));
 		int index = 0;
 		while (index < moves.size()) {
 			Move move = moves.get(index);
@@ -153,7 +150,9 @@ public class Board {
 			if (isKingAttackedOf(player)) {
 				moves.remove(index);
 			} else {
-				determineCheckAndMate(player, move);
+				if (!onlyCheckIfKingIsAttacked) {
+					determineCheckAndMate(player, move, oppositeKingSquare);
+				}
 				index++;
 			}
 
@@ -171,21 +170,26 @@ public class Board {
 		return attacksKing.get();
 	}
 
-	private void determineCheckAndMate(Player player, Move move) {
-		Square oppositeKingSquare = squareOf(new King(player.other()));
-		if (oppositeKingSquare != null) {
-			AtomicBoolean attacksKing = new AtomicBoolean();
-			forEachPlayerPiece(player, (playerPiece, square) -> attacksKing.set(attacksKing.get() || playerPiece.attacks(square, oppositeKingSquare, this)));
-			if (attacksKing.get()) {
-				move.setStatus(CHECK);
+	private void determineCheckAndMate(Player player, Move move, Square oppositeKingSquare) {
+		if (oppositeKingSquare == null) {
+			return;
+		}
+		AtomicBoolean attacksKing = new AtomicBoolean();
+		forEachPlayerPiece(player, (playerPiece, square) -> attacksKing.set(attacksKing.get() || playerPiece.attacks(square, oppositeKingSquare, this)));
+		if (attacksKing.get()) {
+			move.setStatus(CHECK);
+		}
 
-				List<Move> followingMoves = new ArrayList<>();
-				addMovesIgnoringCheck(player.other(), followingMoves);
-				removeMovesCausingCheckForOwnPlayerAndDetermineCheckAndMate(player.other(), followingMoves);
-				if (followingMoves.isEmpty()) {
-					move.setStatus(move.getStatus() == CHECK ? CHECK_MATE : STALE_MATE);
-				}
+		List<Move> followingMoves = new ArrayList<>();
+		forEachPlayerPiece(player, (playerPiece, square) -> {
+			if (followingMoves.isEmpty()) {
+				playerPiece.addPossibleMoves(followingMoves, square, this);
+				processCheck(player.other(), followingMoves, true);
 			}
+		});
+
+		if (followingMoves.isEmpty()) {
+			move.setStatus(move.getStatus() == CHECK ? CHECK_MATE : STALE_MATE);
 		}
 	}
 
@@ -212,6 +216,9 @@ public class Board {
 	}
 
 	public Player currentPlayer() {
+		if (lastMove == null) {
+			throw new IllegalStateException("No moves can be determined when the board is empty");
+		}
 		return lastMove().getPlayer().other();
 	}
 

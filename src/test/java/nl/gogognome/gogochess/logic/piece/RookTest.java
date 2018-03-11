@@ -23,7 +23,7 @@ class RookTest {
 				new BoardMutation(BLACK_ROOK, E4, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(BLACK);
+		List<Move> moves = board.validMoves();
 
 		assertEquals("[Re4-f4, Re4-g4, Re4-h4, Re4-d4, Re4-c4, Re4-b4, Re4-a4, Re4-e5, Re4-e6, Re4-e7, Re4-e8, Re4-e3, Re4-e2, Re4-e1]", moves.toString());
 		assertEquals(singleton(setup), moves.stream().map(Move::getPrecedingMove).collect(toSet()));
@@ -53,7 +53,7 @@ class RookTest {
 				new BoardMutation(BLACK_BISHOP, E5, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(BLACK);
+		List<Move> moves = board.validMoves();
 
 		assertFalse(moves.toString().contains("Re4xBe5"), moves.toString());
 		assertFalse(moves.toString().contains("Re4-e6"), moves.toString());
@@ -66,7 +66,7 @@ class RookTest {
 				new BoardMutation(WHITE_BISHOP, E5, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(BLACK);
+		List<Move> moves = board.validMoves();
 
 		assertTrue(moves.toString().contains("Re4xBe5"), moves.toString());
 		assertMovesContain(moves,

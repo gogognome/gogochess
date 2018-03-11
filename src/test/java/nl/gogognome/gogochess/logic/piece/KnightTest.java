@@ -23,7 +23,7 @@ class KnightTest {
 				new BoardMutation(BLACK_KNIGHT, E4, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(BLACK);
+		List<Move> moves = board.validMoves();
 
 		assertEquals("[Ne4-f6, Ne4-f2, Ne4-d6, Ne4-d2, Ne4-g5, Ne4-g3, Ne4-c5, Ne4-c3]", moves.toString());
 		assertEquals(singleton(setup), moves.stream().map(Move::getPrecedingMove).collect(toSet()));
@@ -47,7 +47,7 @@ class KnightTest {
 				new BoardMutation(BLACK_KNIGHT, A1, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(BLACK);
+		List<Move> moves = board.validMoves();
 
 		assertEquals("[Na1-b3, Na1-c2]", moves.toString());
 		assertEquals(singleton(setup), moves.stream().map(Move::getPrecedingMove).collect(toSet()));
@@ -65,7 +65,7 @@ class KnightTest {
 				new BoardMutation(BLACK_BISHOP, D2, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(BLACK);
+		List<Move> moves = board.validMoves();
 
 		assertFalse(moves.toString().contains("Ne4xBd2"), moves.toString());
 	}
@@ -77,7 +77,7 @@ class KnightTest {
 				new BoardMutation(WHITE_BISHOP, D2, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves(BLACK);
+		List<Move> moves = board.validMoves();
 
 		assertTrue(moves.toString().contains("Ne4xBd2"), moves.toString());
 		assertMovesContain(moves,

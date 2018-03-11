@@ -74,14 +74,13 @@ class BoardTest {
 
 	@Test
 	void validMovesForEmptyBoard() {
-		assertThrows(IllegalStateException.class, () -> board.validMoves(WHITE));
-		assertThrows(IllegalStateException.class, () -> board.validMoves(BLACK));
+		assertThrows(IllegalStateException.class, () -> board.validMoves());
 	}
 
 	@Test
 	void undoMove() {
 		board.process(Move.INITIAL_BOARD);
-		List<Move> moves = board.validMoves(WHITE);
+		List<Move> moves = board.validMoves();
 		board.process(find(moves, "e2-e4"));
 		board.process(Move.INITIAL_BOARD);
 
@@ -101,7 +100,7 @@ class BoardTest {
 	@Test
 	void automaticallyUndoMoveAndProcessNewMove() {
 		board.process(Move.INITIAL_BOARD);
-		List<Move> moves = board.validMoves(WHITE);
+		List<Move> moves = board.validMoves();
 		board.process(find(moves, "e2-e4"));
 		board.process(find(moves, "d2-d4"));
 
@@ -124,7 +123,7 @@ class BoardTest {
 				WHITE_PAWN.addTo(E6),
 				BLACK_KING.addTo(F8)));
 
-		List<Move> moves = board.validMoves(WHITE);
+		List<Move> moves = board.validMoves();
 		assertTrue(moves.toString().contains("e6-e7+"), moves.toString());
 		assertEquals(CHECK, find(moves, "e6-e7+").getStatus());
 	}
@@ -136,7 +135,7 @@ class BoardTest {
 				WHITE_KING.addTo(A6),
 				BLACK_QUEEN.addTo(H6)));
 
-		String moves = board.validMoves(WHITE).toString();
+		String moves = board.validMoves().toString();
 		assertFalse(moves.contains("e6-e7"), moves);
 	}
 
@@ -147,7 +146,7 @@ class BoardTest {
 				WHITE_KING.addTo(F7),
 				BLACK_KING.addTo(H8)));
 
-		List<Move> moves = board.validMoves(WHITE);
+		List<Move> moves = board.validMoves();
 		assertTrue(moves.toString().contains("Qg1-g7++"), moves.toString());
 		assertEquals(CHECK_MATE, find(moves, "Qg1-g7++").getStatus());
 	}
@@ -160,7 +159,7 @@ class BoardTest {
 				WHITE_KING.addTo(F7),
 				BLACK_KING.addTo(H8)));
 
-		List<Move> moves = board.validMoves(WHITE);
+		List<Move> moves = board.validMoves();
 		assertTrue(moves.toString().contains("Qg1-g6"), moves.toString());
 		assertEquals(STALE_MATE, find(moves, "Qg1-g6").getStatus());
 	}
