@@ -7,7 +7,7 @@ public class NumberOfPossibleMovesEvaluator implements BoardEvaluator {
 
 	@Override
 	public int value(Board board) {
-		List<Move> followingMoves = board.lastMove().getFollowingMoves();
+		List<Move> followingMoves = board.validMoves();
 		if (followingMoves != null) {
 			return MoveValues.negateForBlack(followingMoves.size(), board.lastMove().getPlayer());
 		}

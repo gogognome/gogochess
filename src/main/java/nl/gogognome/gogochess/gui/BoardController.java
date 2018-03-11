@@ -29,7 +29,7 @@ public class BoardController {
 	private final Player computerPlayer;
 	private State state;
 	private ExecutorService executorService = Executors.newFixedThreadPool(1);
-	private ArtificialIntelligence ai = new OpeningsDatabaseArtificialIntelligenceWrapper(new MiniMaxAlphaBetaArtificialIntelligence(6));
+	private ArtificialIntelligence ai = new OpeningsDatabaseArtificialIntelligenceWrapper(new MiniMaxAlphaBetaArtificialIntelligence(4));
 
 	private DragData dragData;
 
@@ -92,7 +92,6 @@ public class BoardController {
 	private void onMove(Move move) {
 		board.process(move);
 		moves.add(move);
-		move.keepMoveAndPrecedingMoves();
 		if (move.getStatus().isGameOver()) {
 			state = State.GAME_OVER;
 		} else {

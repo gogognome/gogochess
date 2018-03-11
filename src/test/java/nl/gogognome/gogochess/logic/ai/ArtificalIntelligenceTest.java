@@ -105,10 +105,18 @@ abstract class ArtificalIntelligenceTest {
 	private void assertNextMoves(Player player, String... expectedMoves) {
 		ArtificialIntelligence ai = buildAI();
 
-		Move move = ai.nextMove(board, player, percentage -> {});
-		assertNotNull(move);
+		List<Move> actualMoves = new ArrayList<>();
+		Move move;
+		do {
+			move = ai.nextMove(board, player, percentage -> {});
+			assertNotNull(move);
+			actualMoves.add(move);
+			System.out.println(move.getDescription() + " ");
+			board.process(move);
+			player = player.other();
+		} while (!move.getStatus().isGameOver() && actualMoves.size() < 10);
+		System.out.println();
 
-		List<Move> actualMoves = Move.bestMovesForward(move.getPrecedingMove());
 		List<String> expectedMoveStrings = asList(expectedMoves).subList(0, min(actualMoves.size(), expectedMoves.length));
 		assertEquals(expectedMoveStrings.toString(), actualMoves.toString());
 	}

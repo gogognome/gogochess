@@ -134,70 +134,59 @@ public class Board {
 		if (lastMove == null) {
 			throw new IllegalStateException("No moves can be determined when the board is empty");
 		}
-		if (!lastMove.hasFollowingMoves()) {
-			List<Move> moves = new ArrayList<>(40);
-			addMovesIgnoringCheck(player, moves);
-			removeMovesCausingCheckForOwnPlayer(player, moves);
-			lastMove.setFollowingMoves(moves);
-			determineCheckAndMate(player, lastMove.getFollowingMoves());
-		}
-		return lastMove.getFollowingMoves();
+		List<Move> moves = new ArrayList<>(40);
+		addMovesIgnoringCheck(player, moves);
+		removeMovesCausingCheckForOwnPlayerAndDetermineCheckAndMate(player, moves);
+		return moves;
 	}
 
 	private void addMovesIgnoringCheck(Player player, List<Move> moves) {
 		forEachPlayerPiece(player, (playerPiece, square) -> playerPiece.addPossibleMoves(moves, square, this));
 	}
 
-	private void removeMovesCausingCheckForOwnPlayer(Player player, List<Move> moves) {
+	private void removeMovesCausingCheckForOwnPlayerAndDetermineCheckAndMate(Player player, List<Move> moves) {
 		int index = 0;
 		while (index < moves.size()) {
-			processSingleMove(moves.get(index));
+			Move move = moves.get(index);
+			processSingleMove(move);
 
-			AtomicBoolean attacksKing = new AtomicBoolean();
-			Square kingSquare = squareOf(new King(player));
-			if (kingSquare != null) {
-				forEachPlayerPiece(player.other(), (playerPiece, square) -> attacksKing.set(attacksKing.get() || playerPiece.attacks(square, kingSquare, this)));
-			}
-
-			undoSingleMove(moves.get(index));
-
-			if (attacksKing.get()) {
+			if (isKingAttackedOf(player)) {
 				moves.remove(index);
 			} else {
+				determineCheckAndMate(player, move);
 				index++;
 			}
+
+			undoSingleMove(move);
 		}
 	}
 
-	private void determineCheckAndMate(Player player, List<Move> moves) {
-		for (Move move : moves) {
-			if (!move.isMateChecked()) {
-				determineCheckAndMate(player, move);
-			}
+	private boolean isKingAttackedOf(Player player) {
+		AtomicBoolean attacksKing = new AtomicBoolean();
+		Square kingSquare = squareOf(new King(player));
+		if (kingSquare != null) {
+			forEachPlayerPiece(player.other(), (playerPiece, square) -> attacksKing.set(attacksKing.get() || playerPiece.attacks(square, kingSquare, this)));
 		}
+
+		return attacksKing.get();
 	}
 
 	private void determineCheckAndMate(Player player, Move move) {
-		processSingleMove(move);
-
 		Square oppositeKingSquare = squareOf(new King(player.other()));
 		if (oppositeKingSquare != null) {
 			AtomicBoolean attacksKing = new AtomicBoolean();
 			forEachPlayerPiece(player, (playerPiece, square) -> attacksKing.set(attacksKing.get() || playerPiece.attacks(square, oppositeKingSquare, this)));
 			if (attacksKing.get()) {
 				move.setStatus(CHECK);
-			}
 
-			List<Move> followingMoves = new ArrayList<>();
-			addMovesIgnoringCheck(player.other(), followingMoves);
-			removeMovesCausingCheckForOwnPlayer(player.other(), followingMoves);
-			move.setFollowingMoves(followingMoves);
-			if (followingMoves.isEmpty()) {
-				move.setStatus(move.getStatus() == CHECK ? CHECK_MATE : STALE_MATE);
+				List<Move> followingMoves = new ArrayList<>();
+				addMovesIgnoringCheck(player.other(), followingMoves);
+				removeMovesCausingCheckForOwnPlayerAndDetermineCheckAndMate(player.other(), followingMoves);
+				if (followingMoves.isEmpty()) {
+					move.setStatus(move.getStatus() == CHECK ? CHECK_MATE : STALE_MATE);
+				}
 			}
 		}
-
-		undoSingleMove(move);
 	}
 
 	public void forEachPlayerPiece(Player player, BiConsumer<PlayerPiece, Square> action) {

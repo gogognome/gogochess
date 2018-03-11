@@ -4,7 +4,7 @@ import org.junit.jupiter.api.*;
 
 class MiniMaxAlphaBetaArtificialIntelligenceTest extends ArtificalIntelligenceTest {
 
-	private int maxDepth = 5;
+	private int maxDepth = 2;
 	private int initialAlfa = Integer.MIN_VALUE;
 	private int initialBeta = Integer.MAX_VALUE;
 
@@ -16,7 +16,7 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest extends ArtificalIntelligenceTe
 	@Test
 	@Override
 	void aiFindsMoveLeadingToCheckMateInThreeMoves() {
-		maxDepth = 6;
+		maxDepth = 5;
 		initialBeta = -19000;
 		super.aiFindsMoveLeadingToCheckMateInThreeMoves();
 	}
@@ -24,7 +24,7 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest extends ArtificalIntelligenceTe
 	@Test
 	@Override
 	void aiFindsMoveLeadingToCheckMateWithQueenAndRook() {
-		maxDepth = 8;
+		maxDepth = 7;
 		initialBeta = Integer.MIN_VALUE + 100;
 		super.aiFindsMoveLeadingToCheckMateWithQueenAndRook();
 	}

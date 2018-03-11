@@ -31,25 +31,35 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 	public Move nextMove(Board board, Player player, Consumer<Integer> progressUpdateConsumer) {
 		initMaxDepth(board);
 		System.out.println("maxDepth: " + maxDepth);
-		Move lastMove = board.lastMove();
-		alphaBeta(board, board.lastMove(), 1, initialAlpha, initialBeta, new Progress(progressUpdateConsumer));
+		List<Move> nextMoves = board.validMoves();
+		Progress progress = new Progress(progressUpdateConsumer);
+		Progress.Job job = progress.onStartJobWithNrSteps(nextMoves.size());
+		for (Move move : nextMoves) {
+			alphaBeta(board, move, 1, initialAlpha, initialBeta, progress);
+			job.onNextStep();
+		}
 
-		List<Move> moves = lastMove.getFollowingMoves();
-		moveSort.sort(moves);
-		System.out.println("value: " + moves.get(0).getValue());
-		System.out.println(Move.bestMovesForward(moves.get(0)));
-		return moves.get(0);
+		moveSort.sort(nextMoves);
+		Move nextMove = nextMoves.get(0);
+		System.out.println(nextMove.getDescription() + ", value: " + nextMove.getValue());
+		return nextMove;
 	}
 
-	private int alphaBeta(Board board, Move move, int depth, int alpha, int beta, Progress progress) {
+	private Move alphaBeta(Board board, Move move, int depth, int alpha, int beta, Progress progress) {
 		if (depth == maxDepth || move.getStatus().isGameOver()) {
-			return evaluateMove(board, move);
+			evaluateMove(board, move);
+//			System.out.println(move);
+			return move;
 		}
 
 		List<Move> childMoves = getChildMoves(board, move);
 		if (childMoves.isEmpty()) {
-			return evaluateMove(board, move);
+			evaluateMove(board, move);
+//			System.out.println(move);
+			return move;
 		}
+
+//		System.out.print(move + "\t");
 		return alphaBetaWithChildMoves(board, move, depth, alpha, beta, progress, childMoves);
 	}
 
@@ -67,7 +77,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		}
 	}
 
-	private int alphaBetaWithChildMoves(Board board, Move move, int depth, int alpha, int beta, Progress progress, List<Move> childMoves) {
+	private Move alphaBetaWithChildMoves(Board board, Move move, int depth, int alpha, int beta, Progress progress, List<Move> childMoves) {
 		Progress.Job job = null;
 		if (depth <= 2) {
 			job = progress.onStartJobWithNrSteps(childMoves.size());
@@ -76,7 +86,8 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		if (childMoves.get(0).getPlayer() == Player.WHITE) {
 			int value = Integer.MIN_VALUE;
 			for (Move childMove  : childMoves) {
-				value = max(value, MoveValues.reduce(alphaBeta(board, childMove, depth+1, alpha, beta, progress), 1));
+				Move bestMove = alphaBeta(board, childMove, depth + 1, alpha, beta, progress);
+				value = max(value, MoveValues.reduce(bestMove.getValue(), 1));
 				alpha = max(alpha, value);
 
 				if (job != null) {
@@ -90,7 +101,8 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		} else {
 			int value = Integer.MAX_VALUE;
 			for (Move childMove  : childMoves) {
-				value = min(value, MoveValues.reduce(alphaBeta(board, childMove, depth+1, alpha, beta, progress), 1));
+				Move bestMove = alphaBeta(board, childMove, depth + 1, alpha, beta, progress);
+				value = min(value, MoveValues.reduce(bestMove.getValue(), 1));
 				beta = min(beta, value);
 
 				if (job != null) {
@@ -104,15 +116,12 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 			move.setValue(value);
 		}
 
-		return move.getValue();
+		return move;
 	}
 
 	private List<Move> getChildMoves(Board board, Move move) {
-		List<Move> childMoves = move.getFollowingMoves();
-		if (childMoves == null) {
-			board.process(move);
-			childMoves = board.validMoves();
-		}
+		board.process(move);
+		List<Move> childMoves = board.validMoves();
 
 		evaluateMoves(board, childMoves);
 		moveSort.sort(childMoves);
@@ -126,10 +135,9 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		}
 	}
 
-	private int evaluateMove(Board board, Move move) {
+	private void evaluateMove(Board board, Move move) {
 		board.process(move);
 		move.setValue(boardEvaluator.value(board));
-		return move.getValue();
 	}
 
 }

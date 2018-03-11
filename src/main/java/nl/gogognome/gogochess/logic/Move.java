@@ -1,14 +1,11 @@
 package nl.gogognome.gogochess.logic;
 
 import static java.util.Arrays.*;
-import static java.util.Collections.singletonList;
 import static nl.gogognome.gogochess.logic.Board.*;
-import static nl.gogognome.gogochess.logic.Piece.KING;
-import static nl.gogognome.gogochess.logic.Piece.ROOK;
+import static nl.gogognome.gogochess.logic.Piece.*;
 import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
 import static nl.gogognome.gogochess.logic.Status.*;
-import java.util.ArrayList;
 import java.util.*;
 
 public class Move {
@@ -19,7 +16,6 @@ public class Move {
 	private final List<BoardMutation> boardMutations;
 	private final String description;
 	private final Player player;
-	private List<Move> followingMoves;
 	private int value;
 
 	public Move(String description, Move precedingMove, BoardMutation... boardMutations) {
@@ -64,18 +60,6 @@ public class Move {
 		return depthInTree;
 	}
 
-	public boolean hasFollowingMoves() {
-		return followingMoves != null;
-	}
-
-	public List<Move> getFollowingMoves() {
-		return followingMoves;
-	}
-
-	public void setFollowingMoves(List<Move> followingMoves) {
-		this.followingMoves = followingMoves;
-	}
-
 	public static Move findCommonAncestor(Move left, Move right) {
 		if (left == null || right == null) {
 			return null;
@@ -101,10 +85,6 @@ public class Move {
 		return status;
 	}
 
-	public boolean isMateChecked() {
-		return followingMoves != null;
-	}
-
 	public int getValue() {
 		return value;
 	}
@@ -113,41 +93,9 @@ public class Move {
 		this.value = value;
 	}
 
-	public List<Move> pathFromBegin() {
-		LinkedList<Move> moves = new LinkedList<>();
-		Move move = this;
-		do {
-			moves.addFirst(move);
-			move = move.getPrecedingMove();
-		} while (move != null);
-		return moves;
-	}
-
 	public boolean isCastling() {
 		return boardMutations.stream().filter(m -> m.getPlayerPiece().getPiece().equals(KING)).count() == 2
 				&& boardMutations.stream().filter(m -> m.getPlayerPiece().getPiece().equals(ROOK)).count() == 2;
-	}
-
-	public static List<Move> bestMovesForward(Move lastMove) {
-		List<Move> moves = new ArrayList<>();
-		List<Move> followingMoves = lastMove.getFollowingMoves();
-		Player player = lastMove.player.other();
-		int bestValue = MoveValues.minValue(player);
-		Move bestFollowingMove = null;
-		if (followingMoves != null) {
-			for (Move followingMove : followingMoves) {
-				if (MoveValues.compareTo(followingMove.getValue(), bestValue, player) > 0) {
-					bestValue = followingMove.getValue();
-					bestFollowingMove = followingMove;
-				}
-			}
-		}
-		if (bestFollowingMove != null) {
-			moves.add(bestFollowingMove);
-			moves.addAll(bestMovesForward(bestFollowingMove));
-		}
-
-		return moves;
 	}
 
 	public static Move find(List<Move> moves, String moveDescription) {
@@ -155,17 +103,6 @@ public class Move {
 				.filter(m -> m.getDescription().equals(moveDescription))
 				.findFirst()
 				.orElseThrow(() -> new IllegalArgumentException("could not find move " + moveDescription + " in moves " + moves));
-	}
-
-	public void keepMoveAndPrecedingMoves() {
-		if (precedingMove != null) {
-			precedingMove.keepOnlyFollowingMove(this);
-			precedingMove.keepMoveAndPrecedingMoves();
-		}
-	}
-
-	private void keepOnlyFollowingMove(Move followingMoveToKeep) {
-		followingMoves = singletonList(followingMoveToKeep);
 	}
 
 	@Override
