@@ -3,6 +3,7 @@ package nl.gogognome.gogochess.logic.ai;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import java.util.*;
+import java.util.concurrent.atomic.*;
 import java.util.function.*;
 import nl.gogognome.gogochess.logic.*;
 
@@ -12,6 +13,8 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 	private final int initialAlpha;
 	private final int initialBeta;
 	private int maxDepth;
+
+	private AtomicBoolean canceled = new AtomicBoolean();
 
 	// TODO: introduce DI framework
 	private final BoardEvaluator boardEvaluator = BoardEvaluatorFactory.newInstance();
@@ -78,6 +81,10 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 	}
 
 	private Move alphaBetaWithChildMoves(Board board, Move move, int depth, int alpha, int beta, Progress progress, List<Move> childMoves) {
+		if (canceled.get()) {
+			throw new ArtificalIntelligenceCanceledException();
+		}
+
 		Progress.Job job = null;
 		if (depth <= 1) {
 			job = progress.onStartJobWithNrSteps(childMoves.size());
@@ -140,4 +147,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		move.setValue(boardEvaluator.value(board));
 	}
 
+	public void cancel() {
+		canceled.set(true);
+	}
 }

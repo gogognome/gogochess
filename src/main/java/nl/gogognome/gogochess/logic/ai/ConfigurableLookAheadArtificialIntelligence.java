@@ -1,6 +1,7 @@
 package nl.gogognome.gogochess.logic.ai;
 
 import java.util.*;
+import java.util.concurrent.atomic.*;
 import java.util.function.*;
 import nl.gogognome.gogochess.logic.*;
 
@@ -9,6 +10,7 @@ public class ConfigurableLookAheadArtificialIntelligence implements ArtificialIn
 	private final int maxRecursionLevel;
 	private final Random random = new Random(System.currentTimeMillis());
 	private final BoardEvaluator boardEvaluator = BoardEvaluatorFactory.newInstance();
+	private final AtomicBoolean canceled = new AtomicBoolean();
 
 	public ConfigurableLookAheadArtificialIntelligence(int maxRecursionLevel) {
 		this.maxRecursionLevel = maxRecursionLevel;
@@ -19,6 +21,10 @@ public class ConfigurableLookAheadArtificialIntelligence implements ArtificialIn
 	}
 
 	private Move nextMove(Board board, Player player, int currentLevel, Progress progress) {
+		if (canceled.get()) {
+			throw new ArtificalIntelligenceCanceledException();
+		}
+
 		List<Move> moves = board.validMoves();
 		List<Move> bestMoves = new ArrayList<>();
 		int bestValue = MoveValues.minValue(player);
@@ -62,4 +68,8 @@ public class ConfigurableLookAheadArtificialIntelligence implements ArtificialIn
 		return bestMoves.get(random.nextInt(bestMoves.size()));
 	}
 
+	@Override
+	public void cancel() {
+		canceled.set(true);
+	}
 }

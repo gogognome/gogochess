@@ -55,6 +55,8 @@ public class BoardController {
 		try {
 			Move move = ai.nextMove(board, board.currentPlayer(), percentage -> boardPanel.updatePercentage(percentage));
 			SwingUtilities.invokeLater(() -> onMove(move));
+		} catch (ArtificalIntelligenceCanceledException e) {
+			// ignored intentionally
 		} catch (Exception e) {
 			System.out.println(e);
 			e.printStackTrace();
@@ -153,6 +155,7 @@ public class BoardController {
 	}
 
 	public void onClose() {
+		ai.cancel();
 		executorService.shutdownNow();
 	}
 

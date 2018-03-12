@@ -15,4 +15,8 @@ public interface ArtificialIntelligence {
 	 */
 	Move nextMove(Board board, Player player, Consumer<Integer> progressUpdateConsumer);
 
+	/**
+	 * Cancels nextMove(). If nextMove() is running, it will throw an ArtificalIntelligenceCanceledException.
+	 */
+	void cancel();
 }

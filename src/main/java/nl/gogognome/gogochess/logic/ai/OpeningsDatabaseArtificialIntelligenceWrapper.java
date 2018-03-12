@@ -52,6 +52,11 @@ public class OpeningsDatabaseArtificialIntelligenceWrapper implements Artificial
 				.orElseThrow(() -> new IllegalStateException("Could not find next move " + followingMoveDescription + " in valid moves " + board.validMoves()));
 	}
 
+	@Override
+	public void cancel() {
+		wrappedArtificialIntelligence.cancel();
+	}
+
 	private boolean matchesOpeningWithFollowingMove(String[] opening, Move lastMove) {
 		if (lastMove.depthInTree() + 1 > opening.length) {
 			return false;
