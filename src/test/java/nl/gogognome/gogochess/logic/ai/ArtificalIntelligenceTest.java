@@ -8,6 +8,7 @@ import static nl.gogognome.gogochess.logic.Squares.*;
 import static nl.gogognome.gogochess.logic.Status.*;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.*;
+import java.util.concurrent.atomic.*;
 import org.junit.jupiter.api.*;
 import nl.gogognome.gogochess.logic.*;
 
@@ -25,7 +26,7 @@ abstract class ArtificalIntelligenceTest {
 				BLACK_KING.addTo(H8)));
 
 		ArtificialIntelligence ai = buildAI();
-		Move move = ai.nextMove(board, WHITE, percentage -> {});
+		Move move = ai.nextMove(board, WHITE, percentage -> {}, bestMoves -> {});
 
 		assertTrue("Qg1-h1++, Qg1-h2++, Qg1-g7++, Qg1-g8++".contains(move.getDescription()), move.getDescription());
 		assertEquals(CHECK_MATE, move.getStatus());
@@ -105,19 +106,11 @@ abstract class ArtificalIntelligenceTest {
 	private void assertNextMoves(Player player, String... expectedMoves) {
 		ArtificialIntelligence ai = buildAI();
 
-		List<Move> actualMoves = new ArrayList<>();
-		Move move;
-		do {
-			move = ai.nextMove(board, player, percentage -> {});
-			assertNotNull(move);
-			actualMoves.add(move);
-			System.out.println(move.getDescription() + " ");
-			board.process(move);
-			player = player.other();
-		} while (!move.getStatus().isGameOver() && actualMoves.size() < 10);
+		AtomicReference<List<Move>> actualMoves = new AtomicReference<>();
+		Move move = ai.nextMove(board, player, percentage -> {}, actualMoves::set);
 		System.out.println();
 
-		List<String> expectedMoveStrings = asList(expectedMoves).subList(0, min(actualMoves.size(), expectedMoves.length));
-		assertEquals(expectedMoveStrings.toString(), actualMoves.toString());
+		List<String> expectedMoveStrings = asList(expectedMoves).subList(0, min(actualMoves.get().size(), expectedMoves.length));
+		assertEquals(expectedMoveStrings.toString(), actualMoves.get().toString());
 	}
 }

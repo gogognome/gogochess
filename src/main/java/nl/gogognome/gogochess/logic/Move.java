@@ -105,6 +105,23 @@ public class Move {
 				.orElseThrow(() -> new IllegalArgumentException("could not find move " + moveDescription + " in moves " + moves));
 	}
 
+	/**
+	 * Returns a list of moves from the current move to lastMove, provided that the current move is an ancestor
+	 * of lastMove.
+	 * @param lastMove the last move
+	 * @return the list of moves
+	 */
+	public List<Move> pathTo(Move lastMove) {
+		LinkedList<Move> moves = new LinkedList<>();
+		Move move = lastMove;
+		while (!this.equals(move)) {
+			moves.addFirst(move);
+			move = move.getPrecedingMove();
+		}
+		moves.addFirst(this);
+		return moves;
+	}
+
 	@Override
 	public String toString() {
 		return getDescription();

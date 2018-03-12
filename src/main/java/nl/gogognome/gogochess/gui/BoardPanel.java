@@ -182,8 +182,10 @@ public class BoardPanel extends JPanel {
 	}
 
 	public void updatePercentage(int percentage) {
-		this.percentage = percentage;
-		repaint();
+		if (this.percentage != percentage) {
+			this.percentage = percentage;
+			repaint();
+		}
 	}
 
 }

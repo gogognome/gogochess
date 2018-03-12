@@ -16,17 +16,19 @@ public class ConfigurableLookAheadArtificialIntelligence implements ArtificialIn
 		this.maxRecursionLevel = maxRecursionLevel;
 	}
 
-	public Move nextMove(Board board, Player player, Consumer<Integer> progressUpdateConsumer) {
-		return nextMove(board, player, 0, new Progress(progressUpdateConsumer));
+	public Move nextMove(Board board, Player player, Consumer<Integer> progressUpdateConsumer, Consumer<List<Move>> bestMovesConsumer) {
+		Result result = nextMove(board, player, 0, new Progress(progressUpdateConsumer));
+		bestMovesConsumer.accept(result.nextMove.pathTo(result.bestDescendentMove));
+		return result.nextMove;
 	}
 
-	private Move nextMove(Board board, Player player, int currentLevel, Progress progress) {
+	private Result nextMove(Board board, Player player, int currentLevel, Progress progress) {
 		if (canceled.get()) {
 			throw new ArtificalIntelligenceCanceledException();
 		}
 
 		List<Move> moves = board.validMoves();
-		List<Move> bestMoves = new ArrayList<>();
+		List<Result> bestMoves = new ArrayList<>();
 		int bestValue = MoveValues.minValue(player);
 
 		Progress.Job job = null;
@@ -35,15 +37,19 @@ public class ConfigurableLookAheadArtificialIntelligence implements ArtificialIn
 		}
 		for (Move move : moves) {
 			board.process(move);
+			Result result;
 			if (currentLevel < maxRecursionLevel) {
-				Move nextMove = nextMove(board, player.other(), currentLevel+1, progress);
-				if (nextMove != null) {
-					move.setValue(MoveValues.reduce(nextMove.getValue(), 1));
+				result = nextMove(board, player.other(), currentLevel+1, progress);
+				if (result.nextMove != null) {
+					move.setValue(MoveValues.reduce(result.nextMove.getValue(), 1));
+					result = new Result(move, result.bestDescendentMove);
 				} else {
 					move.setValue(boardEvaluator.value(board));
+					result = new Result(move, move);
 				}
 			} else {
 				move.setValue(boardEvaluator.value(board));
+				result = new Result(move, move);
 			}
 			int signum = MoveValues.compareTo(move.getValue(), bestValue, player);
 			if (signum > 0) {
@@ -51,7 +57,7 @@ public class ConfigurableLookAheadArtificialIntelligence implements ArtificialIn
 				bestMoves.clear();
 			}
 			if (signum >= 0) {
-				bestMoves.add(move);
+				bestMoves.add(result);
 			}
 
 			if (bestValue == MoveValues.maxValue(player)) {
@@ -63,7 +69,7 @@ public class ConfigurableLookAheadArtificialIntelligence implements ArtificialIn
 		}
 
 		if (bestMoves.isEmpty()) {
-			return null;
+			return new Result(null, null);
 		}
 		return bestMoves.get(random.nextInt(bestMoves.size()));
 	}
@@ -71,5 +77,15 @@ public class ConfigurableLookAheadArtificialIntelligence implements ArtificialIn
 	@Override
 	public void cancel() {
 		canceled.set(true);
+	}
+
+	private static class Result {
+		private final Move nextMove;
+		private final Move bestDescendentMove;
+
+		Result(Move nextMove, Move bestDescendentMove) {
+			this.nextMove = nextMove;
+			this.bestDescendentMove = bestDescendentMove;
+		}
 	}
 }

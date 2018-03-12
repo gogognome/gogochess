@@ -29,7 +29,7 @@ public class BoardController {
 	private final Player computerPlayer;
 	private State state;
 	private ExecutorService executorService = Executors.newFixedThreadPool(1);
-	private ArtificialIntelligence ai = new OpeningsDatabaseArtificialIntelligenceWrapper(new MiniMaxAlphaBetaArtificialIntelligence(4));
+	private ArtificialIntelligence ai = new OpeningsDatabaseArtificialIntelligenceWrapper(new MiniMaxAlphaBetaArtificialIntelligence(3));
 
 	private DragData dragData;
 
@@ -53,7 +53,11 @@ public class BoardController {
 
 	private void computerThinking() {
 		try {
-			Move move = ai.nextMove(board, board.currentPlayer(), percentage -> boardPanel.updatePercentage(percentage));
+			Move move = ai.nextMove(
+					board,
+					board.currentPlayer(),
+					percentage -> boardPanel.updatePercentage(percentage),
+					bestMoves -> System.out.println(bestMoves));
 			SwingUtilities.invokeLater(() -> onMove(move));
 		} catch (ArtificalIntelligenceCanceledException e) {
 			// ignored intentionally

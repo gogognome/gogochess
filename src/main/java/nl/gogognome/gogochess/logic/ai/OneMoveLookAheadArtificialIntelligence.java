@@ -2,6 +2,7 @@ package nl.gogognome.gogochess.logic.ai;
 
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Integer.MIN_VALUE;
+import static java.util.Collections.singletonList;
 import static nl.gogognome.gogochess.logic.Player.WHITE;
 import java.util.*;
 import java.util.concurrent.atomic.*;
@@ -14,7 +15,7 @@ public class OneMoveLookAheadArtificialIntelligence implements ArtificialIntelli
 	private final BoardEvaluator boardEvaluator = BoardEvaluatorFactory.newInstance();
 	private final AtomicBoolean canceled = new AtomicBoolean();
 
-	public Move nextMove(Board board, Player player, Consumer<Integer> progressUpdateConsumer) {
+	public Move nextMove(Board board, Player player, Consumer<Integer> progressUpdateConsumer, Consumer<List<Move>> bestMovesConsumer) {
 		List<Move> moves = board.validMoves();
 
 		List<Move> bestMoves = new ArrayList<>();
@@ -43,7 +44,10 @@ public class OneMoveLookAheadArtificialIntelligence implements ArtificialIntelli
 		if (bestMoves.isEmpty()) {
 			return null;
 		}
-		return bestMoves.get(random.nextInt(bestMoves.size()));
+
+		Move move = bestMoves.get(random.nextInt(bestMoves.size()));
+		bestMovesConsumer.accept(singletonList(move));
+		return move;
 	}
 
 	private int compareTo(int value1, int value2, Player player) {

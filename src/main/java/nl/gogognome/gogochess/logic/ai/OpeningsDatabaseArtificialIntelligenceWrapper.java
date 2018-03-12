@@ -1,5 +1,6 @@
 package nl.gogognome.gogochess.logic.ai;
 
+import static java.util.Collections.singletonList;
 import java.util.*;
 import java.util.function.*;
 import nl.gogognome.gogochess.logic.*;
@@ -32,7 +33,7 @@ public class OpeningsDatabaseArtificialIntelligenceWrapper implements Artificial
 	}
 
 	@Override
-	public Move nextMove(Board board, Player player, Consumer<Integer> progressUpdateConsumer) {
+	public Move nextMove(Board board, Player player, Consumer<Integer> progressUpdateConsumer, Consumer<List<Move>> bestMovesConsumer) {
 		List<Integer> matchingOpenings = new ArrayList<>();
 		for (int opening=0; opening<OPENINGS.length; opening++) {
 			if (matchesOpeningWithFollowingMove(OPENINGS[opening], board.lastMove())) {
@@ -41,15 +42,17 @@ public class OpeningsDatabaseArtificialIntelligenceWrapper implements Artificial
 		}
 
 		if (matchingOpenings.isEmpty()) {
-			return wrappedArtificialIntelligence.nextMove(board, player, progressUpdateConsumer);
+			return wrappedArtificialIntelligence.nextMove(board, player, progressUpdateConsumer, bestMovesConsumer);
 		}
 
 		int opening = random.nextInt(matchingOpenings.size());
 		String followingMoveDescription = OPENINGS[matchingOpenings.get(opening)][board.lastMove().depthInTree()];
-		return board.validMoves().stream()
+		Move nextMove = board.validMoves().stream()
 				.filter(move -> move.getDescription().equals(followingMoveDescription))
 				.findFirst()
 				.orElseThrow(() -> new IllegalStateException("Could not find next move " + followingMoveDescription + " in valid moves " + board.validMoves()));
+		bestMovesConsumer.accept(singletonList(nextMove));
+		return nextMove;
 	}
 
 	@Override

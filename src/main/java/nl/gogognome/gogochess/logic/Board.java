@@ -181,7 +181,7 @@ public class Board {
 		}
 
 		List<Move> followingMoves = new ArrayList<>();
-		forEachPlayerPiece(player, (playerPiece, square) -> {
+		forEachPlayerPiece(player.other(), (playerPiece, square) -> {
 			if (followingMoves.isEmpty()) {
 				playerPiece.addPossibleMoves(followingMoves, square, this);
 				processCheck(player.other(), followingMoves, true);
