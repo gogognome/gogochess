@@ -98,9 +98,9 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 			int value = Integer.MIN_VALUE;
 			for (Move childMove  : childMoves) {
 				Move deepestChildMove = alphaBeta(board, childMove, depth + 1, alpha, beta, progress);
-				int bestMoveValue = MoveValues.reduce(childMove.getValue(), 1);
-				if (bestMoveValue > value) {
-					value = bestMoveValue;
+				int childMoveValue = MoveValues.reduce(childMove.getValue(), 1);
+				if (childMoveValue > value) {
+					value = childMoveValue;
 					bestDeepestMove = deepestChildMove;
 				}
 				alpha = max(alpha, value);
@@ -117,9 +117,9 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 			int value = Integer.MAX_VALUE;
 			for (Move childMove  : childMoves) {
 				Move deepestChildMove = alphaBeta(board, childMove, depth + 1, alpha, beta, progress);
-				int bestMoveValue = MoveValues.reduce(childMove.getValue(), 1);
-				if (bestMoveValue < value) {
-					value = bestMoveValue;
+				int childMoveValue = MoveValues.reduce(childMove.getValue(), 1);
+				if (childMoveValue < value) {
+					value = childMoveValue;
 					bestDeepestMove = deepestChildMove;
 				}
 				beta = min(beta, value);
