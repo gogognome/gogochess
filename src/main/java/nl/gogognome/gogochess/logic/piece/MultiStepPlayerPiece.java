@@ -1,5 +1,6 @@
 package nl.gogognome.gogochess.logic.piece;
 
+import static java.lang.Math.signum;
 import java.util.*;
 import nl.gogognome.gogochess.logic.*;
 
@@ -28,6 +29,11 @@ public abstract class MultiStepPlayerPiece extends PlayerPiece {
 	@Override
 	public boolean attacks(Square pieceSquare, Square attackedSquare, Board board) {
 		for (int i = 0; i< deltaX.length; i++) {
+			float signumX = signum(attackedSquare.column() - pieceSquare.column());
+			float signumY = signum(attackedSquare.row() - pieceSquare.row());
+			if (signumX != deltaX[i] || signumY != deltaY[i]) {
+				continue;
+			}
 			Square to = pieceSquare;
 			boolean toIsEmptySquare;
 			do {

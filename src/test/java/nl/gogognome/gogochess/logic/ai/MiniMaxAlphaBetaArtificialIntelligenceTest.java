@@ -32,7 +32,7 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest extends ArtificalIntelligenceTe
 	@Test
 	@Override
 	void aiFindsMoveLeadingToCheckMateWithQueenAndRook() {
-		maxDepth = 3;
+		maxDepth = 2;
 		initialBeta = Integer.MIN_VALUE + 100;
 		super.aiFindsMoveLeadingToCheckMateWithQueenAndRook();
 	}
