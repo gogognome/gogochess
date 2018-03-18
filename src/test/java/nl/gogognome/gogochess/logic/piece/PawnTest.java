@@ -85,7 +85,7 @@ class PawnTest {
 
 	@Test
 	void validMovesForPawnThatCanCaptureAnotherPawnEnPassant() {
-		Move setup = new Move("setup", BLACK,
+		Move setup = new Move("setup", WHITE,
 				new BoardMutation(WHITE_PAWN, B5, ADD),
 				new BoardMutation(BLACK_PAWN, A7, ADD));
 		board.process(setup);
