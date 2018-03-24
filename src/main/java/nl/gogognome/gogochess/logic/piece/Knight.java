@@ -22,12 +22,8 @@ public class Knight extends PlayerPiece {
 
 	@Override
 	public boolean attacks(Square pieceSquare, Square attackedSquare, Board board) {
-		for (int i=0; i<DELTA_X.length; i++) {
-			Square to = pieceSquare.addColumnAndRow(DELTA_X[i], DELTA_Y[i]);
-			if (attackedSquare.equals(to)) {
-				return true;
-			}
-		}
-		return false;
+		int deltaX = Math.abs(attackedSquare.column() - pieceSquare.column());
+		int deltaY = Math.abs(attackedSquare.row() - pieceSquare.row());
+		return (deltaX == 2 && deltaY == 1) || (deltaX == 1 && deltaY == 2);
 	}
 }

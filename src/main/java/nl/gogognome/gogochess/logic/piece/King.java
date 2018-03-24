@@ -91,12 +91,8 @@ public class King extends PlayerPiece {
 
 	@Override
 	public boolean attacks(Square pieceSquare, Square attackedSquare, Board board) {
-		for (int i=0; i<deltaX.length; i++) {
-			Square to = pieceSquare.addColumnAndRow(deltaX[i], deltaY[i]);
-			if (attackedSquare.equals(to)) {
-				return true;
-			}
-		}
-		return false;
+		int deltaX = Math.abs(attackedSquare.column() - pieceSquare.column());
+		int deltaY = Math.abs(attackedSquare.row() - pieceSquare.row());
+		return (deltaX | deltaY) == 1;
 	}
 }

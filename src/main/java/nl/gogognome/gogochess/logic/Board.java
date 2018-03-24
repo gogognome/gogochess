@@ -159,7 +159,7 @@ public class Board {
 		Player player = currentPlayer();
 		List<Move> moves = new ArrayList<>(40);
 		addMovesIgnoringCheck(player, moves);
-		removeMovesCausingCheckForOwnPlayer(player, moves);
+		removeMovesCausingCheckForOwnPlayer(moves);
 		determineCheckAndMate(player, moves);
 		return moves;
 	}
@@ -175,38 +175,58 @@ public class Board {
 	}
 
 	private void determineCheckAndMate(Player player, Move move) {
-		processSingleMove(move);
-
-		Square oppositeKingSquare = squareOf(new King(player.other()));
-		if (oppositeKingSquare != null) {
-			AtomicBoolean attacksKing = new AtomicBoolean();
-			forEachPlayerPiece(player, (playerPiece, square) -> attacksKing.set(attacksKing.get() || playerPiece.attacks(square, oppositeKingSquare, this)));
-			if (attacksKing.get()) {
-				move.setStatus(CHECK);
-			}
-
-			List<Move> followingMoves = new ArrayList<>();
-			addMovesIgnoringCheck(player.other(), followingMoves);
-			removeMovesCausingCheckForOwnPlayer(player.other(), followingMoves);
-			if (followingMoves.isEmpty()) {
-				move.setStatus(move.getStatus() == CHECK ? CHECK_MATE : STALE_MATE);
-			}
+		Square oppositeKingSquare = kingSquareOf(player.other());
+		if (oppositeKingSquare == null) {
+			return; // can happen in tests where board contains just a few pieces but not the opponent's king
 		}
-
+		processSingleMove(move);
+		determineCheck(move, oppositeKingSquare);
+		determineCheckMateAndStaleMate(move);
 		undoSingleMove(move);
 	}
-	private void removeMovesCausingCheckForOwnPlayer(Player player, List<Move> moves) {
+
+	private void determineCheck(Move move, Square oppositeKingSquare) {
+		AtomicBoolean attacksKing = new AtomicBoolean();
+		forEachPlayerPiece(
+				move.getPlayer(),
+				(playerPiece, square) -> attacksKing.set(attacksKing.get() || playerPiece.attacks(square, oppositeKingSquare, this)),
+				() -> attacksKing.get());
+
+		if (attacksKing.get()) {
+			move.setStatus(CHECK);
+		}
+	}
+
+	private void determineCheckMateAndStaleMate(Move move) {
+		List<Move> otherPlayerMoves = new ArrayList<>();
+		Player otherPlayer = move.getPlayer().other();
+		forEachPlayerPiece(
+				otherPlayer,
+				(playerPiece, square) -> {
+					playerPiece.addPossibleMoves(otherPlayerMoves, square, this);
+					removeMovesCausingCheckForOwnPlayer(otherPlayerMoves);
+				},
+				() -> !otherPlayerMoves.isEmpty());
+
+		if (otherPlayerMoves.isEmpty()) {
+			move.setStatus(move.getStatus() == CHECK ? CHECK_MATE : STALE_MATE);
+		}
+	}
+
+	private void removeMovesCausingCheckForOwnPlayer(List<Move> moves) {
 		int index = 0;
 		while (index < moves.size()) {
-			processSingleMove(moves.get(index));
-			Square kingSquare = squareOf(new King(player));
+			Move move = moves.get(index);
+			Player player = move.getPlayer();
+			processSingleMove(move);
+			Square kingSquare = kingSquareOf(player);
 
 			AtomicBoolean attacksKing = new AtomicBoolean();
 			if (kingSquare != null) {
-				forEachPlayerPiece(player.other(), (playerPiece, square) -> attacksKing.set(attacksKing.get() || playerPiece.attacks(square, kingSquare, this)));
+				forEachPlayerPiece(player.other(), (playerPiece, square) -> attacksKing.set(attacksKing.get() || playerPiece.attacks(square, kingSquare, this)), attacksKing::get);
 			}
 
-			undoSingleMove(moves.get(index));
+			undoSingleMove(move);
 
 			if (attacksKing.get()) {
 				moves.remove(index);
@@ -215,27 +235,45 @@ public class Board {
 			}
 		}
 	}
-	public void forEachPlayerPiece(Player player, BiConsumer<PlayerPiece, Square> action) {
+
+	private Square kingSquareOf(Player player) {
+		King king = new King(player);
 		if (player == WHITE) {
 			for (int i=0; i<nrWhitePieces; i++) {
-				Square square = whitePieceSquares[i];
-				action.accept(playerPiecesPerSquare[square.boardIndex()], square);
+				if (king.equals(playerPiecesPerSquare[whitePieceSquares[i].boardIndex()])) {
+					return whitePieceSquares[i];
+				}
 			}
 		} else {
 			for (int i=0; i<nrBlackPieces; i++) {
-				Square square = blackPieceSquares[i];
-				action.accept(playerPiecesPerSquare[square.boardIndex()], square);
-			}
-		}
-	}
-
-	private Square squareOf(PlayerPiece playerPiece) {
-		for (int index = 0; index < playerPiecesPerSquare.length; index++) {
-			if (playerPiece.equals(playerPiecesPerSquare[index])) {
-				return new Square(index);
+				if (king.equals(playerPiecesPerSquare[blackPieceSquares[i].boardIndex()])) {
+					return blackPieceSquares[i];
+				}
 			}
 		}
 		return null;
+	}
+
+	public void forEachPlayerPiece(Player player, BiConsumer<PlayerPiece, Square> action) {
+		forEachPlayerPiece(player, action, () -> false);
+	}
+
+	public void forEachPlayerPiece(Player player, BiConsumer<PlayerPiece, Square> action, Supplier<Boolean> terminateIf) {
+		Square[] tempSquares;
+		int nrTempSquares;
+		if (player == WHITE) {
+			tempSquares = new Square[nrWhitePieces];
+			System.arraycopy(whitePieceSquares, 0, tempSquares, 0, nrWhitePieces);
+			nrTempSquares = nrWhitePieces;
+		} else {
+			tempSquares = new Square[nrBlackPieces];
+			System.arraycopy(blackPieceSquares, 0, tempSquares, 0, nrBlackPieces);
+			nrTempSquares = nrBlackPieces;
+		}
+		for (int i=0; !terminateIf.get() && i<nrTempSquares; i++) {
+			Square square = tempSquares[i];
+			action.accept(playerPiecesPerSquare[square.boardIndex()], square);
+		}
 	}
 
 	public Move lastMove() {
@@ -257,7 +295,7 @@ public class Board {
 	 */
 	public boolean anyPieceAttacks(Player player, Square square) {
 		AtomicBoolean attacked = new AtomicBoolean();
-		forEachPlayerPiece(player, (playerPiece, pieceSquare) -> attacked.set(attacked.get() || playerPiece.attacks(pieceSquare, square, this)));
+		forEachPlayerPiece(player, (playerPiece, pieceSquare) -> attacked.set(attacked.get() || playerPiece.attacks(pieceSquare, square, this)), attacked::get);
 		return attacked.get();
 	}
 
