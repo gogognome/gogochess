@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.*;
 import nl.gogognome.gogochess.logic.piece.*;
 
-public class BoardMutationTest {
+class BoardMutationTest {
 
 	@Test
 	public void testEquals() {
