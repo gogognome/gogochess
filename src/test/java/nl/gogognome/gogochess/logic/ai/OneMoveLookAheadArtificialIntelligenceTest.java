@@ -2,7 +2,7 @@ package nl.gogognome.gogochess.logic.ai;
 
 import org.junit.jupiter.api.*;
 
-class OneMoveLookAheadArtificialIntelligenceTest extends ArtificalIntelligenceTest {
+class OneMoveLookAheadArtificialIntelligenceTest extends ArtificialIntelligenceTest {
 
 	@Override
 	protected ArtificialIntelligence buildAI() {

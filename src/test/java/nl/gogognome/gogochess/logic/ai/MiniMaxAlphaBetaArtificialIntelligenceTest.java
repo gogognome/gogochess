@@ -2,7 +2,7 @@ package nl.gogognome.gogochess.logic.ai;
 
 import org.junit.jupiter.api.*;
 
-class MiniMaxAlphaBetaArtificialIntelligenceTest extends ArtificalIntelligenceTest {
+class MiniMaxAlphaBetaArtificialIntelligenceTest extends ArtificialIntelligenceTest {
 
 	private int maxDepth = 2;
 	private int initialAlfa = Integer.MIN_VALUE;
@@ -17,7 +17,7 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest extends ArtificalIntelligenceTe
 	@Override
 	void aiFindsMoveLeadingToCheckMateInOneMove() {
 		maxDepth = 1;
-		initialBeta = -19000;
+		initialAlfa = Integer.MAX_VALUE - 100;
 		super.aiFindsMoveLeadingToCheckMateInOneMove();
 	}
 
@@ -25,7 +25,7 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest extends ArtificalIntelligenceTe
 	@Override
 	void aiFindsMoveLeadingToCheckMateInThreeMoves() {
 		maxDepth = 5;
-		initialBeta = -19000;
+		initialBeta = Integer.MIN_VALUE + 100;
 		super.aiFindsMoveLeadingToCheckMateInThreeMoves();
 	}
 
