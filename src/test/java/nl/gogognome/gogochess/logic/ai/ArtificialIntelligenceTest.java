@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.*;
 import org.junit.jupiter.api.*;
 import nl.gogognome.gogochess.logic.*;
 
-abstract class ArtificalIntelligenceTest {
+abstract class ArtificialIntelligenceTest {
 
 	private Board board = new Board();
 
