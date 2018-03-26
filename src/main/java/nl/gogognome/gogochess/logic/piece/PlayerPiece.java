@@ -6,8 +6,6 @@ import nl.gogognome.gogochess.logic.*;
 
 public abstract class PlayerPiece {
 
-	protected MoveNotation moveNotation = new MoveNotation();
-
 	private final Piece piece;
 	private final Player player;
 
@@ -30,19 +28,17 @@ public abstract class PlayerPiece {
 
 	public abstract void addPossibleMoves(List<Move> moves, Square square, Board board);
 
-	protected boolean addMoveToEmptyFieldOrCapture(List<Move> moves, Board board, Square square, Square to) {
+	boolean addMoveToEmptyFieldOrCapture(List<Move> moves, Board board, Square square, Square to) {
 		if (to == null) {
 			return false;
 		}
 		PlayerPiece capturedPiece = board.pieceAt(to);
 		if (capturedPiece == null) {
-			moves.add(new Move(moveNotation(square, to), board.lastMove(),
-					removeFrom(square), addTo(to)));
+			moves.add(new Move(board.lastMove(), removeFrom(square), addTo(to)));
 			return true;
 		} else {
 			if (capturedPiece.getPlayer() != getPlayer()) {
-				moves.add(new Move(captureNotation(square, to, capturedPiece), board.lastMove(),
-						removeFrom(square), capturedPiece.removeFrom(to), addTo(to)));
+				moves.add(new Move(board.lastMove(), removeFrom(square), capturedPiece.removeFrom(to), addTo(to)));
 			}
 			return false;
 		}
@@ -64,14 +60,6 @@ public abstract class PlayerPiece {
 	 * @return true if this player piece attacks attackedSquare; false otherwise
 	 */
 	public abstract boolean attacks(Square pieceSquare, Square attackedSquare, Board board);
-
-	public String moveNotation(Square from, Square to) {
-		return moveNotation.move(this, from, to);
-	}
-
-	public String captureNotation(Square from, Square to, PlayerPiece capturedPiece) {
-		return moveNotation.capture(this, from, to, capturedPiece);
-	}
 
 	@Override
 	public boolean equals(Object obj) {

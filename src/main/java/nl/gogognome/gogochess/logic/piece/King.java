@@ -41,8 +41,7 @@ public class King extends PlayerPiece {
 			Square kingTo = new Square(1, row);
 			boolean blockedByAttack = isAnySquareAttacked(board, row, kingTo, kingStartSquare);
 			if (squaresInBetweenEmpty && !blockedByAttack) {
-				moves.add(new Move(moveNotation.castlingShort(), board.lastMove(),
-						removeFrom(kingStartSquare), rook.removeFrom(leftTowerSquare), addTo(kingTo), rook.addTo(new Square(2, row))));
+				moves.add(new Move(board.lastMove(), removeFrom(kingStartSquare), rook.removeFrom(leftTowerSquare), addTo(kingTo), rook.addTo(new Square(2, row))));
 			}
 		}
 
@@ -52,8 +51,7 @@ public class King extends PlayerPiece {
 			Square kingTo = new Square(6, row);
 			boolean blockedByAttack = isAnySquareAttacked(board, row, kingStartSquare, kingTo);
 			if (squaresInBetweenEmpty && !blockedByAttack) {
-				moves.add(new Move(moveNotation.castlingLong(), board.lastMove(),
-						removeFrom(kingStartSquare), rook.removeFrom(rightTowerSquare), addTo(kingTo), rook.addTo(new Square(5, row))));
+				moves.add(new Move(board.lastMove(), removeFrom(kingStartSquare), rook.removeFrom(rightTowerSquare), addTo(kingTo), rook.addTo(new Square(5, row))));
 			}
 		}
 	}

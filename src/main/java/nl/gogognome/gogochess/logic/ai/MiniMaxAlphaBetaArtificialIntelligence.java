@@ -24,7 +24,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		this(maxDepth, Integer.MIN_VALUE, Integer.MAX_VALUE);
 	}
 
-	public MiniMaxAlphaBetaArtificialIntelligence(int maxDepth, int initialAlpha, int initialBeta) {
+	MiniMaxAlphaBetaArtificialIntelligence(int maxDepth, int initialAlpha, int initialBeta) {
 		this.initialMaxDepth = maxDepth;
 		this.initialAlpha = initialAlpha;
 		this.initialBeta = initialBeta;
@@ -47,7 +47,6 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		moveSort.sort(nextMoves);
 		Move nextMove = nextMoves.get(0);
 		bestMovesConsumer.accept(nextMove.pathTo(moveToBestDeepestMove.get(nextMove)));
-		System.out.println(nextMove.getDescription() + ", value: " + nextMove.getValue());
 		return nextMove;
 	}
 
@@ -162,21 +161,4 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		canceled.set(true);
 	}
 
-	private static class Result {
-		private final Move bestMove;
-		private final Move deepestBestMove;
-
-		public Result(Move bestMove, Move deepestBestMove) {
-			this.bestMove = bestMove;
-			this.deepestBestMove = deepestBestMove;
-		}
-
-		public Move getBestMove() {
-			return bestMove;
-		}
-
-		public Move getDeepestBestMove() {
-			return deepestBestMove;
-		}
-	}
 }

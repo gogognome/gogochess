@@ -1,13 +1,13 @@
 package nl.gogognome.gogochess.logic.piece;
 
 import static java.util.Arrays.*;
-import static java.util.Collections.*;
 import static java.util.stream.Collectors.*;
 import static nl.gogognome.gogochess.logic.Board.*;
 import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.*;
-import static nl.gogognome.gogochess.logic.Moves.assertMovesContain;
+import static nl.gogognome.gogochess.logic.Moves.*;
 import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.*;
 import org.junit.jupiter.api.*;
@@ -19,48 +19,45 @@ class KnightTest {
 
 	@Test
 	void validMovesForKnightAtMiddleOfBoard() {
-		Move setup = new Move("setup", WHITE,
+		Move setup = new Move(WHITE,
 				new BoardMutation(BLACK_KNIGHT, E4, ADD));
 		board.process(setup);
 
 		List<Move> moves = board.validMoves();
 
-		assertEquals("[Ne4-f6, Ne4-f2, Ne4-d6, Ne4-d2, Ne4-g5, Ne4-g3, Ne4-c5, Ne4-c3]", moves.toString());
-		assertEquals(singleton(setup), moves.stream().map(Move::getPrecedingMove).collect(toSet()));
-		assertEquals(
-				asList(
-						asList(new BoardMutation(BLACK_KNIGHT, E4, REMOVE), new BoardMutation(BLACK_KNIGHT, F6, ADD)),
-						asList(new BoardMutation(BLACK_KNIGHT, E4, REMOVE), new BoardMutation(BLACK_KNIGHT, F2, ADD)),
-						asList(new BoardMutation(BLACK_KNIGHT, E4, REMOVE), new BoardMutation(BLACK_KNIGHT, D6, ADD)),
-						asList(new BoardMutation(BLACK_KNIGHT, E4, REMOVE), new BoardMutation(BLACK_KNIGHT, D2, ADD)),
-						asList(new BoardMutation(BLACK_KNIGHT, E4, REMOVE), new BoardMutation(BLACK_KNIGHT, G5, ADD)),
-						asList(new BoardMutation(BLACK_KNIGHT, E4, REMOVE), new BoardMutation(BLACK_KNIGHT, G3, ADD)),
-						asList(new BoardMutation(BLACK_KNIGHT, E4, REMOVE), new BoardMutation(BLACK_KNIGHT, C5, ADD)),
-						asList(new BoardMutation(BLACK_KNIGHT, E4, REMOVE), new BoardMutation(BLACK_KNIGHT, C3, ADD))),
-				moves.stream().map(Move::getBoardMutations).collect(toList()));
+		assertMovesContainsExactlyInAnyOrder(moves, "Ne4-f6", "Ne4-f2", "Ne4-d6", "Ne4-d2", "Ne4-g5", "Ne4-g3", "Ne4-c5", "Ne4-c3");
+		assertThat(moves.stream().map(Move::getPrecedingMove).collect(toSet())).containsExactly(setup);
+		assertThat(moves.stream().map(Move::getBoardMutations).collect(toList())).containsExactlyInAnyOrder(
+				asList(new BoardMutation(BLACK_KNIGHT, E4, REMOVE), new BoardMutation(BLACK_KNIGHT, F6, ADD)),
+				asList(new BoardMutation(BLACK_KNIGHT, E4, REMOVE), new BoardMutation(BLACK_KNIGHT, F2, ADD)),
+				asList(new BoardMutation(BLACK_KNIGHT, E4, REMOVE), new BoardMutation(BLACK_KNIGHT, D6, ADD)),
+				asList(new BoardMutation(BLACK_KNIGHT, E4, REMOVE), new BoardMutation(BLACK_KNIGHT, D2, ADD)),
+				asList(new BoardMutation(BLACK_KNIGHT, E4, REMOVE), new BoardMutation(BLACK_KNIGHT, G5, ADD)),
+				asList(new BoardMutation(BLACK_KNIGHT, E4, REMOVE), new BoardMutation(BLACK_KNIGHT, G3, ADD)),
+				asList(new BoardMutation(BLACK_KNIGHT, E4, REMOVE), new BoardMutation(BLACK_KNIGHT, C5, ADD)),
+				asList(new BoardMutation(BLACK_KNIGHT, E4, REMOVE), new BoardMutation(BLACK_KNIGHT, C3, ADD)));
 	}
 
 
 	@Test
 	void validMovesForKnightAtCornerOfBoard() {
-		Move setup = new Move("setup", WHITE,
+		Move setup = new Move(WHITE,
 				new BoardMutation(BLACK_KNIGHT, A1, ADD));
 		board.process(setup);
 
 		List<Move> moves = board.validMoves();
 
-		assertEquals("[Na1-b3, Na1-c2]", moves.toString());
-		assertEquals(singleton(setup), moves.stream().map(Move::getPrecedingMove).collect(toSet()));
-		assertEquals(
-				asList(
+		assertMovesContainsExactlyInAnyOrder(moves, "Na1-b3", "Na1-c2");
+		assertThat(moves.stream().map(Move::getPrecedingMove).collect(toSet())).containsExactly(setup);
+		assertThat(moves.stream().map(Move::getBoardMutations).collect(toList()))
+				.containsExactlyInAnyOrder(
 						asList(new BoardMutation(BLACK_KNIGHT, A1, REMOVE), new BoardMutation(BLACK_KNIGHT, B3, ADD)),
-						asList(new BoardMutation(BLACK_KNIGHT, A1, REMOVE), new BoardMutation(BLACK_KNIGHT, C2, ADD))),
-				moves.stream().map(Move::getBoardMutations).collect(toList()));
+						asList(new BoardMutation(BLACK_KNIGHT, A1, REMOVE), new BoardMutation(BLACK_KNIGHT, C2, ADD)));
 	}
 
 	@Test
 	void knightCannotCapturePieceOfOwnPlayer() {
-		Move setup = new Move("setup", WHITE,
+		Move setup = new Move(WHITE,
 				new BoardMutation(BLACK_KNIGHT, E4, ADD),
 				new BoardMutation(BLACK_BISHOP, D2, ADD));
 		board.process(setup);
@@ -72,14 +69,14 @@ class KnightTest {
 
 	@Test
 	void knightCanCapturePieceOfOtherPlayer() {
-		Move setup = new Move("setup", WHITE,
+		Move setup = new Move(WHITE,
 				new BoardMutation(BLACK_KNIGHT, E4, ADD),
 				new BoardMutation(WHITE_BISHOP, D2, ADD));
 		board.process(setup);
 
 		List<Move> moves = board.validMoves();
 
-		assertTrue(moves.toString().contains("Ne4xBd2"), moves.toString());
+		assertMovesContain(moves, "Ne4xBd2");
 		assertMovesContain(moves,
 				BLACK_KNIGHT.removeFrom(E4),
 				WHITE_BISHOP.removeFrom(D2),

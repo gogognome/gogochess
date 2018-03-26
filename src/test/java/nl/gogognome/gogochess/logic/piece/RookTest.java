@@ -8,6 +8,7 @@ import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.*;
 import static nl.gogognome.gogochess.logic.Moves.*;
 import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.*;
 import org.junit.jupiter.api.*;
@@ -19,13 +20,13 @@ class RookTest {
 
 	@Test
 	void validMovesForRookOnMiddleOfBoard() {
-		Move setup = new Move("setup", WHITE,
+		Move setup = new Move(WHITE,
 				new BoardMutation(BLACK_ROOK, E4, ADD));
 		board.process(setup);
 
 		List<Move> moves = board.validMoves();
 
-		assertEquals("[Re4-f4, Re4-g4, Re4-h4, Re4-d4, Re4-c4, Re4-b4, Re4-a4, Re4-e5, Re4-e6, Re4-e7, Re4-e8, Re4-e3, Re4-e2, Re4-e1]", moves.toString());
+		assertEquals("[Re4-f4, Re4-g4, Re4-h4, Re4-d4, Re4-c4, Re4-b4, Re4-a4, Re4-e5, Re4-e6, Re4-e7, Re4-e8, Re4-e3, Re4-e2, Re4-e1]", Moves.formatMoves(moves).toString());
 		assertEquals(singleton(setup), moves.stream().map(Move::getPrecedingMove).collect(toSet()));
 		assertEquals(
 				asList(
@@ -48,7 +49,7 @@ class RookTest {
 
 	@Test
 	void rookCannotCapturePieceOfOwnPlayer() {
-		Move setup = new Move("setup", WHITE,
+		Move setup = new Move(WHITE,
 				new BoardMutation(BLACK_ROOK, E4, ADD),
 				new BoardMutation(BLACK_BISHOP, E5, ADD));
 		board.process(setup);
@@ -61,24 +62,24 @@ class RookTest {
 
 	@Test
 	void rookCanCapturePieceOfOtherPlayer() {
-		Move setup = new Move("setup", WHITE,
+		Move setup = new Move(WHITE,
 				new BoardMutation(BLACK_ROOK, E4, ADD),
 				new BoardMutation(WHITE_BISHOP, E5, ADD));
 		board.process(setup);
 
 		List<Move> moves = board.validMoves();
 
-		assertTrue(moves.toString().contains("Re4xBe5"), moves.toString());
+		assertThat(Moves.formatMoves(moves).toString()).contains("Re4xBe5");
 		assertMovesContain(moves,
 				BLACK_ROOK.removeFrom(E4),
 				WHITE_BISHOP.removeFrom(E5),
 				BLACK_ROOK.addTo(E5));
-		assertFalse(moves.toString().contains("Be4-e6"), moves.toString());
+		assertThat(Moves.formatMoves(moves).toString()).doesNotContain("Be4-e6");
 	}
 
 	@Test
 	void rookDoesNotAttacksSquareItCannotReach() {
-		Move setup = new Move("setup", WHITE,
+		Move setup = new Move(WHITE,
 				new BoardMutation(WHITE_ROOK, E4, ADD));
 		board.process(setup);
 
@@ -90,7 +91,7 @@ class RookTest {
 
 	@Test
 	void rookAttacksSquareContainingOwnPiece() {
-		Move setup = new Move("setup", WHITE,
+		Move setup = new Move(WHITE,
 				new BoardMutation(WHITE_ROOK, E4, ADD),
 				new BoardMutation(WHITE_QUEEN, E5, ADD));
 		board.process(setup);
@@ -101,7 +102,7 @@ class RookTest {
 
 	@Test
 	void rookAttacksSquareContainingOtherPlayersPiece() {
-		Move setup = new Move("setup", WHITE,
+		Move setup = new Move(WHITE,
 				new BoardMutation(WHITE_ROOK, E4, ADD),
 				new BoardMutation(BLACK_QUEEN, E5, ADD));
 		board.process(setup);

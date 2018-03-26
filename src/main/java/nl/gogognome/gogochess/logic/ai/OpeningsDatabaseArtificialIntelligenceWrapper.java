@@ -8,6 +8,7 @@ import nl.gogognome.gogochess.logic.*;
 public class OpeningsDatabaseArtificialIntelligenceWrapper implements ArtificialIntelligence {
 
 	private final ArtificialIntelligence wrappedArtificialIntelligence;
+	private final MoveNotation moveNotation = new MoveNotation();
 
 	private final static String[][] OPENINGS = new String[][] {
 			{ "e2-e4", "e7-e5", "Ng1-f3", "Nb8-c6", "Bf1-b5" }, // Ruy Lopez (Spanish)
@@ -48,7 +49,7 @@ public class OpeningsDatabaseArtificialIntelligenceWrapper implements Artificial
 		int opening = random.nextInt(matchingOpenings.size());
 		String followingMoveDescription = OPENINGS[matchingOpenings.get(opening)][board.lastMove().depthInTree()];
 		Move nextMove = board.validMoves().stream()
-				.filter(move -> move.getDescription().equals(followingMoveDescription))
+				.filter(move -> moveNotation.format(move).equals(followingMoveDescription))
 				.findFirst()
 				.orElseThrow(() -> new IllegalStateException("Could not find next move " + followingMoveDescription + " in valid moves " + board.validMoves()));
 		bestMovesConsumer.accept(singletonList(nextMove));
@@ -66,7 +67,7 @@ public class OpeningsDatabaseArtificialIntelligenceWrapper implements Artificial
 		}
 
 		for (int index = lastMove.depthInTree() - 1; index >= 0; index--) {
-			if (!lastMove.getDescription().equals(opening[index])) {
+			if (!moveNotation.format(lastMove).equals(opening[index])) {
 				return false;
 			}
 			lastMove = lastMove.getPrecedingMove();

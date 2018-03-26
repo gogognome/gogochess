@@ -14,7 +14,7 @@ class CompositeBoardEvaluatorTest {
 
 	@BeforeEach
 	void initBoard() {
-		Move setup = new Move("setup", WHITE,
+		Move setup = new Move(WHITE,
 				BLACK_KING.addTo(E4));
 		board.process(setup);
 	}
@@ -34,13 +34,13 @@ class CompositeBoardEvaluatorTest {
 	@Test
 	void blackDoesNotSacrificeItsPieces() {
 		board = new Board();
-		board.process(new Move("setup", WHITE,
+		board.process(new Move(WHITE,
 				WHITE_PAWN.addTo(E5),
 				BLACK_PAWN.addTo(F7)));
 		int goodSituation = BoardEvaluatorFactory.newInstance().value(board);
 
 		board = new Board();
-		board.process(new Move("setup", WHITE,
+		board.process(new Move(WHITE,
 				WHITE_PAWN.addTo(E5)));
 		int badSituation = BoardEvaluatorFactory.newInstance().value(board);
 

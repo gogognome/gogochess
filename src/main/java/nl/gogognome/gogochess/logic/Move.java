@@ -14,23 +14,21 @@ public class Move {
 	private int depthInTree;
 	private final Move precedingMove;
 	private final List<BoardMutation> boardMutations;
-	private final String description;
 	private final Player player;
 	private int value;
 
-	public Move(String description, Move precedingMove, BoardMutation... boardMutations) {
-		this(description, precedingMove, precedingMove.player.other(), asList(boardMutations));
+	public Move(Move precedingMove, BoardMutation... boardMutations) {
+		this(precedingMove, precedingMove.player.other(), asList(boardMutations));
 	}
 
-	public Move(String description, Player player, BoardMutation... boardMutations) {
-		this(description, null, player, asList(boardMutations));
+	public Move(Player player, BoardMutation... boardMutations) {
+		this(null, player, asList(boardMutations));
 	}
 
-	public Move(String description, Move precedingMove, Player player, List<BoardMutation> boardMutations) {
+	public Move(Move precedingMove, Player player, List<BoardMutation> boardMutations) {
 		this.precedingMove = precedingMove;
 		this.player = player;
 		this.boardMutations = Collections.unmodifiableList(boardMutations);
-		this.description = description;
 		this.depthInTree = precedingMove == null ? 0 : precedingMove.depthInTree + 1;
 	}
 
@@ -40,16 +38,6 @@ public class Move {
 
 	public Move getPrecedingMove() {
 		return precedingMove;
-	}
-
-	public String getDescription() {
-		String postfix = "";
-		if (status == CHECK_MATE) {
-			postfix = "++";
-		} else if (status == CHECK) {
-			postfix = "+";
-		}
-		return description + postfix;
 	}
 
 	public Player getPlayer() {
@@ -98,13 +86,6 @@ public class Move {
 				&& boardMutations.stream().filter(m -> m.getPlayerPiece().getPiece().equals(ROOK)).count() == 2;
 	}
 
-	public static Move find(List<Move> moves, String moveDescription) {
-		return moves.stream()
-				.filter(m -> m.getDescription().equals(moveDescription))
-				.findFirst()
-				.orElseThrow(() -> new IllegalArgumentException("could not find move " + moveDescription + " in moves " + moves));
-	}
-
 	/**
 	 * Returns a list of moves from the current move to lastMove, provided that the current move is an ancestor
 	 * of lastMove.
@@ -124,10 +105,10 @@ public class Move {
 
 	@Override
 	public String toString() {
-		return getDescription();
+		return boardMutations.toString();
 	}
 
-	public final static Move INITIAL_BOARD = new Move("initial board", BLACK,
+	public final static Move INITIAL_BOARD = new Move(BLACK,
 			WHITE_ROOK.addTo(A1),
 			WHITE_KNIGHT.addTo(B1),
 			WHITE_BISHOP.addTo(C1),

@@ -2,7 +2,7 @@ package nl.gogognome.gogochess.logic;
 
 import static nl.gogognome.gogochess.logic.Board.*;
 import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.*;
-import static nl.gogognome.gogochess.logic.Move.*;
+import static nl.gogognome.gogochess.logic.Moves.assertMovesContain;
 import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
 import static nl.gogognome.gogochess.logic.Status.*;
@@ -119,18 +119,18 @@ class BoardTest {
 
 	@Test
 	void moveCausingCheckIsMarkedAsCheck() {
-		board.process(new Move("initial setup", BLACK,
+		board.process(new Move(BLACK,
 				WHITE_PAWN.addTo(E6),
 				BLACK_KING.addTo(F8)));
 
 		List<Move> moves = board.validMoves();
-		assertTrue(moves.toString().contains("e6-e7+"), moves.toString());
+		assertMovesContain(moves, "e6-e7+");
 		assertEquals(CHECK, find(moves, "e6-e7+").getStatus());
 	}
 
 	@Test
 	void moveCausingCheckForOwnPlayerIsNotValid() {
-		board.process(new Move("initial setup", BLACK,
+		board.process(new Move(BLACK,
 				WHITE_PAWN.addTo(E6),
 				WHITE_KING.addTo(A6),
 				BLACK_QUEEN.addTo(H6)));
@@ -141,26 +141,35 @@ class BoardTest {
 
 	@Test
 	void moveCausingCheckMateIsMarkedAsCheckMate() {
-		board.process(new Move("initial setup", BLACK,
+		board.process(new Move(BLACK,
 				WHITE_QUEEN.addTo(G1),
 				WHITE_KING.addTo(F7),
 				BLACK_KING.addTo(H8)));
 
 		List<Move> moves = board.validMoves();
-		assertTrue(moves.toString().contains("Qg1-g7++"), moves.toString());
+		assertMovesContain(moves, "Qg1-g7++");
 		assertEquals(CHECK_MATE, find(moves, "Qg1-g7++").getStatus());
 	}
 
-
 	@Test
 	void moveCausingStaleMateIsMarkedAsStaleMate() {
-		board.process(new Move("initial setup", BLACK,
+		board.process(new Move(BLACK,
 				WHITE_QUEEN.addTo(G1),
 				WHITE_KING.addTo(F7),
 				BLACK_KING.addTo(H8)));
 
 		List<Move> moves = board.validMoves();
-		assertTrue(moves.toString().contains("Qg1-g6"), moves.toString());
+		assertMovesContain(moves, "Qg1-g6");
 		assertEquals(STALE_MATE, find(moves, "Qg1-g6").getStatus());
 	}
+
+
+	private Move find(List<Move> moves, String moveDescription) {
+		MoveNotation moveNotation = new MoveNotation();
+		return moves.stream()
+				.filter(m -> moveNotation.format(m).equals(moveDescription))
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("could not find move " + moveDescription + " in moves " + moves));
+	}
+
 }

@@ -1,11 +1,12 @@
 package nl.gogognome.gogochess.logic.ai;
 
-import static java.lang.Math.min;
-import static java.util.Arrays.asList;
+import static java.lang.Math.*;
+import static java.util.Arrays.*;
 import static nl.gogognome.gogochess.logic.Board.*;
 import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
 import static nl.gogognome.gogochess.logic.Status.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
@@ -20,7 +21,7 @@ abstract class ArtificialIntelligenceTest {
 
 	@Test
 	void aiFindsMoveLeadingToCheckMateInOneMove() {
-		board.process(new Move("initial setup", BLACK,
+		board.process(new Move(BLACK,
 				WHITE_QUEEN.addTo(G1),
 				WHITE_KING.addTo(F7),
 				BLACK_KING.addTo(H8)));
@@ -28,13 +29,13 @@ abstract class ArtificialIntelligenceTest {
 		ArtificialIntelligence ai = buildAI();
 		Move move = ai.nextMove(board, WHITE, percentage -> {}, bestMoves -> {});
 
-		assertTrue("Qg1-h1++, Qg1-h2++, Qg1-g7++, Qg1-g8++".contains(move.getDescription()), move.getDescription());
+		assertTrue("Qg1-h1++, Qg1-h2++, Qg1-g7++, Qg1-g8++".contains(new MoveNotation().format(move)), move.toString());
 		assertEquals(CHECK_MATE, move.getStatus());
 	}
 
 	@Test
 	void aiFindsMoveLeadingToCheckMateInTwoMoves() {
-		Move initialMove = new Move("initial setup", BLACK,
+		Move initialMove = new Move(BLACK,
 				WHITE_PAWN.addTo(A2),
 				WHITE_KING.addTo(B1),
 				WHITE_BISHOP.addTo(B3),
@@ -57,7 +58,7 @@ abstract class ArtificialIntelligenceTest {
 
 	@Test
 	void aiFindsMoveLeadingToCheckMateInThreeMoves() {
-		Move initialMove = new Move("initial setup", WHITE,
+		Move initialMove = new Move(WHITE,
 				WHITE_ROOK.addTo(A1),
 				WHITE_PAWN.addTo(A2),
 				WHITE_KNIGHT.addTo(B1),
@@ -90,7 +91,7 @@ abstract class ArtificialIntelligenceTest {
 
 	@Test
 	void aiFindsMoveLeadingToCheckMateWithQueenAndRook() {
-		Move initialMove = new Move("initial setup", WHITE,
+		Move initialMove = new Move(WHITE,
 				WHITE_KING.addTo(H5),
 				WHITE_PAWN.addTo(G5),
 				BLACK_KING.addTo(B8),
@@ -107,10 +108,10 @@ abstract class ArtificialIntelligenceTest {
 		ArtificialIntelligence ai = buildAI();
 
 		AtomicReference<List<Move>> actualMoves = new AtomicReference<>();
-		Move move = ai.nextMove(board, player, percentage -> {}, actualMoves::set);
-		System.out.println();
+		ai.nextMove(board, player, percentage -> {}, actualMoves::set);
 
 		List<String> expectedMoveStrings = asList(expectedMoves).subList(0, min(actualMoves.get().size(), expectedMoves.length));
-		assertEquals(expectedMoveStrings.toString(), actualMoves.get().toString());
+		assertThat(Moves.formatMoves(actualMoves.get()).toString())
+			.isEqualTo(expectedMoveStrings.toString());
 	}
 }
