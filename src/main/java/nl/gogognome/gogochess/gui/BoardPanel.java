@@ -38,7 +38,7 @@ public class BoardPanel extends JPanel {
 
 	private final int squareSize;
 	private final int progressBarHeight;
-	private final int marginHeight;
+	private final int margin;
 	private final static Color[] SQUARE_COLORS = new Color[] { new Color(255, 206, 158), new Color(209,139, 71) };
 	private final BufferedImage piecesImage;
 	private final static Piece[] PIECES_IN_IMAGE = new Piece[] { KING, QUEEN, BISHOP, KNIGHT, ROOK, PAWN };
@@ -46,11 +46,16 @@ public class BoardPanel extends JPanel {
 	private DragData dragData;
 	private int percentage;
 
+	private final int movesPanelWidth = 150;
+	private final MoveNotation moveNotation = new MoveNotation();
+	private List<String> moves;
+
 	public BoardPanel(Board board, int squareSize) {
 		this.squareSize = squareSize;
 		this.progressBarHeight = squareSize / 2;
-		this.marginHeight = progressBarHeight / 10;
+		this.margin = progressBarHeight / 10;
 		initSquareToPlayerPiece(board);
+		initMoves(board);
 
 		try {
 			piecesImage = ImageIO.read(getClass().getResourceAsStream("/pieces.png"));
@@ -65,6 +70,7 @@ public class BoardPanel extends JPanel {
 
 	public void updateBoard(Board board, DragData dragData) {
 		initSquareToPlayerPiece(board);
+		initMoves(board);
 		this.dragData = dragData;
 		repaint();
 	}
@@ -79,9 +85,18 @@ public class BoardPanel extends JPanel {
 		}
 	}
 
+	private void initMoves(Board board) {
+		moves = new LinkedList<>();
+		Move move = board.lastMove();
+		while (move != null && move.getPrecedingMove() != null) {
+			moves.add(0, moveNotation.format(move));
+			move = move.getPrecedingMove();
+		}
+	}
+
 	@Override
 	public Dimension getPreferredSize() {
-		return new Dimension(8 * squareSize,8 * squareSize + progressBarHeight + marginHeight);
+		return new Dimension(8 * squareSize + movesPanelWidth,8 * squareSize + progressBarHeight + margin);
 	}
 
 	@Override
@@ -89,6 +104,7 @@ public class BoardPanel extends JPanel {
 		paintBoardAndPiecesExceptDraggedPiece(g);
 		paintDraggedPiece(g);
 		paintProgressBar(g);
+		paintPanelWithMoves(g);
 	}
 
 	private void paintBoardAndPiecesExceptDraggedPiece(Graphics g) {
@@ -133,10 +149,10 @@ public class BoardPanel extends JPanel {
 	private void paintProgressBar(Graphics g) {
 		g.setColor(Color.BLACK);
 		int boardSize = 8 * squareSize;
-		int arcHeight = 2 * marginHeight;
-		g.fillRoundRect(0, boardSize + marginHeight, boardSize, progressBarHeight, arcHeight, arcHeight);
+		int arcHeight = 2 * margin;
+		g.fillRoundRect(0, boardSize + margin, boardSize, progressBarHeight, arcHeight, arcHeight);
 		g.setColor(Color.BLUE);
-		g.fillRoundRect(0, boardSize + marginHeight, boardSize * percentage / 100, progressBarHeight, arcHeight, arcHeight);
+		g.fillRoundRect(0, boardSize + margin, boardSize * percentage / 100, progressBarHeight, arcHeight, arcHeight);
 	}
 
 	private int pieceLeft(PlayerPiece playerPiece) {
@@ -188,4 +204,21 @@ public class BoardPanel extends JPanel {
 		}
 	}
 
+	private void paintPanelWithMoves(Graphics g) {
+		int left = 8 * squareSize + margin;
+		g.setColor(Color.BLACK);
+		g.fillRect(left, 0, movesPanelWidth, 8*squareSize);
+
+		g.setColor(Color.LIGHT_GRAY);
+		Player player = WHITE;
+		int y = margin + g.getFontMetrics().getHeight();
+		for (String move : moves) {
+			int textX =  player == WHITE ? left + margin : left + movesPanelWidth / 2 + margin;
+			g.drawString(move, textX, y);
+			player = player.other();
+			if (player == WHITE) {
+				y += g.getFontMetrics().getHeight() * 150 / 100;
+			}
+		}
+	}
 }
