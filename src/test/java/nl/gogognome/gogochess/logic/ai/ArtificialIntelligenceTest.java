@@ -1,13 +1,12 @@
 package nl.gogognome.gogochess.logic.ai;
 
-import static java.lang.Math.*;
+import static java.lang.Math.min;
 import static java.util.Arrays.*;
 import static nl.gogognome.gogochess.logic.Board.*;
 import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
 import static nl.gogognome.gogochess.logic.Status.*;
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
 import org.junit.jupiter.api.*;
@@ -29,8 +28,8 @@ abstract class ArtificialIntelligenceTest {
 		ArtificialIntelligence ai = buildAI();
 		Move move = ai.nextMove(board, WHITE, percentage -> {}, bestMoves -> {});
 
-		assertTrue("Qg1-h1++, Qg1-h2++, Qg1-g7++, Qg1-g8++".contains(new MoveNotation().format(move)), move.toString());
-		assertEquals(CHECK_MATE, move.getStatus());
+		assertThat("Qg1-h1++, Qg1-h2++, Qg1-g7++, Qg1-g8++").contains(new MoveNotation().format(move));
+		assertThat(move.getStatus()).isEqualTo(CHECK_MATE);
 	}
 
 	@Test
@@ -101,7 +100,10 @@ abstract class ArtificialIntelligenceTest {
 				BLACK_ROOK.addTo(C3));
 		board.process(initialMove);
 
-		assertNextMoves(BLACK, "Qd4-f2", "Kh5-h6", "Rc3-c7", "Kh6-g6", "Qf2-f7+", "Kg6-h6", "Qf7-h7++");
+		assertNextMovesOneOf(BLACK,
+				asList("Qd4-f2", "Kh5-h6", "Rc3-c7", "Kh6-g6", "Qf2-f7+", "Kg6-h6", "Qf7-h7++"),
+				asList("Qd4-f2", "g5-g6", "Qf2-f5+", "Kh5-h6", "Rc3-c7", "g6-g7", "Rc7-c6++"));
+
 	}
 
 	private void assertNextMoves(Player player, String... expectedMoves) {
@@ -110,8 +112,32 @@ abstract class ArtificialIntelligenceTest {
 		AtomicReference<List<Move>> actualMoves = new AtomicReference<>();
 		ai.nextMove(board, player, percentage -> {}, actualMoves::set);
 
-		List<String> expectedMoveStrings = asList(expectedMoves).subList(0, min(actualMoves.get().size(), expectedMoves.length));
-		assertThat(Moves.formatMoves(actualMoves.get()).toString())
-			.isEqualTo(expectedMoveStrings.toString());
+		String actualMovesString = format(actualMoves.get());
+		List<String> expectedMoveStrings = takePartNoLongerThanActualMoves(actualMoves.get(), asList(expectedMoves));
+		assertThat(actualMovesString).isEqualTo(expectedMoveStrings.toString());
+	}
+
+	private void assertNextMovesOneOf(Player player, List<String>... possibleExpectedMoves) {
+		ArtificialIntelligence ai = buildAI();
+
+		AtomicReference<List<Move>> actualMoves = new AtomicReference<>();
+		ai.nextMove(board, player, percentage -> {}, actualMoves::set);
+		String actualMovesString = format(actualMoves.get());
+
+		for (List<String> expectedMoves : possibleExpectedMoves) {
+			List<String> expectedMoveStrings = takePartNoLongerThanActualMoves(actualMoves.get(), expectedMoves);
+			if (actualMovesString.equals(expectedMoveStrings.toString())) {
+				return; // test passed
+			}
+		}
+		fail("Actual moves " + actualMovesString + " is not equal to any of " + Arrays.toString(possibleExpectedMoves));
+	}
+
+	private String format(List<Move> actualMovesList) {
+		return Moves.formatMoves(actualMovesList).toString();
+	}
+
+	private List<String> takePartNoLongerThanActualMoves(List<Move> actualMoves, List<String> expectedMoves) {
+		return expectedMoves.subList(0, min(actualMoves.size(), expectedMoves.size()));
 	}
 }
