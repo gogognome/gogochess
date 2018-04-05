@@ -26,14 +26,18 @@ public abstract class MultiStepPlayerPiece extends PlayerPiece {
 	}
 
 	protected boolean allSquaresEmptyBetweenPieceSquareAndAttackedSquare(Square pieceSquare, Square attackedSquare, Board board, int deltaX, int deltaY) {
-		Square to = pieceSquare;
+		int toX = pieceSquare.column();
+		int toY = pieceSquare.row();
+		int attackedSquareX = attackedSquare.column();
+		int attackedSquareY = attackedSquare.row();
 		boolean toIsEmptySquare;
 		do {
-			to = to.addColumnAndRow(deltaX, deltaY);
-			if (attackedSquare.equals(to)) {
+			toX += deltaX;
+			toY += deltaY;
+			if (toX == attackedSquareX && toY == attackedSquareY) {
 				return true;
 			}
-			toIsEmptySquare = to != null && board.empty(to);
+			toIsEmptySquare = board.empty(toX, toY);
 		} while (toIsEmptySquare);
 
 		return false;

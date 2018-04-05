@@ -152,6 +152,10 @@ public class Board {
 		return pieceAt(square) == null;
 	}
 
+	public boolean empty(int column, int row) {
+		return playerPiecesPerSquare[column*8 + row] == null;
+	}
+
 	public List<Move> validMoves() {
 		if (lastMove == null) {
 			throw new IllegalStateException("No moves can be determined when the board is empty");
