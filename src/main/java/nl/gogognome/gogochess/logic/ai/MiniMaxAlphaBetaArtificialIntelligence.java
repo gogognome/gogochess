@@ -13,10 +13,11 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 	private final int initialAlpha;
 	private final int initialBeta;
 	private int maxDepth;
+	private int nrPositionsEvaluated;
+	private int nrPositionsGenerated;
 
 	private AtomicBoolean canceled = new AtomicBoolean();
 
-	// TODO: introduce DI framework
 	private final BoardEvaluator boardEvaluator = BoardEvaluatorFactory.newInstance();
 	private final MoveSort moveSort = new MoveSort();
 
@@ -33,8 +34,11 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 	@Override
 	public Move nextMove(Board board, Player player, Consumer<Integer> progressUpdateConsumer, Consumer<List<Move>> bestMovesConsumer) {
 		initMaxDepth(board);
+		nrPositionsEvaluated = 0;
+		long startTime = System.nanoTime();
 		System.out.println("maxDepth: " + maxDepth);
 		List<Move> nextMoves = board.validMoves();
+		nrPositionsGenerated = nextMoves.size();
 		Progress progress = new Progress(progressUpdateConsumer);
 		Progress.Job job = progress.onStartJobWithNrSteps(nextMoves.size());
 		Map<Move, Move> moveToBestDeepestMove = new HashMap<>();
@@ -47,25 +51,11 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		moveSort.sort(nextMoves);
 		Move nextMove = nextMoves.get(0);
 		bestMovesConsumer.accept(nextMove.pathTo(moveToBestDeepestMove.get(nextMove)));
+		long endTime = System.nanoTime();
+		double durationMillis = (endTime - startTime) / 1000000000.0;
+		System.out.println("evaluating " + nrPositionsEvaluated + " positions took " + durationMillis + " s (" + (nrPositionsEvaluated / (durationMillis)) + " positions/s");
+		System.out.println("generating " + nrPositionsGenerated + " positions took " + durationMillis + " s (" + (nrPositionsGenerated / (durationMillis)) + " positions/s");
 		return nextMove;
-	}
-
-	private Move alphaBeta(Board board, Move move, int depth, int alpha, int beta, Progress progress) {
-		if (depth == maxDepth || move.getStatus().isGameOver()) {
-			evaluateMove(board, move);
-//			System.out.println(move);
-			return move;
-		}
-
-		List<Move> childMoves = getChildMoves(board, move);
-		if (childMoves.isEmpty()) {
-			evaluateMove(board, move);
-//			System.out.println(move);
-			return move;
-		}
-
-//		System.out.print(move + "\t");
-		return alphaBetaWithChildMoves(board, move, depth, alpha, beta, progress, childMoves);
 	}
 
 	private void initMaxDepth(Board board) {
@@ -80,6 +70,27 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		if (numberNonPawnPieces <= 4) {
 			maxDepth += 2;
 		}
+	}
+
+	private Move alphaBeta(Board board, Move move, int depth, int alpha, int beta, Progress progress) {
+		if (depth == maxDepth || move.getStatus().isGameOver()) {
+			evaluateMove(board, move);
+			nrPositionsEvaluated++;
+//			System.out.println(move);
+			return move;
+		}
+
+		List<Move> childMoves = getChildMoves(board, move);
+		nrPositionsGenerated += childMoves.size();
+		if (childMoves.isEmpty()) {
+			evaluateMove(board, move);
+			nrPositionsEvaluated++;
+//			System.out.println(move);
+			return move;
+		}
+
+//		System.out.print(move + "\t");
+		return alphaBetaWithChildMoves(board, move, depth, alpha, beta, progress, childMoves);
 	}
 
 	private Move alphaBetaWithChildMoves(Board board, Move move, int depth, int alpha, int beta, Progress progress, List<Move> childMoves) {
