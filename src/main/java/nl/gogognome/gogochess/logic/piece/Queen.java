@@ -14,11 +14,13 @@ public class Queen extends MultiStepPlayerPiece {
 
 	@Override
 	public boolean attacks(Square pieceSquare, Square attackedSquare, Board board) {
-		if (abs(pieceSquare.column() - attackedSquare.column()) != abs(pieceSquare.row() - attackedSquare.row())
-				&& pieceSquare.column() != attackedSquare.column() && pieceSquare.row() != attackedSquare.row()) {
+		int deltaX = attackedSquare.column() - pieceSquare.column();
+		int deltaY = attackedSquare.row() - pieceSquare.row();
+
+		if (abs(deltaX) != abs(deltaY) && (deltaX != 0 && deltaY != 0)) {
 			return false;
 		}
-		return super.attacks(pieceSquare, attackedSquare, board);
+		return super.attacks(pieceSquare, attackedSquare, board, signum(deltaX), signum(deltaY));
 	}
 
 }

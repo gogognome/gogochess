@@ -1,6 +1,5 @@
 package nl.gogognome.gogochess.logic.piece;
 
-import static java.lang.Math.signum;
 import java.util.*;
 import nl.gogognome.gogochess.logic.*;
 
@@ -26,25 +25,27 @@ public abstract class MultiStepPlayerPiece extends PlayerPiece {
 		}
 	}
 
-	@Override
-	public boolean attacks(Square pieceSquare, Square attackedSquare, Board board) {
-		for (int i = 0; i< deltaX.length; i++) {
-			float signumX = signum(attackedSquare.column() - pieceSquare.column());
-			float signumY = signum(attackedSquare.row() - pieceSquare.row());
-			if (signumX != deltaX[i] || signumY != deltaY[i]) {
-				continue;
+	protected boolean attacks(Square pieceSquare, Square attackedSquare, Board board, int deltaX, int deltaY) {
+		Square to = pieceSquare;
+		boolean toIsEmptySquare;
+		do {
+			to = to.addColumnAndRow(deltaX, deltaY);
+			if (attackedSquare.equals(to)) {
+				return true;
 			}
-			Square to = pieceSquare;
-			boolean toIsEmptySquare;
-			do {
-				to = to.addColumnAndRow(deltaX[i], deltaY[i]);
-				if (attackedSquare.equals(to)) {
-					return true;
-				}
-				toIsEmptySquare = to != null && board.empty(to);
-			} while (toIsEmptySquare);
-		}
+			toIsEmptySquare = to != null && board.empty(to);
+		} while (toIsEmptySquare);
 
 		return false;
 	}
+
+	/**
+	 * Returns the signum of n.
+	 * @param n a number
+	 * @return 0 if n = 0, -1 if n is negative, 1 if n is positive
+	 */
+	protected int signum(int n) {
+		return n == 0 ? 0 : n < 0 ? -1 : 1;
+	}
+
 }

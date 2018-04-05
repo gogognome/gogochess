@@ -13,9 +13,11 @@ public class Rook extends MultiStepPlayerPiece {
 
 	@Override
 	public boolean attacks(Square pieceSquare, Square attackedSquare, Board board) {
-		if (pieceSquare.column() != attackedSquare.column() && pieceSquare.row() != attackedSquare.row()) {
+		int deltaX = attackedSquare.column() - pieceSquare.column();
+		int deltaY = attackedSquare.row() - pieceSquare.row();
+		if (deltaX != 0 && deltaY != 0) {
 			return false;
 		}
-		return super.attacks(pieceSquare, attackedSquare, board);
+		return super.attacks(pieceSquare, attackedSquare, board, signum(deltaX), signum(deltaY));
 	}
 }

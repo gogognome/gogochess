@@ -14,9 +14,12 @@ public class Bishop extends MultiStepPlayerPiece {
 
 	@Override
 	public boolean attacks(Square pieceSquare, Square attackedSquare, Board board) {
-		if (abs(pieceSquare.column() - attackedSquare.column()) != abs(pieceSquare.row() - attackedSquare.row())) {
+		int deltaX = attackedSquare.column() - pieceSquare.column();
+		int deltaY = attackedSquare.row() - pieceSquare.row();
+		if (abs(deltaX) != abs(deltaY)) {
 			return false;
 		}
-		return super.attacks(pieceSquare, attackedSquare, board);
+		return attacks(pieceSquare, attackedSquare, board, signum(deltaX), signum(deltaY));
 	}
+
 }
