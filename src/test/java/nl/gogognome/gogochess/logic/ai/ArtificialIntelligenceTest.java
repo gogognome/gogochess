@@ -117,7 +117,8 @@ abstract class ArtificialIntelligenceTest {
 		assertThat(actualMovesString).isEqualTo(expectedMoveStrings.toString());
 	}
 
-	private void assertNextMovesOneOf(Player player, List<String>... possibleExpectedMoves) {
+	@SafeVarargs
+	private final void assertNextMovesOneOf(Player player, List<String>... possibleExpectedMoves) {
 		ArtificialIntelligence ai = buildAI();
 
 		AtomicReference<List<Move>> actualMoves = new AtomicReference<>();
