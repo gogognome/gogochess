@@ -1,5 +1,6 @@
 package nl.gogognome.gogochess.logic.piece;
 
+import static java.lang.Math.abs;
 import static nl.gogognome.gogochess.logic.Piece.KNIGHT;
 import java.util.*;
 import nl.gogognome.gogochess.logic.*;
@@ -21,9 +22,9 @@ public class Knight extends PlayerPiece {
 	}
 
 	@Override
-	public boolean attacks(Square pieceSquare, Square attackedSquare, Board board) {
-		int deltaX = Math.abs(attackedSquare.column() - pieceSquare.column());
-		int deltaY = Math.abs(attackedSquare.row() - pieceSquare.row());
+	protected boolean attacks(Square pieceSquare, Square attackedSquare, Board board, int deltaX, int deltaY) {
+		deltaX = abs(deltaX);
+		deltaY = abs(deltaY);
 		return (deltaX == 2 && deltaY == 1) || (deltaX == 1 && deltaY == 2);
 	}
 }

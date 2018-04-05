@@ -25,7 +25,7 @@ public abstract class MultiStepPlayerPiece extends PlayerPiece {
 		}
 	}
 
-	protected boolean attacks(Square pieceSquare, Square attackedSquare, Board board, int deltaX, int deltaY) {
+	protected boolean allSquaresEmptyBetweenPieceSquareAndAttackedSquare(Square pieceSquare, Square attackedSquare, Board board, int deltaX, int deltaY) {
 		Square to = pieceSquare;
 		boolean toIsEmptySquare;
 		do {

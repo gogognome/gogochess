@@ -1,5 +1,6 @@
 package nl.gogognome.gogochess.logic.piece;
 
+import static java.lang.Math.abs;
 import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.REMOVE;
 import static nl.gogognome.gogochess.logic.Piece.*;
 import java.util.*;
@@ -88,9 +89,7 @@ public class King extends PlayerPiece {
 	}
 
 	@Override
-	public boolean attacks(Square pieceSquare, Square attackedSquare, Board board) {
-		int deltaX = Math.abs(attackedSquare.column() - pieceSquare.column());
-		int deltaY = Math.abs(attackedSquare.row() - pieceSquare.row());
-		return (deltaX | deltaY) == 1;
+	protected boolean attacks(Square pieceSquare, Square attackedSquare, Board board, int deltaX, int deltaY) {
+		return (abs(deltaX) | abs(deltaY)) == 1;
 	}
 }

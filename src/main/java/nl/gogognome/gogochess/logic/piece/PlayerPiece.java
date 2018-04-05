@@ -59,7 +59,17 @@ public abstract class PlayerPiece {
 	 * @param board the board
 	 * @return true if this player piece attacks attackedSquare; false otherwise
 	 */
-	public abstract boolean attacks(Square pieceSquare, Square attackedSquare, Board board);
+	public boolean attacks(Square pieceSquare, Square attackedSquare, Board board) {
+		int deltaX = attackedSquare.column() - pieceSquare.column();
+		int deltaY = attackedSquare.row() - pieceSquare.row();
+		return attacks(pieceSquare, attackedSquare, board, deltaX, deltaY);
+	}
+
+	/**
+	 * Same method as {@link #attacks(Square, Square, Board, int, int)} above, except that deltaX and deltaY are filled
+	 * in with the deltas to get from pieceSquare to attackedSquare.
+	 */
+	protected abstract boolean attacks(Square pieceSquare, Square attackedSquare, Board board, int deltaX, int deltaY);
 
 	@Override
 	public boolean equals(Object obj) {

@@ -80,8 +80,7 @@ public class Pawn extends PlayerPiece {
 	}
 
 	@Override
-	public boolean attacks(Square pieceSquare, Square attackedSquare, Board board) {
-		return attackedSquare.equals(pieceSquare.addColumnAndRow(-1, forwardRowDelta))
-				|| attackedSquare.equals(pieceSquare.addColumnAndRow(1, forwardRowDelta));
+	public boolean attacks(Square pieceSquare, Square attackedSquare, Board board, int deltaX, int deltaY) {
+		return deltaY == forwardRowDelta && (deltaX == 1 || deltaX == -1);
 	}
 }
