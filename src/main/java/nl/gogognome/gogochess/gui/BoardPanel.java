@@ -39,7 +39,7 @@ public class BoardPanel extends JPanel {
 	private final int squareSize;
 	private final int progressBarHeight;
 	private final int margin;
-	private final static Color[] SQUARE_COLORS = new Color[] { new Color(255, 206, 158), new Color(209,139, 71) };
+	private final static Color[] SQUARE_COLORS = new Color[] { new Color(209,139, 71), new Color(255, 206, 158) };
 	private final BufferedImage piecesImage;
 	private final static Piece[] PIECES_IN_IMAGE = new Piece[] { KING, QUEEN, BISHOP, KNIGHT, ROOK, PAWN };
 	private Map<Square, PlayerPiece> squareToPlayerPiece = new HashMap<>();

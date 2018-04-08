@@ -19,6 +19,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 	private AtomicBoolean canceled = new AtomicBoolean();
 
 	private final BoardEvaluator boardEvaluator = BoardEvaluatorFactory.newInstance();
+	private final PositionalAnalysis positonalAnalysis = new PositionalAnalysis();
 	private final MoveSort moveSort = new MoveSort();
 
 	public MiniMaxAlphaBetaArtificialIntelligence(int maxDepth) {
@@ -38,6 +39,9 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		long startTime = System.nanoTime();
 		System.out.println("maxDepth: " + maxDepth);
 		List<Move> nextMoves = board.validMoves();
+		positonalAnalysis.evaluate(board, nextMoves);
+		moveSort.sort(nextMoves);
+
 		nrPositionsGenerated = nextMoves.size();
 		Progress progress = new Progress(progressUpdateConsumer);
 		Progress.Job job = progress.onStartJobWithNrSteps(nextMoves.size());

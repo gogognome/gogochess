@@ -314,6 +314,27 @@ public class Board {
 		return count;
 	}
 
+	public int countNrPawnsInColumn(PlayerPiece playerPiece, int column) {
+		int nrPawns = 0;
+		for (int row=0; row<8; row++) {
+			if (playerPiece.equals(pieceAt(new Square(column, row)))) {
+				nrPawns++;
+			}
+		}
+		return nrPawns;
+	}
+
+	public boolean isIsolatedPawnInColumn(PlayerPiece playerPiece, int column) {
+		int nrPawnsInAdjacentColumns = 0;
+		if (column > 0) {
+			nrPawnsInAdjacentColumns += countNrPawnsInColumn(playerPiece, column - 1);
+		}
+		if (column < 7) {
+			nrPawnsInAdjacentColumns += countNrPawnsInColumn(playerPiece, column + 1);
+		}
+		return nrPawnsInAdjacentColumns > 0;
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(9*8);
@@ -349,4 +370,5 @@ public class Board {
 			default: throw new IllegalArgumentException("Unknown player found: " + playerPiece.getPlayer());
 		}
 	}
+
 }

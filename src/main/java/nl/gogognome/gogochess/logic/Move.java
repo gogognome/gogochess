@@ -2,11 +2,15 @@ package nl.gogognome.gogochess.logic;
 
 import static java.util.Arrays.*;
 import static nl.gogognome.gogochess.logic.Board.*;
+import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.ADD;
+import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.REMOVE;
 import static nl.gogognome.gogochess.logic.Piece.*;
 import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
 import static nl.gogognome.gogochess.logic.Status.*;
 import java.util.*;
+import java.util.function.*;
+import nl.gogognome.gogochess.logic.piece.*;
 
 public class Move {
 
@@ -81,9 +85,17 @@ public class Move {
 		this.value = value;
 	}
 
-	public boolean isCastling() {
-		return boardMutations.stream().filter(m -> m.getPlayerPiece().getPiece().equals(KING)).count() == 2
-				&& boardMutations.stream().filter(m -> m.getPlayerPiece().getPiece().equals(ROOK)).count() == 2;
+	public boolean isCapture() {
+		int adds = 0;
+		int removes = 0;
+		for (int index = 0; index<boardMutations.size(); index++) {
+			if (boardMutations.get(index).getMutation() == ADD) {
+				adds++;
+			} else {
+				removes--;
+			}
+		}
+		return adds == 1 && removes == 2;
 	}
 
 	/**
@@ -101,6 +113,41 @@ public class Move {
 		}
 		moves.addFirst(this);
 		return moves;
+	}
+
+	public BoardMutation getMutationRemovingPieceFromStart() {
+		return getBoardMutations().stream()
+				.filter(mutation -> mutation.getPlayerPiece().getPlayer() == getPlayer() && mutation.getMutation() == REMOVE)
+				.filter(filterForKingDuringCastling())
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("No mutation found that removes a piece of the player"));
+	}
+
+	public BoardMutation getMutationAddingPieceAtDestination() {
+		return getBoardMutations().stream()
+				.filter(mutation -> mutation.getPlayerPiece().getPlayer() == getPlayer() && mutation.getMutation() == ADD)
+				.filter(filterForKingDuringCastling())
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("No mutation found that adds a piece of the player"));
+	}
+
+	public PlayerPiece capturedPlayerPiece() {
+		Square squareOfCapturedPiece = getMutationAddingPieceAtDestination().getSquare();
+		return getBoardMutations().stream()
+				.filter(mutation -> mutation.getMutation() == REMOVE && squareOfCapturedPiece.equals(mutation.getSquare()))
+				.map(mutation -> mutation.getPlayerPiece())
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("This move is not a capture"));
+	}
+
+	private Predicate<BoardMutation> filterForKingDuringCastling() {
+		Predicate<BoardMutation> extraFilter = mutation -> true;
+		if (getBoardMutations().stream()
+				.filter(mutation -> mutation.getPlayerPiece().getPlayer() == getPlayer() && mutation.getMutation() == REMOVE)
+				.count() == 2) {
+			extraFilter = mutation -> mutation.getPlayerPiece().getPiece() == KING;
+		}
+		return extraFilter;
 	}
 
 	@Override
@@ -141,5 +188,4 @@ public class Move {
 			BLACK_BISHOP.addTo(F8),
 			BLACK_KNIGHT.addTo(G8),
 			BLACK_ROOK.addTo(H8));
-
 }

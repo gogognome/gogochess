@@ -1,8 +1,6 @@
 package nl.gogognome.gogochess.logic;
 
-import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.*;
 import static nl.gogognome.gogochess.logic.Piece.*;
-import java.util.function.*;
 import nl.gogognome.gogochess.logic.piece.*;
 
 public class MoveNotation {
@@ -12,8 +10,8 @@ public class MoveNotation {
 			throw new IllegalArgumentException("Move must not be null");
 		}
 
-		BoardMutation removeMutation = getMutationRemovingPieceFromStart(move);
-		BoardMutation addMutation = getMutationAddingPieceAtDestination(move);
+		BoardMutation removeMutation = move.getMutationRemovingPieceFromStart();
+		BoardMutation addMutation = move.getMutationAddingPieceAtDestination();
 		PlayerPiece capturedPiece = findCapturedPiece(move);
 
 		StringBuilder result = new StringBuilder();
@@ -27,32 +25,6 @@ public class MoveNotation {
 
 		appendCheckOrCheckMate(move, result);
 		return result.toString();
-	}
-
-	private BoardMutation getMutationRemovingPieceFromStart(Move move) {
-		return move.getBoardMutations().stream()
-				.filter(mutation -> mutation.getPlayerPiece().getPlayer() == move.getPlayer() && mutation.getMutation() == REMOVE)
-				.filter(filterForKingDuringCastling(move))
-				.findFirst()
-				.orElseThrow(() -> new IllegalArgumentException("No mutation found that removes a piece of the player"));
-	}
-
-	private BoardMutation getMutationAddingPieceAtDestination(Move move) {
-		return move.getBoardMutations().stream()
-				.filter(mutation -> mutation.getPlayerPiece().getPlayer() == move.getPlayer() && mutation.getMutation() == ADD)
-				.filter(filterForKingDuringCastling(move))
-				.findFirst()
-				.orElseThrow(() -> new IllegalArgumentException("No mutation found that adds a piece of the player"));
-	}
-
-	private Predicate<BoardMutation> filterForKingDuringCastling(Move move) {
-		Predicate<BoardMutation> extraFilter = mutation -> true;
-		if (move.getBoardMutations().stream()
-				.filter(mutation -> mutation.getPlayerPiece().getPlayer() == move.getPlayer() && mutation.getMutation() == REMOVE)
-				.count() == 2) {
-			extraFilter = mutation -> mutation.getPlayerPiece().getPiece() == KING;
-		}
-		return extraFilter;
 	}
 
 	private PlayerPiece findCapturedPiece(Move move) {
