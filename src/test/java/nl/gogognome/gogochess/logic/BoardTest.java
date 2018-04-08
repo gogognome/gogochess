@@ -9,6 +9,7 @@ import static nl.gogognome.gogochess.logic.Status.*;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.*;
 import org.junit.jupiter.api.*;
+import nl.gogognome.gogochess.logic.movenotation.*;
 
 class BoardTest {
 
@@ -165,7 +166,7 @@ class BoardTest {
 
 
 	private Move find(List<Move> moves, String moveDescription) {
-		MoveNotation moveNotation = new MoveNotation();
+		MoveNotation moveNotation = new ReverseAlgebraicNotation();
 		return moves.stream()
 				.filter(m -> moveNotation.format(m).equals(moveDescription))
 				.findFirst()

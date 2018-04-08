@@ -5,30 +5,43 @@ import static java.lang.Math.min;
 import java.util.*;
 import java.util.concurrent.atomic.*;
 import java.util.function.*;
+import javax.inject.*;
 import nl.gogognome.gogochess.logic.*;
 
 public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelligence {
 
-	private final int initialMaxDepth;
-	private final int initialAlpha;
-	private final int initialBeta;
+	private int initialMaxDepth;
+	private int initialAlpha;
+	private int initialBeta;
 	private int maxDepth;
 	private int nrPositionsEvaluated;
 	private int nrPositionsGenerated;
 
 	private AtomicBoolean canceled = new AtomicBoolean();
 
-	private final BoardEvaluator boardEvaluator = BoardEvaluatorFactory.newInstance();
-	private final PositionalAnalysis positonalAnalysis = new PositionalAnalysis();
-	private final MoveSort moveSort = new MoveSort();
+	private final BoardEvaluator boardEvaluator;
+	private final PositionalAnalysis positonalAnalysis;
+	private final MoveSort moveSort;
 
-	public MiniMaxAlphaBetaArtificialIntelligence(int maxDepth) {
-		this(maxDepth, Integer.MIN_VALUE, Integer.MAX_VALUE);
+	@Inject
+	public MiniMaxAlphaBetaArtificialIntelligence(BoardEvaluator boardEvaluator, PositionalAnalysis positionalAnalysis, MoveSort moveSort) {
+		this.boardEvaluator = boardEvaluator;
+		this.positonalAnalysis = positionalAnalysis;
+		this.moveSort = moveSort;
+		this.initialMaxDepth = 3;
+		this.initialAlpha = Integer.MIN_VALUE;
+		this.initialBeta = Integer.MAX_VALUE;
 	}
 
-	MiniMaxAlphaBetaArtificialIntelligence(int maxDepth, int initialAlpha, int initialBeta) {
-		this.initialMaxDepth = maxDepth;
+	public void setInitialMaxDepth(int initialMaxDepth) {
+		this.initialMaxDepth = initialMaxDepth;
+	}
+
+	public void setInitialAlpha(int initialAlpha) {
 		this.initialAlpha = initialAlpha;
+	}
+
+	public void setInitialBeta(int initialBeta) {
 		this.initialBeta = initialBeta;
 	}
 

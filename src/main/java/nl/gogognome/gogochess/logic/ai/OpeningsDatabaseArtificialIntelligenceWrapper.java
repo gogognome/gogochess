@@ -3,12 +3,14 @@ package nl.gogognome.gogochess.logic.ai;
 import static java.util.Collections.singletonList;
 import java.util.*;
 import java.util.function.*;
+import javax.inject.*;
 import nl.gogognome.gogochess.logic.*;
+import nl.gogognome.gogochess.logic.movenotation.*;
 
 public class OpeningsDatabaseArtificialIntelligenceWrapper implements ArtificialIntelligence {
 
 	private final ArtificialIntelligence wrappedArtificialIntelligence;
-	private final MoveNotation moveNotation = new MoveNotation();
+	private final MoveNotation moveNotation = new ReverseAlgebraicNotation();
 
 	private final static String[][] OPENINGS = new String[][] {
 			{ "e2-e4", "e7-e5", "Ng1-f3", "Nb8-c6", "Bf1-b5" }, // Ruy Lopez (Spanish)
@@ -29,6 +31,7 @@ public class OpeningsDatabaseArtificialIntelligenceWrapper implements Artificial
 
 	private final Random random = new Random();
 
+	@Inject
 	public OpeningsDatabaseArtificialIntelligenceWrapper(ArtificialIntelligence wrappedArtificialIntelligence) {
 		this.wrappedArtificialIntelligence = wrappedArtificialIntelligence;
 	}

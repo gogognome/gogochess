@@ -6,10 +6,11 @@ import static nl.gogognome.gogochess.logic.Squares.*;
 import static nl.gogognome.gogochess.logic.Status.*;
 import static org.assertj.core.api.Assertions.*;
 import org.junit.jupiter.api.*;
+import nl.gogognome.gogochess.logic.movenotation.*;
 
 class MoveNotationTest {
 
-	private final MoveNotation moveNotation = new MoveNotation();
+	private final MoveNotation moveNotation = new ReverseAlgebraicNotation();
 
 	@Test
 	void format_null_throwsException() {

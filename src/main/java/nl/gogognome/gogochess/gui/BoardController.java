@@ -2,11 +2,13 @@ package nl.gogognome.gogochess.gui;
 
 import static java.util.stream.Collectors.*;
 import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.*;
+import static nl.gogognome.gogochess.logic.Player.BLACK;
 import static nl.gogognome.gogochess.logic.Player.WHITE;
 import static nl.gogognome.gogochess.logic.Squares.*;
 import java.awt.event.*;
 import java.util.*;
 import java.util.concurrent.*;
+import javax.inject.*;
 import javax.swing.*;
 import nl.gogognome.gogochess.gui.BoardPanel.*;
 import nl.gogognome.gogochess.logic.*;
@@ -22,20 +24,23 @@ public class BoardController {
 		GAME_OVER
 	}
 
-	private final Board board = new Board();
+	private final Board board;
 	private final BoardPanel boardPanel;
 
 	private final List<Move> moves = new ArrayList<>();
 	private final Player computerPlayer;
 	private State state;
 	private ExecutorService executorService = Executors.newFixedThreadPool(1);
-	private ArtificialIntelligence ai = new OpeningsDatabaseArtificialIntelligenceWrapper(new MiniMaxAlphaBetaArtificialIntelligence(3));
+	private ArtificialIntelligence ai;
 
 	private DragData dragData;
 
-	public BoardController(Player computerPlayer) {
-		this.computerPlayer = computerPlayer;
-		boardPanel = new BoardPanel(board, 100);
+	@Inject
+	public BoardController(OpeningsDatabaseArtificialIntelligenceWrapper ai, Board board, BoardPanel boardPanel) {
+		this.ai = ai;
+		this.board = board;
+		this.computerPlayer = BLACK;
+		this.boardPanel = boardPanel;
 		MouseListener mouseListener = new MouseListener();
 		boardPanel.addMouseListener(mouseListener);
 		boardPanel.addMouseMotionListener(mouseListener);

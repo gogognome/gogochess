@@ -8,8 +8,10 @@ import java.io.*;
 import java.util.*;
 import java.util.List;
 import javax.imageio.*;
+import javax.inject.*;
 import javax.swing.*;
 import nl.gogognome.gogochess.logic.*;
+import nl.gogognome.gogochess.logic.movenotation.*;
 import nl.gogognome.gogochess.logic.piece.*;
 
 public class BoardPanel extends JPanel {
@@ -47,11 +49,13 @@ public class BoardPanel extends JPanel {
 	private int percentage;
 
 	private final int movesPanelWidth = 150;
-	private final MoveNotation moveNotation = new MoveNotation();
+	private final MoveNotation moveNotation;
 	private List<String> moves;
 
-	public BoardPanel(Board board, int squareSize) {
+	@Inject
+	public BoardPanel(Board board, MoveNotation moveNotation, int squareSize) {
 		this.squareSize = squareSize;
+		this.moveNotation = moveNotation;
 		this.progressBarHeight = squareSize / 2;
 		this.margin = progressBarHeight / 10;
 		initSquareToPlayerPiece(board);

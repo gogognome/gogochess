@@ -1,10 +1,12 @@
-package nl.gogognome.gogochess.logic;
+package nl.gogognome.gogochess.logic.movenotation;
 
 import static nl.gogognome.gogochess.logic.Piece.*;
+import nl.gogognome.gogochess.logic.*;
 import nl.gogognome.gogochess.logic.piece.*;
 
-public class MoveNotation {
+public class ReverseAlgebraicNotation implements MoveNotation {
 
+	@Override
 	public String format(Move move) {
 		if (move == null) {
 			throw new IllegalArgumentException("Move must not be null");

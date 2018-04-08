@@ -13,7 +13,7 @@ import nl.gogognome.gogochess.logic.piece.*;
 /**
  * This class evaluates the opening positions. Based on James J.Gillogly, "The Technology Chess Program" (1972).
  */
-class PositionalAnalysis {
+public class PositionalAnalysis {
 
 	private static class SimpleMove {
 		private final BoardMutation from;

@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.concurrent.atomic.*;
 import org.junit.jupiter.api.*;
 import nl.gogognome.gogochess.logic.*;
+import nl.gogognome.gogochess.logic.movenotation.*;
 
 abstract class ArtificialIntelligenceTest {
 
@@ -28,7 +29,7 @@ abstract class ArtificialIntelligenceTest {
 		ArtificialIntelligence ai = buildAI();
 		Move move = ai.nextMove(board, WHITE, percentage -> {}, bestMoves -> {});
 
-		assertThat("Qg1-h1++, Qg1-h2++, Qg1-g7++, Qg1-g8++").contains(new MoveNotation().format(move));
+		assertThat("Qg1-h1++, Qg1-h2++, Qg1-g7++, Qg1-g8++").contains(new ReverseAlgebraicNotation().format(move));
 		assertThat(move.getStatus()).isEqualTo(CHECK_MATE);
 	}
 
