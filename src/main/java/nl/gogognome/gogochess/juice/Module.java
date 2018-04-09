@@ -14,7 +14,7 @@ public class Module extends AbstractModule {
 		bind(ArtificialIntelligence.class).to(MiniMaxAlphaBetaArtificialIntelligence.class);
 		bind(BoardEvaluator.class).toInstance(new CompositeBoardEvaluator(
 				new CheckMateBoardEvaluator(),
-				new PieceValueEvaluator(1000)));
+				new PieceValueEvaluator()));
 
 	}
 
