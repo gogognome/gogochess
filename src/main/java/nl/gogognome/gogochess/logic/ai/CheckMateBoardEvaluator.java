@@ -11,9 +11,6 @@ public class CheckMateBoardEvaluator implements BoardEvaluator {
 		if (status == CHECK_MATE) {
 			return MoveValues.maxValue(board.lastMove().getPlayer());
 		}
-		if (status == CHECK) {
-			return MoveValues.negateForBlack(1000, board.lastMove().getPlayer());
-		}
 		return 0;
 	}
 }

@@ -92,7 +92,7 @@ public class Move {
 			if (boardMutations.get(index).getMutation() == ADD) {
 				adds++;
 			} else {
-				removes--;
+				removes++;
 			}
 		}
 		return adds == 1 && removes == 2;

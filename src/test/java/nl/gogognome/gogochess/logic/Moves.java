@@ -21,7 +21,6 @@ public class Moves {
 		assertThat(descriptions).contains(description);
 	}
 
-
 	public static void assertMovesDoNotContain(List<Move> moves, String description) {
 		MoveNotation moveNotation = new ReverseAlgebraicNotation();
 		List<String> descriptions = moves.stream().map(moveNotation::format).collect(toList());

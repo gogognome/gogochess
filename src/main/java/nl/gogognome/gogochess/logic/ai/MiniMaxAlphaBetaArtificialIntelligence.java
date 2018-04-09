@@ -1,7 +1,6 @@
 package nl.gogognome.gogochess.logic.ai;
 
-import static java.lang.Math.max;
-import static java.lang.Math.min;
+import static java.lang.Math.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
 import java.util.function.*;
@@ -90,10 +89,9 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 	}
 
 	private Move alphaBeta(Board board, Move move, int depth, int alpha, int beta, Progress progress) {
-		if (depth == maxDepth || move.getStatus().isGameOver()) {
+		if (depth >= maxDepth && isQuiescent(move) || move.getStatus().isGameOver()) {
 			evaluateMove(board, move);
 			nrPositionsEvaluated++;
-//			System.out.println(move);
 			return move;
 		}
 
@@ -102,12 +100,14 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		if (childMoves.isEmpty()) {
 			evaluateMove(board, move);
 			nrPositionsEvaluated++;
-//			System.out.println(move);
 			return move;
 		}
 
-//		System.out.print(move + "\t");
 		return alphaBetaWithChildMoves(board, move, depth, alpha, beta, progress, childMoves);
+	}
+
+	private boolean isQuiescent(Move move) {
+		return !move.isCapture();
 	}
 
 	private Move alphaBetaWithChildMoves(Board board, Move move, int depth, int alpha, int beta, Progress progress, List<Move> childMoves) {
