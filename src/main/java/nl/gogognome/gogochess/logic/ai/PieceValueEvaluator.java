@@ -1,5 +1,6 @@
 package nl.gogognome.gogochess.logic.ai;
 
+import static java.lang.Math.max;
 import static nl.gogognome.gogochess.logic.Piece.*;
 import static nl.gogognome.gogochess.logic.Player.*;
 import java.util.*;
@@ -45,10 +46,12 @@ public class PieceValueEvaluator implements BoardEvaluator {
 	}
 
 	private void reduceValueOfPiecesIfAhead(
-			AtomicInteger whiteValue, AtomicInteger whitePawnsValue, AtomicInteger blackValue) {
-		if (whiteValue.get() - blackValue.get() >= 200) {
-			double factor = Math.max(0.6, ((double) blackValue.get()) / whiteValue.get());
-			whiteValue.set((int) ((whiteValue.get() - whitePawnsValue.get()) * factor + whitePawnsValue.get()));
+			AtomicInteger myValueIncludingPawns,
+			AtomicInteger myPawnValues,
+			AtomicInteger opponentValueIncludingPawns) {
+		if (myValueIncludingPawns.get() - opponentValueIncludingPawns.get() >= 200) {
+			double factor = max(0.6, ((double) opponentValueIncludingPawns.get()) / myValueIncludingPawns.get());
+			myValueIncludingPawns.set((int) ((myValueIncludingPawns.get() - myPawnValues.get()) * factor + myPawnValues.get()));
 		}
 	}
 }
