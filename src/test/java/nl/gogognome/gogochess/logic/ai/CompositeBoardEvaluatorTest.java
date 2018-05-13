@@ -6,6 +6,8 @@ import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.*;
+import com.google.inject.*;
+import nl.gogognome.gogochess.juice.Module;
 import nl.gogognome.gogochess.logic.*;
 
 class CompositeBoardEvaluatorTest {
@@ -33,16 +35,19 @@ class CompositeBoardEvaluatorTest {
 
 	@Test
 	void blackDoesNotSacrificeItsPieces() {
+		Injector injector = Guice.createInjector(new Module());
+		BoardEvaluator boardEvaluator = injector.getInstance(BoardEvaluator.class);
+
 		board = new Board();
 		board.process(new Move(WHITE,
 				WHITE_PAWN.addTo(E5),
 				BLACK_PAWN.addTo(F7)));
-		int goodSituation = BoardEvaluatorFactory.newInstance().value(board);
+		int goodSituation = boardEvaluator.value(board);
 
 		board = new Board();
 		board.process(new Move(WHITE,
 				WHITE_PAWN.addTo(E5)));
-		int badSituation = BoardEvaluatorFactory.newInstance().value(board);
+		int badSituation = boardEvaluator.value(board);
 
 		assertTrue(goodSituation < badSituation, goodSituation + " should be smaller than " + badSituation);
 	}
