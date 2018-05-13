@@ -24,7 +24,11 @@ public class Module extends AbstractModule {
 	}
 
 	@Provides
-	BoardPanel boardPanel(Board board, MoveNotation moveNotation) {
-		return new BoardPanel(board, moveNotation, 100);
+	MovesPanel movesPanel(MoveNotation moveNotation) {
+		return new MovesPanel(moveNotation, 130, 8*100);
+	}
+	@Provides
+	BoardPanel boardPanel(Board board, MovesPanel movesPanel) {
+		return new BoardPanel(board, 100, movesPanel);
 	}
 }

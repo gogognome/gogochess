@@ -89,7 +89,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 	}
 
 	private Move alphaBeta(Board board, Move move, int depth, int alpha, int beta, Progress progress) {
-		if (depth >= maxDepth && isQuiescent(move) || depth >= maxDepth + 2 || move.getStatus().isGameOver()) {
+		if (depth >= maxDepth && isQuiescent(move) || move.getStatus().isGameOver()) {
 			evaluateMove(board, move);
 			nrPositionsEvaluated++;
 			return move;
