@@ -3,10 +3,10 @@ package nl.gogognome.gogochess.gui;
 import static nl.gogognome.gogochess.logic.Piece.*;
 import static nl.gogognome.gogochess.logic.Player.*;
 import java.awt.*;
+import java.awt.event.*;
 import java.awt.image.*;
 import java.io.*;
 import java.util.*;
-import java.util.List;
 import javax.imageio.*;
 import javax.inject.*;
 import javax.swing.*;
@@ -15,48 +15,24 @@ import nl.gogognome.gogochess.logic.piece.*;
 
 public class BoardPanel extends JPanel {
 
-	private List<Square> targets;
-
-	public static class DragData {
-		private final Square startSquare;
-		private final int deltaX;
-		private final int deltaY;
-
-		public DragData(Square startSquare, int deltaX, int deltaY) {
-			this.startSquare = startSquare;
-			this.deltaX = deltaX;
-			this.deltaY = deltaY;
-		}
-
-		public Square getStartSquare() {
-			return startSquare;
-		}
-
-		public DragData dragTo(int currentX, int currentY) {
-			return new DragData(startSquare, currentX - deltaX, currentY - deltaY);
-		}
-	}
-
-	private final int squareSize;
-	private final int progressBarHeight;
-	private final int margin;
+	private final GamePresentationModel presentationModel;
 	private final static Color[] SQUARE_COLORS = new Color[] { new Color(209,139, 71), new Color(255, 206, 158) };
 	private final BufferedImage piecesImage;
 	private final static Piece[] PIECES_IN_IMAGE = new Piece[] { KING, QUEEN, BISHOP, KNIGHT, ROOK, PAWN };
 	private Map<Square, PlayerPiece> squareToPlayerPiece = new HashMap<>();
-	private DragData dragData;
-	private int percentage;
-
-	private final MovesPanel movesPanel;
+	private int squareSize = 1;
+	private Square dragStartSquare;
+	private Point dragStartPoint;
+	private Point dragDelta;
 
 	@Inject
-	public BoardPanel(Board board, int squareSize, MovesPanel movesPanel) {
-		this.squareSize = squareSize;
-		this.progressBarHeight = squareSize / 2;
-		this.margin = progressBarHeight / 10;
-		this.movesPanel = movesPanel;
-		initSquareToPlayerPiece(board);
-		updateBoard(board);
+	public BoardPanel(GamePresentationModel presentationModel) {
+		this.presentationModel = presentationModel;
+		presentationModel.addListener(this::onEvent);
+
+		MouseListener mouseListener = new MouseListener();
+		addMouseListener(mouseListener);
+		addMouseMotionListener(mouseListener);
 
 		try {
 			piecesImage = ImageIO.read(getClass().getResourceAsStream("/pieces.png"));
@@ -65,14 +41,14 @@ public class BoardPanel extends JPanel {
 		}
 	}
 
-	public void updateBoard(Board board) {
-		updateBoard(board, null);
+	private void onEvent(GamePresentationModel.Event event) {
+		if (event == GamePresentationModel.Event.STATE_CHANGED || event == GamePresentationModel.Event.DRAGGING_PIECE) {
+			updateBoard();
+		}
 	}
 
-	public void updateBoard(Board board, DragData dragData) {
-		initSquareToPlayerPiece(board);
-		movesPanel.updateBoard(board);
-		this.dragData = dragData;
+	private void updateBoard() {
+		initSquareToPlayerPiece(presentationModel.getBoard());
 		repaint();
 	}
 
@@ -87,34 +63,28 @@ public class BoardPanel extends JPanel {
 	}
 
 	@Override
-	public Dimension getPreferredSize() {
-		return new Dimension(8 * squareSize + movesPanel.getPreferredSize().width,8 * squareSize + progressBarHeight + margin);
-	}
-
-	@Override
 	public void paint(Graphics g) {
+		super.paint(g);
 		paintBoardAndPiecesExceptDraggedPiece(g);
 		paintDraggedPiece(g);
-		paintProgressBar(g);
-		g.translate(8*squareSize, 0);
-		movesPanel.paint(g);
 	}
 
 	private void paintBoardAndPiecesExceptDraggedPiece(Graphics g) {
 		g.setColor(Color.WHITE);
 		g.fillRect(0, 0, getPreferredSize().width, getPreferredSize().height);
+		squareSize = Math.min(getWidth(), getHeight()) / 8;
 
 		for (int y=0; y<8; y++) {
 			for (int x=0; x<8; x++) {
 				Square square = new Square(x, y);
 				Color squareColor = SQUARE_COLORS[(x + y) % 2];
-				if (targets != null && targets.contains(square)) {
+				if (presentationModel.getTargets() != null && presentationModel.getTargets().contains(square)) {
 					squareColor = squareColor.darker();
 				}
 				g.setColor(squareColor);
 				g.fillRect(left(x), top(y), squareSize, squareSize);
 
-				if (dragData != null && dragData.startSquare.equals(square)) {
+				if (dragStartSquare != null && dragStartSquare.equals(square)) {
 					continue;
 				}
 				paintPieceAtSquare(g, square, 0, 0);
@@ -123,8 +93,8 @@ public class BoardPanel extends JPanel {
 	}
 
 	private void paintDraggedPiece(Graphics g) {
-		if (dragData != null) {
-			paintPieceAtSquare(g, dragData.startSquare, dragData.deltaX, dragData.deltaY);
+		if (dragStartSquare != null) {
+			paintPieceAtSquare(g, dragStartSquare, dragDelta.x, dragDelta.y);
 		}
 	}
 
@@ -137,15 +107,6 @@ public class BoardPanel extends JPanel {
 					pieceLeft(playerPiece), pieceTop(playerPiece), pieceRight(playerPiece), pieceBottom(playerPiece),
 					null);
 		}
-	}
-
-	private void paintProgressBar(Graphics g) {
-		g.setColor(Color.BLACK);
-		int boardSize = 8 * squareSize;
-		int arcHeight = 2 * margin;
-		g.fillRoundRect(0, boardSize + margin, boardSize, progressBarHeight, arcHeight, arcHeight);
-		g.setColor(Color.BLUE);
-		g.fillRoundRect(0, boardSize + margin, boardSize * percentage / 100, progressBarHeight, arcHeight, arcHeight);
 	}
 
 	private int pieceLeft(PlayerPiece playerPiece) {
@@ -182,18 +143,38 @@ public class BoardPanel extends JPanel {
 		return (7 - y) * squareSize;
 	}
 
-	public Square getSquare(int x, int y) {
+	private Square getSquare(int x, int y) {
 		return new Square(x / squareSize, 7 - y/squareSize);
 	}
 
-	public void setTargets(List<Square> targets) {
-		this.targets = targets;
-	}
+	private class MouseListener extends MouseAdapter {
+		@Override
+		public void mousePressed(MouseEvent e) {
+			if (presentationModel.getState() == GamePresentationModel.State.WAITING_FOR_DRAG) {
+				dragStartSquare = getSquare(e.getX(), e.getY());
+				dragStartPoint = e.getPoint();
+				dragDelta = new Point(0, 0);
+				presentationModel.onStartDragPiece(dragStartSquare);
+			}
+		}
 
-	public void updatePercentage(int percentage) {
-		if (this.percentage != percentage) {
-			this.percentage = percentage;
-			repaint();
+		@Override
+		public void mouseDragged(MouseEvent e) {
+			if (presentationModel.getState() == GamePresentationModel.State.DRAGGING) {
+				dragDelta = new Point(e.getX() - dragStartPoint.x, e.getY() - dragStartPoint.y);
+				updateBoard();
+			}
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			if (presentationModel.getState() == GamePresentationModel.State.DRAGGING) {
+				Square targetSquare = getSquare(e.getX(), e.getY());
+				presentationModel.onPlayerMove(dragStartSquare, targetSquare);
+				dragStartSquare = null;
+				dragStartPoint = null;
+				dragDelta = null;
+			}
 		}
 	}
 

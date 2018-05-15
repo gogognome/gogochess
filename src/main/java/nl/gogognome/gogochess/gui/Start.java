@@ -14,12 +14,14 @@ public class Start {
 		Injector injector = Guice.createInjector(new Module());
 		JFrame frame = new JFrame("Gogo Chess");
 
-		BoardController controller = injector.getInstance(BoardController.class);
+		GamePresentationModel controller = injector.getInstance(GamePresentationModel.class);
+		BoardMovesAndSettingsPanel mainPanel = injector.getInstance(BoardMovesAndSettingsPanel.class);
 
 		frame.setLayout(new BorderLayout());
-		frame.add(controller.getBoardPanel(), CENTER);
+		frame.add(mainPanel, CENTER);
 		frame.pack();
 		frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		frame.setMinimumSize(new Dimension(500, 500));
 		frame.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
@@ -28,6 +30,6 @@ public class Start {
 		});
 		frame.setVisible(true);
 
-		controller.playGame();
+		SwingUtilities.invokeLater(() -> controller.playGame());
 	}
 }

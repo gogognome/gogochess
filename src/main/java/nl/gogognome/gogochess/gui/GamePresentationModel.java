@@ -1,23 +1,30 @@
 package nl.gogognome.gogochess.gui;
 
 import static java.util.stream.Collectors.*;
+import static nl.gogognome.gogochess.gui.GamePresentationModel.State.INITIALIZING;
 import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.*;
-import static nl.gogognome.gogochess.logic.Player.BLACK;
-import static nl.gogognome.gogochess.logic.Player.WHITE;
+import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
-import java.awt.event.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.*;
 import javax.inject.*;
 import javax.swing.*;
-import nl.gogognome.gogochess.gui.BoardPanel.*;
 import nl.gogognome.gogochess.logic.*;
 import nl.gogognome.gogochess.logic.ai.*;
 import nl.gogognome.gogochess.logic.piece.*;
 
-public class BoardController {
+public class GamePresentationModel {
 
-	private enum State {
+	public enum Event {
+		STATE_CHANGED,
+		DRAGGING_PIECE,
+		PERCENTAGE_CHANGED,
+		SETTING_CHANGED
+	}
+
+	public enum State {
+		INITIALIZING,
 		COMPUTER_THINKING,
 		WAITING_FOR_DRAG,
 		DRAGGING,
@@ -25,35 +32,76 @@ public class BoardController {
 	}
 
 	private final Board board;
-	private final BoardPanel boardPanel;
 
 	private final List<Move> moves = new ArrayList<>();
-	private final Player computerPlayer;
-	private State state;
+	private State state = INITIALIZING;
 	private ExecutorService executorService = Executors.newFixedThreadPool(1);
 	private ArtificialIntelligence ai;
 
-	private DragData dragData;
+	private boolean whitePlayerAi = false;
+	private boolean blackPlayerAi = true;
+
+	private List<Square> targets;
+	private int percentage;
+	private final List<Consumer<Event>> listeners = new ArrayList<>();
 
 	@Inject
-	public BoardController(OpeningsDatabaseArtificialIntelligenceWrapper ai, Board board, BoardPanel boardPanel) {
+	public GamePresentationModel(ArtificialIntelligence ai, Board board) {
 		this.ai = ai;
 		this.board = board;
-		this.computerPlayer = BLACK;
-		this.boardPanel = boardPanel;
-		MouseListener mouseListener = new MouseListener();
-		boardPanel.addMouseListener(mouseListener);
-		boardPanel.addMouseMotionListener(mouseListener);
-
-		state = computerPlayer == WHITE ? State.COMPUTER_THINKING : State.WAITING_FOR_DRAG;
+		board.process(Move.INITIAL_BOARD);
 	}
 
-	public BoardPanel getBoardPanel() {
-		return boardPanel;
+	public void addListener(Consumer<Event> listener) {
+		listeners.add(listener);
+	}
+
+	public Board getBoard() {
+		return board;
+	}
+
+	public State getState() {
+		return state;
+	}
+
+	public List<Square> getTargets() {
+		return targets;
+	}
+
+	public int getPercentage() {
+		return percentage;
+	}
+
+	public boolean isWhitePlayerAi() {
+		return whitePlayerAi;
+	}
+
+	public boolean isBlackPlayerAi() {
+		return blackPlayerAi;
+	}
+
+	public void onWhitePlayerAI(boolean whitePlayerAi) {
+		this.whitePlayerAi = whitePlayerAi;
+		if (state == State.COMPUTER_THINKING) {
+			ai.cancel();
+		}
+		fireEvent(Event.SETTING_CHANGED);
+		onStartThinking();
+	}
+
+	public void onBlackPlayerAI(boolean blackPlayerAi) {
+		this.blackPlayerAi = blackPlayerAi;
+		if (state == State.COMPUTER_THINKING) {
+			ai.cancel();
+		}
+		fireEvent(Event.SETTING_CHANGED);
+		onStartThinking();
 	}
 
 	public void playGame() {
-		onMove(Move.INITIAL_BOARD);
+		board.process(Move.INITIAL_BOARD);
+		onStartThinking();
+		fireEvent(Event.STATE_CHANGED);
 	}
 
 	private void computerThinking() {
@@ -61,7 +109,7 @@ public class BoardController {
 			Move move = ai.nextMove(
 					board,
 					board.currentPlayer(),
-					percentage -> boardPanel.updatePercentage(percentage),
+					percentage -> setPercentage(percentage),
 					bestMoves -> System.out.println(bestMoves));
 			SwingUtilities.invokeLater(() -> onMove(move));
 		} catch (ArtificalIntelligenceCanceledException e) {
@@ -72,8 +120,15 @@ public class BoardController {
 		}
 	}
 
-	private void onPlayerMove(Square startSquare, Square targetSquare) {
-		boardPanel.setTargets(null);
+	private void setPercentage(Integer percentage) {
+		if (this.percentage != percentage) {
+			this.percentage = percentage;
+			SwingUtilities.invokeLater(() -> fireEvent(Event.PERCENTAGE_CHANGED));
+		}
+	}
+
+	public void onPlayerMove(Square startSquare, Square targetSquare) {
+		targets = null;
 		Optional<Move> move = board.validMoves().stream()
 				.filter(m -> startAndTargetSquareMatchMove(m, startSquare, targetSquare))
 				.findFirst();
@@ -97,7 +152,7 @@ public class BoardController {
 
 	private void onInvalidMove() {
 		state = State.WAITING_FOR_DRAG;
-		boardPanel.updateBoard(board);
+		fireEvent(Event.STATE_CHANGED);
 	}
 
 	private void onMove(Move move) {
@@ -105,25 +160,28 @@ public class BoardController {
 		moves.add(move);
 		if (move.getStatus().isGameOver()) {
 			state = State.GAME_OVER;
+			fireEvent(Event.STATE_CHANGED);
 		} else {
-			if (board.currentPlayer() == computerPlayer) {
-				state = State.COMPUTER_THINKING;
-				executorService.submit(this::computerThinking);
-			} else {
-				state = State.WAITING_FOR_DRAG;
-			}
+			onStartThinking();
 		}
-		boardPanel.updateBoard(board);
 	}
 
-	private void onStartDragPiece(int x, int y) {
-		Square square = boardPanel.getSquare(x, y);
+	private void onStartThinking() {
+		if (board.currentPlayer() == WHITE && whitePlayerAi || board.currentPlayer() == BLACK && blackPlayerAi) {
+			state = State.COMPUTER_THINKING;
+			executorService.submit(this::computerThinking);
+		} else {
+			state = State.WAITING_FOR_DRAG;
+		}
+		fireEvent(Event.STATE_CHANGED);
+	}
+
+	public void onStartDragPiece(Square square) {
 		PlayerPiece playerPiece = board.pieceAt(square);
 		if (playerPiece != null && playerPiece.getPlayer() == board.currentPlayer()) {
-			dragData = new DragData(square, x, y);
 			state = State.DRAGGING;
-			boardPanel.setTargets(determineTargetsForValidMoves(square));
-			boardPanel.updateBoard(board, dragData.dragTo(x, y));
+			targets = determineTargetsForValidMoves(square);
+			fireEvent(Event.DRAGGING_PIECE);
 		}
 	}
 
@@ -139,33 +197,13 @@ public class BoardController {
 				.collect(toList());
 	}
 
-	private class MouseListener extends MouseAdapter {
-		@Override
-		public void mousePressed(MouseEvent e) {
-			if (state == State.WAITING_FOR_DRAG) {
-				onStartDragPiece(e.getX(), e.getY());
-			}
-		}
-
-		@Override
-		public void mouseDragged(MouseEvent e) {
-			if (state == State.DRAGGING) {
-				boardPanel.updateBoard(board, dragData.dragTo(e.getX(), e.getY()));
-			}
-		}
-
-		@Override
-		public void mouseReleased(MouseEvent e) {
-			if (state == State.DRAGGING) {
-				Square targetSquare = boardPanel.getSquare(e.getX(), e.getY());
-				onPlayerMove(dragData.getStartSquare(), targetSquare);
-			}
-		}
-	}
-
 	public void onClose() {
 		ai.cancel();
 		executorService.shutdownNow();
+	}
+
+	private void fireEvent(Event event) {
+		listeners.forEach(l -> l.accept(event));
 	}
 
 }

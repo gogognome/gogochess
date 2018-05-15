@@ -9,19 +9,27 @@ import nl.gogognome.gogochess.logic.*;
 import nl.gogognome.gogochess.logic.movenotation.*;
 
 public class MovesPanel extends JPanel {
-	private final Dimension preferredSize;
 
 	private final MoveNotation moveNotation;
-	private List<String> moves;
+	private final GamePresentationModel presentationModel;
+	private List<String> moves = new LinkedList<>();
 
-	public MovesPanel(MoveNotation moveNotation, int width, int height) {
+	public MovesPanel(MoveNotation moveNotation, GamePresentationModel presentationModel) {
 		this.moveNotation = moveNotation;
-		this.preferredSize = new Dimension(width, height);
+		this.presentationModel = presentationModel;
+		presentationModel.addListener(this::event);
 	}
 
-	public void updateBoard(Board board) {
-		moves = new LinkedList<>();
-		Move move = board.lastMove();
+	private void event(GamePresentationModel.Event event) {
+		if (event == GamePresentationModel.Event.STATE_CHANGED) {
+			updateMoves();
+			repaint();
+		}
+	}
+
+	private void updateMoves() {
+		moves.clear();
+		Move move = presentationModel.getBoard().lastMove();
 		while (move != null && move.getPrecedingMove() != null) {
 			moves.add(0, moveNotation.format(move));
 			move = move.getPrecedingMove();
@@ -29,22 +37,18 @@ public class MovesPanel extends JPanel {
 	}
 
 	@Override
-	public Dimension getPreferredSize() {
-		return preferredSize;
-	}
-
-	@Override
 	public void paint(Graphics g) {
-		int margin = preferredSize.width * 10 / 100;
-		int left = margin;
+		super.paint(g);
+		int margin = getWidth() * 10 / 100;
+		int left = 0;
 		g.setColor(Color.BLACK);
-		g.fillRect(left, 0, preferredSize.width - margin, preferredSize.height);
+		g.fillRect(left, 0, getWidth() - margin, getHeight());
 
 		g.setColor(Color.LIGHT_GRAY);
 		Player player = WHITE;
 		int y = margin + g.getFontMetrics().getHeight();
 		for (String move : moves) {
-			int textX =  player == WHITE ? left : left + (preferredSize.width-left) / 2;
+			int textX =  player == WHITE ? left + margin : left + (getWidth()-left) / 2;
 			g.drawString(move, textX, y);
 			player = player.other();
 			if (player == WHITE) {
