@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.*;
 import java.util.function.*;
 import javax.inject.*;
 import nl.gogognome.gogochess.logic.*;
+import nl.gogognome.gogochess.logic.movenotation.*;
 
 public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelligence {
 
@@ -53,6 +54,10 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		List<Move> nextMoves = board.validMoves();
 		positonalAnalysis.evaluate(board, nextMoves);
 		moveSort.sort(nextMoves);
+		MoveNotation notation = new ReverseAlgebraicNotation();
+		for (Move move : nextMoves) {
+			System.out.println(notation.format(move) + "\t" + move.getValue());
+		}
 
 		nrPositionsGenerated = nextMoves.size();
 		Progress progress = new Progress(progressUpdateConsumer);

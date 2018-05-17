@@ -3,7 +3,6 @@ package nl.gogognome.gogochess.logic.ai;
 import static nl.gogognome.gogochess.logic.Board.*;
 import static nl.gogognome.gogochess.logic.MoveValues.*;
 import static nl.gogognome.gogochess.logic.Piece.*;
-import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
 import java.util.*;
 import com.google.common.collect.*;
@@ -46,8 +45,8 @@ public class PositionalAnalysis {
 				.put(new SimpleMove(WHITE_PAWN.removeFrom(D3), WHITE_PAWN.removeFrom(D4)), 2)
 				.put(new SimpleMove(WHITE_KNIGHT.removeFrom(B1), WHITE_KNIGHT.addTo(A3)), -15)
 				.put(new SimpleMove(WHITE_KNIGHT.removeFrom(G1), WHITE_KNIGHT.addTo(H3)), -15)
-				.put(new SimpleMove(WHITE_KNIGHT.removeFrom(B8), WHITE_KNIGHT.addTo(A6)), -15)
-				.put(new SimpleMove(WHITE_KNIGHT.removeFrom(G8), WHITE_KNIGHT.addTo(H6)), -15)
+				.put(new SimpleMove(BLACK_KNIGHT.removeFrom(B8), BLACK_KNIGHT.addTo(A6)), -15)
+				.put(new SimpleMove(BLACK_KNIGHT.removeFrom(G8), BLACK_KNIGHT.addTo(H6)), -15)
 			.build();
 
 	private final static int[][] CENTER_CONTORL_ARRAY = new int[][] {
@@ -76,70 +75,114 @@ public class PositionalAnalysis {
 			return;
 		}
 
-		int value = 0;
 		BoardMutation from = move.getMutationRemovingPieceFromStart();
 		BoardMutation to = move.getMutationAddingPieceAtDestination();
-		value -= negateForBlack(valueOf(from.getPlayerPiece().getPiece(), from.getSquare()), move.getPlayer());
-		value += negateForBlack(valueOf(to.getPlayerPiece().getPiece(), to.getSquare()), move.getPlayer());
-
-		Integer delta = SIMPLE_MOVE_TO_VALUE.get(new SimpleMove(from, to));
-		if (delta != null) {
-			value += delta;
-		}
-
 		int fromColumn = from.getSquare().column();
 		int toColumn = to.getSquare().column();
-		if (from.getPlayerPiece().getPiece() == KING && toColumn - fromColumn == 2) {
-			value += 30;
-		}
 
-		if (from.getPlayerPiece().getPiece() == KING && fromColumn - toColumn == 3) {
-			value += 10;
-		}
-		if (E3.equals(to.getSquare()) || D3.equals(to.getSquare())) {
-			PlayerPiece blockedPiece = board.pieceAt(to.getSquare().addRow(-1));
-		    if (blockedPiece != null && blockedPiece.getPiece() == PAWN) {
-				value -= 50;
-			}
-		}
+		int value = negateForBlack(getCenterControlDelta(from, to), move);
+		value += negateForBlack(getPawnOrKnightMoveValue(from, to), move);
+		value += negateForBlack(getCastlingValue(from.getPlayerPiece().getPiece(), fromColumn, toColumn), move);
+		value += getPieceBlocksWhiteCenterPawn(board, to);
+		value += getPieceBlocksBlackCenterPawn(board, to);
+		value += negateForBlack(getPieceMovingFromKingSideValue(fromColumn), move);
+		value += negateForBlack(getPawnCaptureValue(board, move, from, to, toColumn), move);
 
-		if (fromColumn >= 4 && toColumn < 4) {
-			value += negateForBlack(2, move.getPlayer());
-		}
+		move.setValue(value);
+	}
 
+	private int getPawnOrKnightMoveValue(BoardMutation from, BoardMutation to) {
+		int pawnOrKnightMoveValue = 0;
+		Integer delta = SIMPLE_MOVE_TO_VALUE.get(new SimpleMove(from, to));
+		if (delta != null) {
+			pawnOrKnightMoveValue = delta;
+		}
+		return pawnOrKnightMoveValue;
+	}
+
+	private int getPawnCaptureValue(Board board, Move move, BoardMutation from, BoardMutation to, int toColumn) {
+		int pawnCaptureValue = 0;
 		if (from.getPlayerPiece().getPiece() == PAWN) {
 			if (move.isCapture()) {
 				if (isNearerToCenter(from.getSquare(), to.getSquare())) {
-					value += negateForBlack(5, move.getPlayer());
+					pawnCaptureValue += 5;
 				} else {
-					value -= negateForBlack(5, move.getPlayer());
+					pawnCaptureValue -= 5;
 				}
 
 				if (board.countNrPawnsInColumn(to.getPlayerPiece(), toColumn) > 1 && board.isIsolatedPawnInColumn(to.getPlayerPiece(), toColumn)) {
-					value -= negateForBlack(10, move.getPlayer());
+					pawnCaptureValue -= 10;
 				}
 
 				if (move.capturedPlayerPiece().getPiece() == PAWN && (toColumn == 3 || toColumn == 4)) {
 					if (board.isIsolatedPawnInColumn(move.capturedPlayerPiece(), toColumn)) {
-						value += negateForBlack(50, move.getPlayer());
+						pawnCaptureValue += 50;
 					}
-					int rowDelta = move.getPlayer() == WHITE ? 1 : -1;
+					int rowDelta = negateForBlack(1, move);
 					Square leftForward = to.getSquare().addColumnAndRow(-1, rowDelta);
 					Square rightForward = to.getSquare().addColumnAndRow(1, rowDelta);
 					PlayerPiece pawnOfOpponent = new Pawn(move.getPlayer().other());
 					if ((leftForward != null && pawnOfOpponent.equals(board.pieceAt(leftForward)))
 							|| (rightForward != null && pawnOfOpponent.equals(board.pieceAt(rightForward)))) {
-						value -= negateForBlack(15, move.getPlayer());
+						pawnCaptureValue -= 15;
 					}
 				}
 			} else {
 				if (to.getSquare().column() == 0 || to.getSquare().column() == 7) {
-					value -= negateForBlack(10, move.getPlayer());
+					pawnCaptureValue -= 10;
 				}
 			}
 		}
+		return pawnCaptureValue;
+	}
 
-		move.setValue(value);
+	private int getPieceMovingFromKingSideValue(int fromColumn) {
+		int pieceMovingFromKingSideValue = 0;
+		if (fromColumn >= 4) {
+			pieceMovingFromKingSideValue = 2;
+		}
+		return pieceMovingFromKingSideValue;
+	}
+
+	private int getPieceBlocksWhiteCenterPawn(Board board, BoardMutation to) {
+		int pieceBlocksWhiteCenterPawn = 0;
+		if (E3.equals(to.getSquare()) || D3.equals(to.getSquare())) {
+			PlayerPiece blockedPiece = board.pieceAt(to.getSquare().addRow(-1));
+		    if (blockedPiece != null && blockedPiece.getPiece() == PAWN) {
+				pieceBlocksWhiteCenterPawn = -50;
+			}
+		}
+		return pieceBlocksWhiteCenterPawn;
+	}
+
+	private int getPieceBlocksBlackCenterPawn(Board board, BoardMutation to) {
+		int pieceBlocksBlackCenterPawn = 0;
+		if (E6.equals(to.getSquare()) || D6.equals(to.getSquare())) {
+			PlayerPiece blockedPiece = board.pieceAt(to.getSquare().addRow(1));
+		    if (blockedPiece != null && blockedPiece.getPiece() == PAWN) {
+				pieceBlocksBlackCenterPawn = 50;
+			}
+		}
+		return pieceBlocksBlackCenterPawn;
+	}
+
+	private int getCenterControlDelta(BoardMutation from, BoardMutation to) {
+		int centerControlDelta = 0;
+		centerControlDelta -= valueOf(from.getPlayerPiece().getPiece(), from.getSquare());
+		centerControlDelta += valueOf(to.getPlayerPiece().getPiece(), to.getSquare());
+		return centerControlDelta;
+	}
+
+	private int getCastlingValue(Piece movedPiece, int fromColumn, int toColumn) {
+		int castlingValue = 0;
+		if (movedPiece == KING && toColumn - fromColumn == 2) {
+			castlingValue = 30;
+		}
+
+		if (movedPiece == KING && fromColumn - toColumn == 3) {
+			castlingValue = 10;
+		}
+		return castlingValue;
 	}
 
 	private boolean isNearerToCenter(Square from, Square to) {

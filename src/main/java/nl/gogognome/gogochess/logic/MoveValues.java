@@ -23,6 +23,10 @@ public class MoveValues {
 		return player == WHITE ? MIN_VALUE : MAX_VALUE;
 	}
 
+	public static int negateForBlack(int value, Move move) {
+		return negateForBlack(value, move.getPlayer());
+	}
+
 	public static int negateForBlack(int value, Player player) {
 		return player == WHITE ? value : -value;
 	}
