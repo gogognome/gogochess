@@ -14,20 +14,23 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 	private int initialAlpha;
 	private int initialBeta;
 	private int maxDepth;
-	private int nrPositionsEvaluated;
-	private int nrPositionsGenerated;
 
 	private AtomicBoolean canceled = new AtomicBoolean();
 
 	private final BoardEvaluator boardEvaluator;
 	private final PositionalAnalysis positonalAnalysis;
 	private final MoveSort moveSort;
+	private final QuiescenceSearch quiescenceSearch;
+	private final Statistics statistics;
 
 	@Inject
-	public MiniMaxAlphaBetaArtificialIntelligence(BoardEvaluator boardEvaluator, PositionalAnalysis positionalAnalysis, MoveSort moveSort) {
+	public MiniMaxAlphaBetaArtificialIntelligence(BoardEvaluator boardEvaluator, PositionalAnalysis positionalAnalysis, MoveSort moveSort,
+			QuiescenceSearch quiescenceSearch, Statistics statistics) {
 		this.boardEvaluator = boardEvaluator;
 		this.positonalAnalysis = positionalAnalysis;
 		this.moveSort = moveSort;
+		this.quiescenceSearch = quiescenceSearch;
+		this.statistics = statistics;
 		this.initialMaxDepth = 3;
 		this.initialAlpha = Integer.MIN_VALUE;
 		this.initialBeta = Integer.MAX_VALUE;
@@ -48,7 +51,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 	@Override
 	public Move nextMove(Board board, Player player, Consumer<Integer> progressUpdateConsumer, Consumer<List<Move>> bestMovesConsumer) {
 		initMaxDepth(board);
-		nrPositionsEvaluated = 0;
+		statistics.reset();
 		long startTime = System.nanoTime();
 		System.out.println("maxDepth: " + maxDepth);
 		List<Move> nextMoves = board.validMoves();
@@ -59,7 +62,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 			System.out.println(notation.format(move) + "\t" + move.getValue());
 		}
 
-		nrPositionsGenerated = nextMoves.size();
+		statistics.onPositionsGenerated(nextMoves.size());
 		Progress progress = new Progress(progressUpdateConsumer);
 		Progress.Job job = progress.onStartJobWithNrSteps(nextMoves.size());
 		Map<Move, Move> moveToBestDeepestMove = new HashMap<>();
@@ -74,8 +77,8 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		bestMovesConsumer.accept(nextMove.pathTo(moveToBestDeepestMove.get(nextMove)));
 		long endTime = System.nanoTime();
 		double durationMillis = (endTime - startTime) / 1000000000.0;
-		System.out.println("evaluating " + nrPositionsEvaluated + " positions took " + durationMillis + " s (" + (nrPositionsEvaluated / (durationMillis)) + " positions/s");
-		System.out.println("generating " + nrPositionsGenerated + " positions took " + durationMillis + " s (" + (nrPositionsGenerated / (durationMillis)) + " positions/s");
+		System.out.println("evaluating " + statistics.getNrPositionsEvaluated()+ " positions took " + durationMillis + " s (" + (statistics.getNrPositionsEvaluated() / (durationMillis)) + " positions/s");
+		System.out.println("generating " + statistics.getNrPositionsGenerated() + " positions took " + durationMillis + " s (" + (statistics.getNrPositionsGenerated() / (durationMillis)) + " positions/s");
 		return nextMove;
 	}
 
@@ -94,25 +97,24 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 	}
 
 	private Move alphaBeta(Board board, Move move, int depth, int alpha, int beta, Progress progress) {
-		if (depth >= maxDepth && isQuiescent(move) || move.getStatus().isGameOver()) {
+		if (move.getStatus().isGameOver()) {
 			evaluateMove(board, move);
-			nrPositionsEvaluated++;
+			statistics.onPositionEvaluated();
 			return move;
+		}
+		if (depth >= maxDepth) {
+			return quiescenceSearch.search(board, move, alpha, beta);
 		}
 
 		List<Move> childMoves = getChildMoves(board, move);
-		nrPositionsGenerated += childMoves.size();
+		statistics.onPositionsGenerated(childMoves.size());
 		if (childMoves.isEmpty()) {
 			evaluateMove(board, move);
-			nrPositionsEvaluated++;
+			statistics.onPositionEvaluated();
 			return move;
 		}
 
 		return alphaBetaWithChildMoves(board, move, depth, alpha, beta, progress, childMoves);
-	}
-
-	private boolean isQuiescent(Move move) {
-		return !move.isCapture();
 	}
 
 	private Move alphaBetaWithChildMoves(Board board, Move move, int depth, int alpha, int beta, Progress progress, List<Move> childMoves) {

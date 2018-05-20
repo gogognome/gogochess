@@ -21,7 +21,7 @@ class MoveNotationTest {
 
 	@Test
 	void formatPawnMove() {
-		assertThat(moveNotation.format(new Move(WHITE, WHITE_PAWN.removeFrom(Squares.E2), WHITE_PAWN.addTo(E4))))
+		assertThat(moveNotation.format(new Move(WHITE, WHITE_PAWN.removeFrom(E2), WHITE_PAWN.addTo(E4))))
 				.isEqualTo("e2-e4");
 	}
 
@@ -129,7 +129,6 @@ class MoveNotationTest {
 				.isEqualTo("O-O+");
 	}
 
-
 	@Test
 	void formatLongCastlingMoveResultingIntoCheckMate() {
 		Move move = new Move(BLACK, BLACK_ROOK.removeFrom(A8), BLACK_KING.removeFrom(Squares.E8), BLACK_ROOK.addTo(C8), BLACK_KING.addTo(B8));
@@ -138,4 +137,14 @@ class MoveNotationTest {
 				.isEqualTo("O-O-O++");
 	}
 
+	@Test
+	void formatSequenceOfMoves() {
+		Move move1 = new Move(WHITE, WHITE_PAWN.removeFrom(E2), WHITE_PAWN.addTo(E4));
+		Move move2 = new Move(move1, BLACK_PAWN.removeFrom(E7), BLACK_PAWN.addTo(E5));
+		Move move3 = new Move(move2, WHITE_KNIGHT.removeFrom(G1), WHITE_KNIGHT.addTo(F3));
+
+		assertThat(moveNotation.format(move1, move3)).isEqualTo("e2-e4, e7-e5, Ng1-f3");
+		assertThat(moveNotation.format(move2, move3)).isEqualTo("e7-e5, Ng1-f3");
+		assertThat(moveNotation.format(move3, move3)).isEqualTo("Ng1-f3");
+	}
 }

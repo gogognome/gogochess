@@ -22,15 +22,24 @@ public class Module extends AbstractModule {
 	}
 
 	@Provides
-	ArtificialIntelligence provideArtificialIntelligence(BoardEvaluator boardEvaluator, PositionalAnalysis positionalAnalysis, MoveSort moveSort) {
-		return new OpeningsDatabaseArtificialIntelligenceWrapper(
-				new MiniMaxAlphaBetaArtificialIntelligence(boardEvaluator, positionalAnalysis, moveSort)
-		);
+	ArtificialIntelligence provideArtificialIntelligence(
+			MiniMaxAlphaBetaArtificialIntelligence miniMaxAlphaBetaArtificialIntelligence) {
+		return new OpeningsDatabaseArtificialIntelligenceWrapper(miniMaxAlphaBetaArtificialIntelligence);
+	}
+
+	@Provides
+	MiniMaxAlphaBetaArtificialIntelligence provideMiniMaxAlphaBetaArtificialIntelligence(
+			BoardEvaluator boardEvaluator,
+			PositionalAnalysis positionalAnalysis,
+			MoveSort moveSort) {
+		Statistics statistics = new Statistics();
+		QuiescenceSearch quiescenceSearch = new QuiescenceSearch(boardEvaluator, statistics);
+		return new MiniMaxAlphaBetaArtificialIntelligence(boardEvaluator, positionalAnalysis, moveSort, quiescenceSearch, statistics);
 	}
 
 	@Provides
 	@Singleton
-	GamePresentationModel gamePresentationModel(ArtificialIntelligence ai, Board board) {
+	GamePresentationModel provideGamePresentationModel(ArtificialIntelligence ai, Board board) {
 		return new GamePresentationModel(ai, board);
 	}
 

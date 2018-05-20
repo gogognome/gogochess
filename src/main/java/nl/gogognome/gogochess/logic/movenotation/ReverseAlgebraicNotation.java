@@ -1,6 +1,7 @@
 package nl.gogognome.gogochess.logic.movenotation;
 
 import static nl.gogognome.gogochess.logic.Piece.*;
+import java.util.stream.*;
 import nl.gogognome.gogochess.logic.*;
 import nl.gogognome.gogochess.logic.piece.*;
 
@@ -27,6 +28,13 @@ public class ReverseAlgebraicNotation implements MoveNotation {
 
 		appendCheckOrCheckMate(move, result);
 		return result.toString();
+	}
+
+	@Override
+	public String format(Move from, Move to) {
+		return from.pathTo(to).stream()
+				.map(this::format)
+				.collect(Collectors.joining(", "));
 	}
 
 	private PlayerPiece findCapturedPiece(Move move) {
@@ -98,4 +106,6 @@ public class ReverseAlgebraicNotation implements MoveNotation {
 			result.append('(').append(pieceName(addMutation.getPlayerPiece())).append(')');
 		}
 	}
+
+
 }

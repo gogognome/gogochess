@@ -86,6 +86,9 @@ public class Move {
 	}
 
 	public boolean isCapture() {
+		if (boardMutations.size() == 2) {
+			return false;
+		}
 		int adds = 0;
 		int removes = 0;
 		for (int index = 0; index<boardMutations.size(); index++) {
