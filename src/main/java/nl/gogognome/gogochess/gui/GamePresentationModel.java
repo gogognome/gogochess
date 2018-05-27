@@ -102,7 +102,6 @@ public class GamePresentationModel {
 	}
 
 	public void playGame() {
-		board.process(Move.INITIAL_BOARD);
 		onStartThinking();
 		fireEvent(Event.STATE_CHANGED);
 	}
