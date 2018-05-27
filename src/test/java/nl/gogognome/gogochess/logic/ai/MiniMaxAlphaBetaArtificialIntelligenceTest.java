@@ -94,9 +94,10 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 				BLACK_PAWN.addTo(G7));
 		board.process(initialMove);
 
-		assertNextMoves(5, MIN_VALUE, MIN_VALUE + 100,
+		assertNextMovesOneOf(5, MIN_VALUE, MIN_VALUE + 100,
 				BLACK,
-				"Nc6-d4+", "Ke2xRd1", "Ng4-e3+", "Kd1-c1", "Nd4-e2++");
+				asList("Nc6-d4+", "Ke2xRd1", "Ng4-e3+", "Kd1-c1", "Nd4-e2++"),
+				asList("Rd1-h1", "Bc4xf7+", "Ke8xBf7", "Bd8xc7", "Nc6-d4++"));
 	}
 
 	@Test
