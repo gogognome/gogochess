@@ -4,6 +4,7 @@ import com.google.inject.*;
 import nl.gogognome.gogochess.gui.*;
 import nl.gogognome.gogochess.logic.*;
 import nl.gogognome.gogochess.logic.ai.*;
+import nl.gogognome.gogochess.logic.ai.positionalanalysis.*;
 import nl.gogognome.gogochess.logic.movenotation.*;
 
 public class Module extends AbstractModule {

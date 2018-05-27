@@ -1,6 +1,5 @@
 package nl.gogognome.gogochess.logic.ai;
 
-import static java.lang.Integer.*;
 import static nl.gogognome.gogochess.logic.Board.*;
 import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
@@ -25,12 +24,6 @@ class CompositeBoardEvaluatorTest {
 	void compositeAddsValues() {
 		CompositeBoardEvaluator compositeBoardEvaluator = new CompositeBoardEvaluator(new ConstEvaluator(10), new ConstEvaluator(20));
 		assertEquals(30, compositeBoardEvaluator.value(board));
-	}
-
-	@Test
-	void compositeCapsAddedNumbersToMaxValue() {
-		CompositeBoardEvaluator compositeBoardEvaluator = new CompositeBoardEvaluator(new ConstEvaluator(MAX_VALUE), new ConstEvaluator(10));
-		assertEquals(MAX_VALUE, compositeBoardEvaluator.value(board));
 	}
 
 	@Test

@@ -20,25 +20,15 @@ public class PieceValueEvaluator implements BoardEvaluator {
 
 	@Override
 	public int value(Board board) {
+		return getValueForPieces(board, WHITE) - getValueForPieces(board, BLACK);
+	}
+
+	public int getValueForPieces(Board board, Player white) {
 		AtomicInteger whiteValue = new AtomicInteger();
-		AtomicInteger whitePawnsValue = new AtomicInteger();
-		AtomicInteger blackValue = new AtomicInteger();
-		AtomicInteger blackPawnsValue = new AtomicInteger();
-
-		board.forEachPlayerPiece(WHITE, (playerPiece, square) -> {
+		board.forEachPlayerPiece(white, (playerPiece, square) -> {
 			whiteValue.getAndAdd(PIECE_TO_VALUE.get(playerPiece.getPiece()));
-			if (playerPiece.getPiece() == PAWN) {
-				whitePawnsValue.getAndAdd(PIECE_TO_VALUE.get(playerPiece.getPiece()));
-			}
 		});
-		board.forEachPlayerPiece(BLACK, (playerPiece, square) -> {
-			blackValue.getAndAdd(PIECE_TO_VALUE.get(playerPiece.getPiece()));
-			if (playerPiece.getPiece() == PAWN) {
-				blackPawnsValue.getAndAdd(PIECE_TO_VALUE.get(playerPiece.getPiece()));
-			}
-		});
-
-		return whiteValue.get() - blackValue.get();
+		return whiteValue.get();
 	}
 
 }

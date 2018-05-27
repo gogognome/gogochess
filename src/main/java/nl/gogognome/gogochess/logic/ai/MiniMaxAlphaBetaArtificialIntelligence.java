@@ -5,10 +5,14 @@ import java.util.*;
 import java.util.concurrent.atomic.*;
 import java.util.function.*;
 import javax.inject.*;
+import org.slf4j.*;
 import nl.gogognome.gogochess.logic.*;
+import nl.gogognome.gogochess.logic.ai.positionalanalysis.*;
 import nl.gogognome.gogochess.logic.movenotation.*;
 
 public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelligence {
+
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private int initialMaxDepth;
 	private int initialAlpha;
@@ -53,14 +57,12 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		initMaxDepth(board);
 		statistics.reset();
 		long startTime = System.nanoTime();
-		System.out.println("maxDepth: " + maxDepth);
+		logger.debug("maxDepth: " + maxDepth);
 		List<Move> nextMoves = board.validMoves();
 		positonalAnalysis.evaluate(board, nextMoves);
 		moveSort.sort(nextMoves);
-		MoveNotation notation = new ReverseAlgebraicNotation();
-		for (Move move : nextMoves) {
-			System.out.println(notation.format(move) + "\t" + move.getValue());
-		}
+		ReverseAlgebraicNotation notation = new ReverseAlgebraicNotation();
+		nextMoves.stream().forEach(m -> logger.debug(notation.format(m) + "\t" + m.getValue()));
 
 		statistics.onPositionsGenerated(nextMoves.size());
 		Progress progress = new Progress(progressUpdateConsumer);
@@ -77,8 +79,8 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		bestMovesConsumer.accept(nextMove.pathTo(moveToBestDeepestMove.get(nextMove)));
 		long endTime = System.nanoTime();
 		double durationMillis = (endTime - startTime) / 1000000000.0;
-		System.out.println("evaluating " + statistics.getNrPositionsEvaluated()+ " positions took " + durationMillis + " s (" + (statistics.getNrPositionsEvaluated() / (durationMillis)) + " positions/s");
-		System.out.println("generating " + statistics.getNrPositionsGenerated() + " positions took " + durationMillis + " s (" + (statistics.getNrPositionsGenerated() / (durationMillis)) + " positions/s");
+		logger.debug("evaluating " + statistics.getNrPositionsEvaluated()+ " positions took " + durationMillis + " s (" + (statistics.getNrPositionsEvaluated() / (durationMillis)) + " positions/s");
+		logger.debug("generating " + statistics.getNrPositionsGenerated() + " positions took " + durationMillis + " s (" + (statistics.getNrPositionsGenerated() / (durationMillis)) + " positions/s");
 		return nextMove;
 	}
 

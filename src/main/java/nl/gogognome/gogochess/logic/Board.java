@@ -160,7 +160,10 @@ public class Board {
 		if (lastMove == null) {
 			throw new IllegalStateException("No moves can be determined when the board is empty");
 		}
-		Player player = currentPlayer();
+		return validMovesFor(currentPlayer());
+	}
+
+	public List<Move> validMovesFor(Player player) {
 		List<Move> moves = new ArrayList<>(40);
 		addMovesIgnoringCheck(player, moves);
 		removeMovesCausingCheckForOwnPlayer(moves);
@@ -240,7 +243,7 @@ public class Board {
 		}
 	}
 
-	private Square kingSquareOf(Player player) {
+	public Square kingSquareOf(Player player) {
 		King king = new King(player);
 		if (player == WHITE) {
 			for (int i=0; i<nrWhitePieces; i++) {

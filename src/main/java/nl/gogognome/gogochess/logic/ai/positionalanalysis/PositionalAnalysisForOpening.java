@@ -1,9 +1,12 @@
-package nl.gogognome.gogochess.logic.ai;
+package nl.gogognome.gogochess.logic.ai.positionalanalysis;
 
 import static nl.gogognome.gogochess.logic.Board.*;
-import static nl.gogognome.gogochess.logic.MoveValues.*;
-import static nl.gogognome.gogochess.logic.Piece.*;
+import static nl.gogognome.gogochess.logic.Board.BLACK_KNIGHT;
+import static nl.gogognome.gogochess.logic.MoveValues.negateForBlack;
+import static nl.gogognome.gogochess.logic.Piece.KING;
+import static nl.gogognome.gogochess.logic.Piece.PAWN;
 import static nl.gogognome.gogochess.logic.Squares.*;
+import static nl.gogognome.gogochess.logic.Squares.D6;
 import java.util.*;
 import com.google.common.collect.*;
 import nl.gogognome.gogochess.logic.*;
@@ -12,75 +15,40 @@ import nl.gogognome.gogochess.logic.piece.*;
 /**
  * This class evaluates the opening positions. Based on James J.Gillogly, "The Technology Chess Program" (1972).
  */
-public class PositionalAnalysis {
+class PositionalAnalysisForOpening {
 
-	private static class SimpleMove {
-		private final BoardMutation from;
-		private final BoardMutation to;
-
-		private SimpleMove(BoardMutation from, BoardMutation to) {
-			this.from = from;
-			this.to = to;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (obj instanceof SimpleMove) {
-				SimpleMove that = (SimpleMove) obj;
-				return this.from.equals(that.from) && this.to.equals(that.to);
-			}
-			return false;
-		}
-
-		@Override
-		public int hashCode() {
-			return from.hashCode() + 23 * to.hashCode();
-		}
-	}
+	private final CentralControlHeuristic centralControlHeuristic;
 
 	private final static Map<SimpleMove, Integer> SIMPLE_MOVE_TO_VALUE = ImmutableMap.<SimpleMove, Integer>builder()
-				.put(new SimpleMove(WHITE_PAWN.removeFrom(E2), WHITE_PAWN.removeFrom(E4)), 30)
-				.put(new SimpleMove(WHITE_PAWN.removeFrom(E3), WHITE_PAWN.removeFrom(E4)), 2)
-				.put(new SimpleMove(WHITE_PAWN.removeFrom(D2), WHITE_PAWN.removeFrom(D4)), 20)
-				.put(new SimpleMove(WHITE_PAWN.removeFrom(D3), WHITE_PAWN.removeFrom(D4)), 2)
-				.put(new SimpleMove(WHITE_KNIGHT.removeFrom(B1), WHITE_KNIGHT.addTo(A3)), -15)
-				.put(new SimpleMove(WHITE_KNIGHT.removeFrom(G1), WHITE_KNIGHT.addTo(H3)), -15)
-				.put(new SimpleMove(BLACK_KNIGHT.removeFrom(B8), BLACK_KNIGHT.addTo(A6)), -15)
-				.put(new SimpleMove(BLACK_KNIGHT.removeFrom(G8), BLACK_KNIGHT.addTo(H6)), -15)
+			.put(new SimpleMove(WHITE_PAWN.removeFrom(E2), WHITE_PAWN.removeFrom(E4)), 30)
+			.put(new SimpleMove(WHITE_PAWN.removeFrom(E3), WHITE_PAWN.removeFrom(E4)), 2)
+			.put(new SimpleMove(WHITE_PAWN.removeFrom(D2), WHITE_PAWN.removeFrom(D4)), 20)
+			.put(new SimpleMove(WHITE_PAWN.removeFrom(D3), WHITE_PAWN.removeFrom(D4)), 2)
+			.put(new SimpleMove(WHITE_KNIGHT.removeFrom(B1), WHITE_KNIGHT.addTo(A3)), -15)
+			.put(new SimpleMove(WHITE_KNIGHT.removeFrom(G1), WHITE_KNIGHT.addTo(H3)), -15)
+			.put(new SimpleMove(BLACK_KNIGHT.removeFrom(B8), BLACK_KNIGHT.addTo(A6)), -15)
+			.put(new SimpleMove(BLACK_KNIGHT.removeFrom(G8), BLACK_KNIGHT.addTo(H6)), -15)
 			.build();
 
-	private final static int[][] CENTER_CONTORL_ARRAY = new int[][] {
-			{ 0, 1, 2, 3, 3, 2, 1, 0 },
-			{ 1, 3, 4, 5, 5, 4, 3, 1 },
-			{ 2, 4, 6, 7, 7, 6, 4, 2 },
-			{ 3, 5, 7, 8, 8, 7, 5, 3 },
-			{ 3, 5, 7, 8, 8, 7, 5, 3 },
-			{ 2, 4, 6, 7, 7, 6, 4, 2 },
-			{ 1, 3, 4, 5, 5, 4, 3, 1 },
-			{ 0, 1, 2, 3, 3, 2, 1, 0 }
-	};
+
+	public PositionalAnalysisForOpening(
+			CentralControlHeuristic centralControlHeuristic) {
+		this.centralControlHeuristic = centralControlHeuristic;
+	}
 
 	public void evaluate(Board board, List<Move> moves) {
-		if (moves.isEmpty()) {
-			return;
-		}
-
 		for (Move move : moves) {
 			determineOpeningValue(board, move);
 		}
 	}
 
 	private void determineOpeningValue(Board board, Move move) {
-		if (move.depthInTree() > 15) {
-			return;
-		}
-
 		BoardMutation from = move.getMutationRemovingPieceFromStart();
 		BoardMutation to = move.getMutationAddingPieceAtDestination();
 		int fromColumn = from.getSquare().column();
 		int toColumn = to.getSquare().column();
 
-		int value = negateForBlack(getCenterControlDelta(from, to), move);
+		int value = negateForBlack(centralControlHeuristic.getCenterControlDeltaForOpening(from, to), move);
 		value += negateForBlack(getPawnOrKnightMoveValue(from, to), move);
 		value += negateForBlack(getCastlingValue(from.getPlayerPiece().getPiece(), fromColumn, toColumn), move);
 		value += getPieceBlocksWhiteCenterPawn(board, to);
@@ -148,7 +116,7 @@ public class PositionalAnalysis {
 		int pieceBlocksWhiteCenterPawn = 0;
 		if (E3.equals(to.getSquare()) || D3.equals(to.getSquare())) {
 			PlayerPiece blockedPiece = board.pieceAt(to.getSquare().addRow(-1));
-		    if (blockedPiece != null && blockedPiece.getPiece() == PAWN) {
+			if (blockedPiece != null && blockedPiece.getPiece() == PAWN) {
 				pieceBlocksWhiteCenterPawn = -50;
 			}
 		}
@@ -159,18 +127,11 @@ public class PositionalAnalysis {
 		int pieceBlocksBlackCenterPawn = 0;
 		if (E6.equals(to.getSquare()) || D6.equals(to.getSquare())) {
 			PlayerPiece blockedPiece = board.pieceAt(to.getSquare().addRow(1));
-		    if (blockedPiece != null && blockedPiece.getPiece() == PAWN) {
+			if (blockedPiece != null && blockedPiece.getPiece() == PAWN) {
 				pieceBlocksBlackCenterPawn = 50;
 			}
 		}
 		return pieceBlocksBlackCenterPawn;
-	}
-
-	private int getCenterControlDelta(BoardMutation from, BoardMutation to) {
-		int centerControlDelta = 0;
-		centerControlDelta -= valueOf(from.getPlayerPiece().getPiece(), from.getSquare());
-		centerControlDelta += valueOf(to.getPlayerPiece().getPiece(), to.getSquare());
-		return centerControlDelta;
 	}
 
 	private int getCastlingValue(Piece movedPiece, int fromColumn, int toColumn) {
@@ -190,21 +151,28 @@ public class PositionalAnalysis {
 				|| (from.column() >= 4 && to.column() < from.column());
 	}
 
-	private int valueOf(Piece piece, Square square) {
-		int pieceFactor = getPieceFactor(piece);
-		int centerControlValue = CENTER_CONTORL_ARRAY[square.row()][square.column()];
-		return pieceFactor * centerControlValue;
-	}
+	private static class SimpleMove {
+		private final BoardMutation from;
+		private final BoardMutation to;
 
-	private int getPieceFactor(Piece piece) {
-		switch (piece) {
-			case PAWN: return 1;
-			case KNIGHT: return 4;
-			case BISHOP: return 3;
-			case ROOK: return 2;
-			case QUEEN: return 1;
-			case KING: return -1;
-			default: throw new IllegalArgumentException("The piece " + piece + " is not supported");
+		private SimpleMove(BoardMutation from, BoardMutation to) {
+			this.from = from;
+			this.to = to;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof SimpleMove) {
+				SimpleMove that = (SimpleMove) obj;
+				return this.from.equals(that.from) && this.to.equals(that.to);
+			}
+			return false;
+		}
+
+		@Override
+		public int hashCode() {
+			return from.hashCode() + 23 * to.hashCode();
 		}
 	}
+
 }

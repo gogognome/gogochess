@@ -10,11 +10,14 @@ import java.util.concurrent.*;
 import java.util.function.*;
 import javax.inject.*;
 import javax.swing.*;
+import org.slf4j.*;
 import nl.gogognome.gogochess.logic.*;
 import nl.gogognome.gogochess.logic.ai.*;
 import nl.gogognome.gogochess.logic.piece.*;
 
 public class GamePresentationModel {
+
+	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	public enum Event {
 		STATE_CHANGED,
@@ -110,13 +113,12 @@ public class GamePresentationModel {
 					board,
 					board.currentPlayer(),
 					percentage -> setPercentage(percentage),
-					bestMoves -> System.out.println(bestMoves));
+					bestMoves -> logger.debug(bestMoves.stream().map(m -> m.toString()).collect(joining(", "))));
 			SwingUtilities.invokeLater(() -> onMove(move));
 		} catch (ArtificalIntelligenceCanceledException e) {
 			// ignored intentionally
 		} catch (Exception e) {
-			System.out.println(e);
-			e.printStackTrace();
+			logger.error("Problem occurred: " + e.getMessage(), e);
 		}
 	}
 

@@ -15,11 +15,10 @@ public class CompositeBoardEvaluator implements BoardEvaluator {
 	@Override
 	public int value(Board board) {
 		int value = 0;
+		// This method is called very, very often. To prevent garbage on the heap, use index instead of iterator.
+		//noinspection ForLoopReplaceableByForEach
 		for (int i=0; i<evaluators.size(); i++) {
-			value = MoveValues.add(value, evaluators.get(i).value(board));
-			if (value == Integer.MAX_VALUE || value == Integer.MIN_VALUE) {
-				break;
-			}
+			value += evaluators.get(i).value(board);
 		}
 		return value;
 	}

@@ -1,10 +1,7 @@
 package nl.gogognome.gogochess.logic;
 
-import static java.lang.Integer.MAX_VALUE;
-import static java.lang.Integer.MIN_VALUE;
-import static nl.gogognome.gogochess.logic.Player.BLACK;
-import static nl.gogognome.gogochess.logic.Player.WHITE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static nl.gogognome.gogochess.logic.Player.*;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.*;
 
 class MoveValuesTest {
@@ -21,14 +18,14 @@ class MoveValuesTest {
 
 	@Test
 	void maxValue() {
-		assertEquals(MAX_VALUE, MoveValues.maxValue(WHITE));
-		assertEquals(MIN_VALUE, MoveValues.maxValue(BLACK));
+		assertEquals(1_000_000, MoveValues.maxValue(WHITE));
+		assertEquals(-1_000_000, MoveValues.maxValue(BLACK));
 	}
 
 	@Test
 	void minValue() {
-		assertEquals(MIN_VALUE, MoveValues.minValue(WHITE));
-		assertEquals(MAX_VALUE, MoveValues.minValue(BLACK));
+		assertEquals(-1_000_000, MoveValues.minValue(WHITE));
+		assertEquals(1_000_000, MoveValues.minValue(BLACK));
 	}
 
 	@Test
@@ -42,14 +39,6 @@ class MoveValuesTest {
 	void reduceBringsNumberNearerToZero() {
 		assertEquals(90, MoveValues.reduce(100, 10));
 		assertEquals(-90, MoveValues.reduce(-100, 10));
-	}
-
-	@Test
-	void add() {
-		assertEquals(100, MoveValues.add(90, 10));
-		assertEquals(-100, MoveValues.add(-90, -10));
-		assertEquals(MAX_VALUE, MoveValues.add(MAX_VALUE - 1, 10));
-		assertEquals(MIN_VALUE, MoveValues.add(MIN_VALUE + 1, -10));
 	}
 
 }

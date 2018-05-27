@@ -1,8 +1,6 @@
 package nl.gogognome.gogochess.logic;
 
-import static java.lang.Integer.*;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
+import static java.lang.Math.*;
 import static nl.gogognome.gogochess.logic.Player.*;
 
 public class MoveValues {
@@ -16,11 +14,11 @@ public class MoveValues {
 	}
 
 	public static int maxValue(Player player) {
-		return player == WHITE ? MAX_VALUE : MIN_VALUE;
+		return player == WHITE ? 1_000_000 : -1_000_000;
 	}
 
 	public static int minValue(Player player) {
-		return player == WHITE ? MIN_VALUE : MAX_VALUE;
+		return player == WHITE ? -1_000_000 : 1_000_000;
 	}
 
 	public static int negateForBlack(int value, Move move) {
@@ -29,13 +27,6 @@ public class MoveValues {
 
 	public static int negateForBlack(int value, Player player) {
 		return player == WHITE ? value : -value;
-	}
-
-	public static int add(int value, int delta) {
-		long result = (long) value + (long) delta;
-		result = max(MIN_VALUE, result);
-		result = min(MAX_VALUE, result);
-		return (int) result;
 	}
 
 	public static int reduce(int value, int amountToReduce) {
