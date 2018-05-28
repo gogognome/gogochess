@@ -1,6 +1,7 @@
 package nl.gogognome.gogochess.logic.ai;
 
 import static java.util.Collections.swap;
+import static nl.gogognome.gogochess.logic.Player.WHITE;
 import java.util.*;
 import nl.gogognome.gogochess.logic.*;
 
@@ -11,7 +12,31 @@ import nl.gogognome.gogochess.logic.*;
  */
 public class KillerHeuristic {
 
-	private final List<Move> levelToKillerMove = new ArrayList<>();
+	private static class KillerMove {
+		private final Move move;
+		private int count;
+
+		private KillerMove(Move move) {
+			this.move = move;
+		}
+
+		public Move getMove() {
+			return move;
+		}
+
+		public void incrementCount() {
+			count++;
+		}
+
+		public int getCount() {
+			return count;
+		}
+	}
+
+	private final static KillerMove NullMove = new KillerMove(new Move(WHITE));
+
+	private final List<KillerMove> levelToKillerMove1 = new ArrayList<>();
+	private final List<KillerMove> levelToKillerMove2 = new ArrayList<>();
 
 	/**
 	 * Marks the specified move as killer move.
@@ -20,11 +45,28 @@ public class KillerHeuristic {
 	 */
 	public boolean markAsKiller(Move move) {
 		int level = move.depthInTree();
-		while (levelToKillerMove.size() <= level) {
-			levelToKillerMove.add(null);
+		while (levelToKillerMove1.size() <= level) {
+			levelToKillerMove1.add(NullMove);
+			levelToKillerMove2.add(NullMove);
 		}
-		Move previousKillerMove = levelToKillerMove.set(level, move);
-		return (previousKillerMove != null && areEqual(previousKillerMove, move));
+		if (moveIsAlreadyKillerMove(move, level, levelToKillerMove1)) {
+			return true;
+		}
+		if (moveIsAlreadyKillerMove(move, level, levelToKillerMove2)) {
+			return true;
+		}
+
+		List<KillerMove> levelToKillerMove = getLeastUsedKillerMove(level);
+		levelToKillerMove.set(level, new KillerMove(move));
+		return false;
+	}
+
+	private boolean moveIsAlreadyKillerMove(Move move, int level, List<KillerMove> levelToKillerMove) {
+		if (areEqual(levelToKillerMove.get(level).getMove(), move)) {
+			levelToKillerMove.get(level).incrementCount();
+			return true;
+		}
+		return false;
 	}
 
 	public List<Move> putKillerMoveFirst(List<Move> moves) {
@@ -32,24 +74,35 @@ public class KillerHeuristic {
 			return moves;
 		}
 
-		Move killer = findKillerMove(moves);
-		if (killer == null) {
-			return moves;
-		}
-
-		for (int index=0; index<moves.size(); index++) {
-			if (areEqual(killer, moves.get(index))) {
-				swap(moves, 0, index);
-				break;
+		List<Move> killers = findKillerMoves(moves.get(0).depthInTree());
+		int killerIndex = 0;
+		for (Move killer : killers) {
+			for (int index = killerIndex; index < moves.size(); index++) {
+				if (areEqual(killer, moves.get(index))) {
+					swap(moves, killerIndex, index);
+					killerIndex++;
+					break;
+				}
 			}
 		}
-
 		return moves;
 	}
 
-	private Move findKillerMove(List<Move> moves) {
-		int level = moves.get(0).depthInTree();
-		return level < levelToKillerMove.size() ? levelToKillerMove.get(level) : null;
+	private List<Move> findKillerMoves(int level) {
+		List<Move> killerMoves = new ArrayList<>();
+		if (level < levelToKillerMove1.size()) {
+			killerMoves.add(getMostUsedKillerMove(level).get(level).getMove());
+			killerMoves.add(getLeastUsedKillerMove(level).get(level).getMove());
+		}
+		return killerMoves;
+	}
+
+	private List<KillerMove> getMostUsedKillerMove(int level) {
+		return levelToKillerMove1.get(level).getCount() >= levelToKillerMove2.get(level).getCount() ? levelToKillerMove1 : levelToKillerMove2;
+	}
+
+	private List<KillerMove> getLeastUsedKillerMove(int level) {
+		return levelToKillerMove1.get(level).getCount() < levelToKillerMove2.get(level).getCount() ? levelToKillerMove1 : levelToKillerMove2;
 	}
 
 	private boolean areEqual(Move m1, Move m2) {

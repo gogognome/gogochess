@@ -37,7 +37,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		this.quiescenceSearch = quiescenceSearch;
 		this.statistics = statistics;
 		this.killerHeuristic = killerHeuristic;
-		this.initialMaxDepth = 3;
+		this.initialMaxDepth = 4;
 		this.initialAlpha = Integer.MIN_VALUE;
 		this.initialBeta = Integer.MAX_VALUE;
 	}
