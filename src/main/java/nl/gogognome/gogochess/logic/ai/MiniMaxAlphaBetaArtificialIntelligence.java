@@ -26,15 +26,17 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 	private final MoveSort moveSort;
 	private final QuiescenceSearch quiescenceSearch;
 	private final Statistics statistics;
+	private final KillerHeuristic killerHeuristic;
 
 	@Inject
 	public MiniMaxAlphaBetaArtificialIntelligence(BoardEvaluator boardEvaluator, PositionalAnalysis positionalAnalysis, MoveSort moveSort,
-			QuiescenceSearch quiescenceSearch, Statistics statistics) {
+			QuiescenceSearch quiescenceSearch, Statistics statistics, KillerHeuristic killerHeuristic) {
 		this.boardEvaluator = boardEvaluator;
 		this.positonalAnalysis = positionalAnalysis;
 		this.moveSort = moveSort;
 		this.quiescenceSearch = quiescenceSearch;
 		this.statistics = statistics;
+		this.killerHeuristic = killerHeuristic;
 		this.initialMaxDepth = 3;
 		this.initialAlpha = Integer.MIN_VALUE;
 		this.initialBeta = Integer.MAX_VALUE;
@@ -78,10 +80,15 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		Move nextMove = nextMoves.get(0);
 		bestMovesConsumer.accept(nextMove.pathTo(moveToBestDeepestMove.get(nextMove)));
 		long endTime = System.nanoTime();
+		logStatistics(startTime, endTime);
+		return nextMove;
+	}
+
+	private void logStatistics(long startTime, long endTime) {
 		double durationMillis = (endTime - startTime) / 1000000000.0;
 		logger.debug("evaluating " + statistics.getNrPositionsEvaluated()+ " positions took " + durationMillis + " s (" + (statistics.getNrPositionsEvaluated() / (durationMillis)) + " positions/s");
 		logger.debug("generating " + statistics.getNrPositionsGenerated() + " positions took " + durationMillis + " s (" + (statistics.getNrPositionsGenerated() / (durationMillis)) + " positions/s");
-		return nextMove;
+		logger.debug("nr cut offs caused by killer heuristic: " + statistics.getNrCutOffsByKillerMove());
 	}
 
 	private void initMaxDepth(Board board) {
@@ -116,6 +123,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 			return move;
 		}
 
+		killerHeuristic.putKillerMoveFirst(childMoves);
 		return alphaBetaWithChildMoves(board, move, depth, alpha, beta, progress, childMoves);
 	}
 
@@ -145,6 +153,9 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 					job.onNextStep();
 				}
 				if (beta <= alpha) {
+					if (killerHeuristic.markAsKiller(childMove)) {
+						statistics.onCutOffByKillerMove();
+					}
 					break; // beta cut-off
 				}
 			}
@@ -165,6 +176,9 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 				}
 
 				if (beta <= alpha) {
+					if (killerHeuristic.markAsKiller(childMove)) {
+						statistics.onCutOffByKillerMove();
+					}
 					break; // alpha cut-off
 				}
 			}

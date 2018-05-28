@@ -97,7 +97,8 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 		assertNextMovesOneOf(5, MIN_VALUE, MIN_VALUE + 100,
 				BLACK,
 				asList("Nc6-d4+", "Ke2xRd1", "Ng4-e3+", "Kd1-c1", "Nd4-e2++"),
-				asList("Rd1-h1", "Bc4xf7+", "Ke8xBf7", "Bd8xc7", "Nc6-d4++"));
+				asList("Rd1-h1", "Bc4xf7+", "Ke8xBf7", "Bd8xc7", "Nc6-d4++"),
+				asList("Rd1xNb1", "Bd8xc7", "Rb1xRa1", "Bc7xd6", "Nc6-d4++"));
 	}
 
 	@Test

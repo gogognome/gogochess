@@ -8,10 +8,14 @@ public class QuiescenceSearch {
 
 	private final BoardEvaluator boardEvaluator;
 	private final Statistics statistics;
+	private final KillerHeuristic killerHeuristic;
 
-	public QuiescenceSearch(BoardEvaluator boardEvaluator, Statistics statistics) {
+	public QuiescenceSearch(
+			BoardEvaluator boardEvaluator, Statistics statistics,
+			KillerHeuristic killerHeuristic) {
 		this.boardEvaluator = boardEvaluator;
 		this.statistics = statistics;
+		this.killerHeuristic = killerHeuristic;
 	}
 
 	public Move search(Board board, Move move, int alpha, int beta) {
@@ -24,6 +28,9 @@ public class QuiescenceSearch {
 		if (playerForNextMove == WHITE) {
 			if (value >= beta) {
 				move.setValue(beta);
+				if (killerHeuristic.markAsKiller(move)) {
+					statistics.onCutOffByKillerMove();
+				}
 				return move;
 			}
 			if (alpha < value) {
@@ -32,6 +39,9 @@ public class QuiescenceSearch {
 		} else {
 			if (value <= alpha) {
 				move.setValue(alpha);
+				if (killerHeuristic.markAsKiller(move)) {
+					statistics.onCutOffByKillerMove();
+				}
 				return move;
 			}
 			if (beta > value) {
@@ -43,6 +53,7 @@ public class QuiescenceSearch {
 		List<Move> childMoves = board.validMoves();
 		statistics.onPositionsGenerated(childMoves.size());
 		for (Move childMove : childMoves) {
+			killerHeuristic.putKillerMoveFirst(childMoves);
 			if (!childMove.isCapture()) {
 				continue;
 			}
@@ -53,6 +64,9 @@ public class QuiescenceSearch {
 			if (playerForNextMove == WHITE) {
 				if (value >= beta) {
 					move.setValue(beta);
+					if (killerHeuristic.markAsKiller(childMove)) {
+						statistics.onCutOffByKillerMove();
+					}
 					return deepestMove;
 				}
 				if (alpha < value) {
@@ -63,6 +77,9 @@ public class QuiescenceSearch {
 			} else {
 				if (value <= alpha) {
 					move.setValue(alpha);
+					if (killerHeuristic.markAsKiller(childMove)) {
+						statistics.onCutOffByKillerMove();
+					}
 					return deepestMove;
 				}
 				if (beta > value) {

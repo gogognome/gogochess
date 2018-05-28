@@ -56,7 +56,7 @@ class QuiescenceSearchTest {
 		Injector injector = Guice.createInjector(new Module());
 		BoardEvaluator boardEvaluator = injector.getInstance(BoardEvaluator.class);
 		statistics.reset();
-		return new QuiescenceSearch(boardEvaluator, statistics);
+		return new QuiescenceSearch(boardEvaluator, statistics, new KillerHeuristic());
 	}
 
 }
