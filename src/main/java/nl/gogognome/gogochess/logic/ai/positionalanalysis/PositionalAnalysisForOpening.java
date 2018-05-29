@@ -1,12 +1,9 @@
 package nl.gogognome.gogochess.logic.ai.positionalanalysis;
 
 import static nl.gogognome.gogochess.logic.Board.*;
-import static nl.gogognome.gogochess.logic.Board.BLACK_KNIGHT;
-import static nl.gogognome.gogochess.logic.MoveValues.negateForBlack;
-import static nl.gogognome.gogochess.logic.Piece.KING;
-import static nl.gogognome.gogochess.logic.Piece.PAWN;
+import static nl.gogognome.gogochess.logic.MoveValues.*;
+import static nl.gogognome.gogochess.logic.Piece.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
-import static nl.gogognome.gogochess.logic.Squares.D6;
 import java.util.*;
 import com.google.common.collect.*;
 import nl.gogognome.gogochess.logic.*;
@@ -18,12 +15,9 @@ import nl.gogognome.gogochess.logic.piece.*;
 class PositionalAnalysisForOpening {
 
 	private final CentralControlHeuristic centralControlHeuristic;
+	private final PawnHeuristics pawnHeuristics;
 
 	private final static Map<SimpleMove, Integer> SIMPLE_MOVE_TO_VALUE = ImmutableMap.<SimpleMove, Integer>builder()
-			.put(new SimpleMove(WHITE_PAWN.removeFrom(E2), WHITE_PAWN.removeFrom(E4)), 30)
-			.put(new SimpleMove(WHITE_PAWN.removeFrom(E3), WHITE_PAWN.removeFrom(E4)), 2)
-			.put(new SimpleMove(WHITE_PAWN.removeFrom(D2), WHITE_PAWN.removeFrom(D4)), 20)
-			.put(new SimpleMove(WHITE_PAWN.removeFrom(D3), WHITE_PAWN.removeFrom(D4)), 2)
 			.put(new SimpleMove(WHITE_KNIGHT.removeFrom(B1), WHITE_KNIGHT.addTo(A3)), -15)
 			.put(new SimpleMove(WHITE_KNIGHT.removeFrom(G1), WHITE_KNIGHT.addTo(H3)), -15)
 			.put(new SimpleMove(BLACK_KNIGHT.removeFrom(B8), BLACK_KNIGHT.addTo(A6)), -15)
@@ -32,8 +26,10 @@ class PositionalAnalysisForOpening {
 
 
 	public PositionalAnalysisForOpening(
-			CentralControlHeuristic centralControlHeuristic) {
+			CentralControlHeuristic centralControlHeuristic,
+			PawnHeuristics pawnHeuristics) {
 		this.centralControlHeuristic = centralControlHeuristic;
+		this.pawnHeuristics = pawnHeuristics;
 	}
 
 	public void evaluate(Board board, List<Move> moves) {
@@ -49,17 +45,16 @@ class PositionalAnalysisForOpening {
 		int toColumn = to.getSquare().column();
 
 		int value = negateForBlack(centralControlHeuristic.getCenterControlDeltaForOpening(from, to), move);
-		value += negateForBlack(getPawnOrKnightMoveValue(from, to), move);
+		value += pawnHeuristics.getPawnHeuristicsForOpening(board, from, to);
+		value += negateForBlack(getKnightMoveValue(from, to), move);
 		value += negateForBlack(getCastlingValue(from.getPlayerPiece().getPiece(), fromColumn, toColumn), move);
-		value += getPieceBlocksWhiteCenterPawn(board, to);
-		value += getPieceBlocksBlackCenterPawn(board, to);
 		value += negateForBlack(getPieceMovingFromKingSideValue(fromColumn), move);
 		value += negateForBlack(getPawnCaptureValue(board, move, from, to, toColumn), move);
 
 		move.setValue(value);
 	}
 
-	private int getPawnOrKnightMoveValue(BoardMutation from, BoardMutation to) {
+	private int getKnightMoveValue(BoardMutation from, BoardMutation to) {
 		int pawnOrKnightMoveValue = 0;
 		Integer delta = SIMPLE_MOVE_TO_VALUE.get(new SimpleMove(from, to));
 		if (delta != null) {
@@ -112,35 +107,13 @@ class PositionalAnalysisForOpening {
 		return pieceMovingFromKingSideValue;
 	}
 
-	private int getPieceBlocksWhiteCenterPawn(Board board, BoardMutation to) {
-		int pieceBlocksWhiteCenterPawn = 0;
-		if (E3.equals(to.getSquare()) || D3.equals(to.getSquare())) {
-			PlayerPiece blockedPiece = board.pieceAt(to.getSquare().addRow(-1));
-			if (blockedPiece != null && blockedPiece.getPiece() == PAWN) {
-				pieceBlocksWhiteCenterPawn = -50;
-			}
-		}
-		return pieceBlocksWhiteCenterPawn;
-	}
-
-	private int getPieceBlocksBlackCenterPawn(Board board, BoardMutation to) {
-		int pieceBlocksBlackCenterPawn = 0;
-		if (E6.equals(to.getSquare()) || D6.equals(to.getSquare())) {
-			PlayerPiece blockedPiece = board.pieceAt(to.getSquare().addRow(1));
-			if (blockedPiece != null && blockedPiece.getPiece() == PAWN) {
-				pieceBlocksBlackCenterPawn = 50;
-			}
-		}
-		return pieceBlocksBlackCenterPawn;
-	}
-
 	private int getCastlingValue(Piece movedPiece, int fromColumn, int toColumn) {
 		int castlingValue = 0;
 		if (movedPiece == KING && toColumn - fromColumn == 2) {
 			castlingValue = 30;
 		}
 
-		if (movedPiece == KING && fromColumn - toColumn == 3) {
+		if (movedPiece == KING && fromColumn - toColumn == 2) {
 			castlingValue = 10;
 		}
 		return castlingValue;

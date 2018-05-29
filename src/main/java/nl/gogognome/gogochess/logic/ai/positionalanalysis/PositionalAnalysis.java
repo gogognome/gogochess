@@ -13,7 +13,8 @@ public class PositionalAnalysis {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 	private final CentralControlHeuristic centralControlHeuristic = new CentralControlHeuristic();
-	private final PositionalAnalysisForOpening positionalAnalysisForOpening = new PositionalAnalysisForOpening(centralControlHeuristic);
+	private final PawnHeuristics pawnHeuristics = new PawnHeuristics();
+	private final PositionalAnalysisForOpening positionalAnalysisForOpening = new PositionalAnalysisForOpening(centralControlHeuristic, pawnHeuristics);
 	private final PositionalAnalysisForMiddleGame positionalAnalysisForMiddleGame = new PositionalAnalysisForMiddleGame(centralControlHeuristic, new KingField());
 	private final PieceValueEvaluator pieceValueEvaluator = new PieceValueEvaluator();
 
