@@ -93,7 +93,7 @@ class MoveNotationTest {
 
 	@Test
 	void formatLongCastlingMove() {
-		assertThat(moveNotation.format(new Move(BLACK, BLACK_ROOK.removeFrom(A8), BLACK_KING.removeFrom(Squares.E8), BLACK_ROOK.addTo(C8), BLACK_KING.addTo(B8))))
+		assertThat(moveNotation.format(new Move(BLACK, BLACK_ROOK.removeFrom(A8), BLACK_KING.removeFrom(Squares.E8), BLACK_ROOK.addTo(D8), BLACK_KING.addTo(C8))))
 				.isEqualTo("O-O-O");
 	}
 
@@ -131,7 +131,7 @@ class MoveNotationTest {
 
 	@Test
 	void formatLongCastlingMoveResultingIntoCheckMate() {
-		Move move = new Move(BLACK, BLACK_ROOK.removeFrom(A8), BLACK_KING.removeFrom(Squares.E8), BLACK_ROOK.addTo(C8), BLACK_KING.addTo(B8));
+		Move move = new Move(BLACK, BLACK_ROOK.removeFrom(A8), BLACK_KING.removeFrom(Squares.E8), BLACK_ROOK.addTo(D8), BLACK_KING.addTo(C8));
 		move.setStatus(CHECK_MATE);
 		assertThat(moveNotation.format(move))
 				.isEqualTo("O-O-O++");

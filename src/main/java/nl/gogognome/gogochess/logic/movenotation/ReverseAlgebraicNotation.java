@@ -54,7 +54,7 @@ public class ReverseAlgebraicNotation implements MoveNotation {
 	}
 
 	private boolean isLongCastling(BoardMutation removeMutation, BoardMutation addMutation) {
-		return removeMutation.getPlayerPiece().getPiece() == KING && removeMutation.getSquare().column() == 4 && addMutation.getSquare().column() == 1;
+		return removeMutation.getPlayerPiece().getPiece() == KING && removeMutation.getSquare().column() == 4 && addMutation.getSquare().column() == 2;
 	}
 
 	private void appendLongCastling(StringBuilder result) {

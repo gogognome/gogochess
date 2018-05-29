@@ -81,8 +81,8 @@ class KingTest {
 		assertMovesContain(moves,
 				BLACK_KING.removeFrom(E8),
 				BLACK_ROOK.removeFrom(A8),
-				BLACK_KING.addTo(B8),
-				BLACK_ROOK.addTo(C8));
+				BLACK_KING.addTo(C8),
+				BLACK_ROOK.addTo(D8));
 	}
 
 	@Test

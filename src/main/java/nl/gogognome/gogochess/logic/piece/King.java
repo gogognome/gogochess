@@ -39,10 +39,10 @@ public class King extends PlayerPiece {
 		Square leftTowerSquare = new Square(0, row);
 		if (rook.equals(board.pieceAt(leftTowerSquare)) && !movedBeforeFromSquare(board.lastMove(), leftTowerSquare)) {
 			boolean squaresInBetweenEmpty = areAllSquaresInBetweenEmpty(board, leftTowerSquare, kingStartSquare);
-			Square kingTo = new Square(1, row);
+			Square kingTo = new Square(2, row);
 			boolean blockedByAttack = isAnySquareAttacked(board, row, kingTo, kingStartSquare);
 			if (squaresInBetweenEmpty && !blockedByAttack) {
-				moves.add(new Move(board.lastMove(), removeFrom(kingStartSquare), rook.removeFrom(leftTowerSquare), addTo(kingTo), rook.addTo(new Square(2, row))));
+				moves.add(new Move(board.lastMove(), removeFrom(kingStartSquare), rook.removeFrom(leftTowerSquare), addTo(kingTo), rook.addTo(new Square(3, row))));
 			}
 		}
 
