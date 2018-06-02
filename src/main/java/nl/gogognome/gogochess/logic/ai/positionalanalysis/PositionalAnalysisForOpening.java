@@ -7,7 +7,6 @@ import static nl.gogognome.gogochess.logic.Squares.*;
 import java.util.*;
 import com.google.common.collect.*;
 import nl.gogognome.gogochess.logic.*;
-import nl.gogognome.gogochess.logic.piece.*;
 
 /**
  * This class evaluates the opening positions. Based on James J.Gillogly, "The Technology Chess Program" (1972).
@@ -45,11 +44,10 @@ class PositionalAnalysisForOpening {
 		int toColumn = to.getSquare().column();
 
 		int value = negateForBlack(centralControlHeuristic.getCenterControlDeltaForOpening(from, to), move);
-		value += pawnHeuristics.getPawnHeuristicsForOpening(board, from, to);
+		value += pawnHeuristics.getPawnHeuristicsForOpening(board, move, from, to);
 		value += negateForBlack(getKnightMoveValue(from, to), move);
 		value += negateForBlack(getCastlingValue(from.getPlayerPiece().getPiece(), fromColumn, toColumn), move);
 		value += negateForBlack(getPieceMovingFromKingSideValue(fromColumn), move);
-		value += negateForBlack(getPawnCaptureValue(board, move, from, to, toColumn), move);
 
 		move.setValue(value);
 	}
@@ -61,42 +59,6 @@ class PositionalAnalysisForOpening {
 			pawnOrKnightMoveValue = delta;
 		}
 		return pawnOrKnightMoveValue;
-	}
-
-	private int getPawnCaptureValue(Board board, Move move, BoardMutation from, BoardMutation to, int toColumn) {
-		int pawnCaptureValue = 0;
-		if (from.getPlayerPiece().getPiece() == PAWN) {
-			if (move.isCapture()) {
-				if (isNearerToCenter(from.getSquare(), to.getSquare())) {
-					pawnCaptureValue += 5;
-				} else {
-					pawnCaptureValue -= 5;
-				}
-
-				if (board.countNrPawnsInColumn(to.getPlayerPiece(), toColumn) > 1 && board.isIsolatedPawnInColumn(to.getPlayerPiece(), toColumn)) {
-					pawnCaptureValue -= 10;
-				}
-
-				if (move.capturedPlayerPiece().getPiece() == PAWN && (toColumn == 3 || toColumn == 4)) {
-					if (board.isIsolatedPawnInColumn(move.capturedPlayerPiece(), toColumn)) {
-						pawnCaptureValue += 50;
-					}
-					int rowDelta = negateForBlack(1, move);
-					Square leftForward = to.getSquare().addColumnAndRow(-1, rowDelta);
-					Square rightForward = to.getSquare().addColumnAndRow(1, rowDelta);
-					PlayerPiece pawnOfOpponent = new Pawn(move.getPlayer().other());
-					if ((leftForward != null && pawnOfOpponent.equals(board.pieceAt(leftForward)))
-							|| (rightForward != null && pawnOfOpponent.equals(board.pieceAt(rightForward)))) {
-						pawnCaptureValue -= 15;
-					}
-				}
-			} else {
-				if (to.getSquare().column() == 0 || to.getSquare().column() == 7) {
-					pawnCaptureValue -= 10;
-				}
-			}
-		}
-		return pawnCaptureValue;
 	}
 
 	private int getPieceMovingFromKingSideValue(int fromColumn) {
@@ -117,11 +79,6 @@ class PositionalAnalysisForOpening {
 			castlingValue = 10;
 		}
 		return castlingValue;
-	}
-
-	private boolean isNearerToCenter(Square from, Square to) {
-		return (from.column() < 4 && to.column() > from.column())
-				|| (from.column() >= 4 && to.column() < from.column());
 	}
 
 	private static class SimpleMove {

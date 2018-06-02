@@ -91,6 +91,20 @@ class PositionalAnalysisForOpeningTest {
 		assertThat(value).isEqualTo(-50 - 9); // -50 for blocking pawn and -9 for centrality
 	}
 
+	@Test
+	void whitePieceMovingToE6BlockingPawnMustBe50Points() {
+		int value = valueOfMove(new Move(BLACK, BLACK_PAWN.addTo(E7), WHITE_BISHOP.addTo(D7)),
+				WHITE_BISHOP.removeFrom(D7), WHITE_BISHOP.addTo(E6));
+		assertThat(value).isEqualTo(50 + 6); // 50 for blocking pawn and 6 for centrality
+	}
+
+	@Test
+	void blackPieceMovingToD7BlockingPawnMustBe50Points() {
+		int value = valueOfMove(new Move(WHITE, WHITE_PAWN.addTo(D7), BLACK_BISHOP.addTo(C7)),
+				BLACK_BISHOP.removeFrom(C7), BLACK_BISHOP.addTo(D6));
+		assertThat(value).isEqualTo(50 - 9); // 50 for blocking pawn and -9 for centrality
+	}
+
 	private int valueOfMove(BoardMutation... mutations) {
 		Move setup = buildSetupMove(mutations);
 		return valueOfMove(setup, mutations);

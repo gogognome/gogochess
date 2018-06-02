@@ -1,6 +1,7 @@
 package nl.gogognome.gogochess.logic.ai.positionalanalysis;
 
 import static nl.gogognome.gogochess.logic.Board.*;
+import static nl.gogognome.gogochess.logic.MoveValues.negateForBlack;
 import static nl.gogognome.gogochess.logic.Piece.PAWN;
 import static nl.gogognome.gogochess.logic.Squares.*;
 import nl.gogognome.gogochess.logic.*;
@@ -8,11 +9,19 @@ import nl.gogognome.gogochess.logic.piece.*;
 
 public class PawnHeuristics {
 
+	public int getPawnHeuristicsForOpening(Board board, Move move, BoardMutation from, BoardMutation to) {
+		int value = getValueForWhitePawnMovingToD3_D4_E3_E4(from, to);
+		value += getValueForPieceBlocksWhiteCenterPawn(board, to);
+		value += getValueForPieceBlocksBlackCenterPawn(board, to);
+		value += getValueForPawnCapturingOtherPiece(board, move, from, to);
+		value += negateForBlack(getValueForPawnOnSideOfBoard(from, to), move);
 
-	public int getPawnHeuristicsForOpening(Board board, BoardMutation from, BoardMutation to) {
+		return value;
+	}
+
+	private int getValueForWhitePawnMovingToD3_D4_E3_E4(BoardMutation from, BoardMutation to) {
 		int value = 0;
-		PlayerPiece playerPiece = from.getPlayerPiece();
-		if (playerPiece.equals(WHITE_PAWN)) {
+		if (from.getPlayerPiece().equals(WHITE_PAWN)) {
 			if (from.getSquare().equals(E2) && to.getSquare().equals(E4)) {
 				value += 30;
 			}
@@ -26,14 +35,10 @@ public class PawnHeuristics {
 				value += 2;
 			}
 		}
-
-		value += getPieceBlocksWhiteCenterPawn(board, to);
-		value += getPieceBlocksBlackCenterPawn(board, to);
-
 		return value;
 	}
 
-	private int getPieceBlocksWhiteCenterPawn(Board board, BoardMutation to) {
+	private int getValueForPieceBlocksWhiteCenterPawn(Board board, BoardMutation to) {
 		int pieceBlocksWhiteCenterPawn = 0;
 		if (E3.equals(to.getSquare()) || D3.equals(to.getSquare())) {
 			PlayerPiece blockedPiece = board.pieceAt(to.getSquare().addRow(-1));
@@ -44,7 +49,7 @@ public class PawnHeuristics {
 		return pieceBlocksWhiteCenterPawn;
 	}
 
-	private int getPieceBlocksBlackCenterPawn(Board board, BoardMutation to) {
+	private int getValueForPieceBlocksBlackCenterPawn(Board board, BoardMutation to) {
 		int pieceBlocksBlackCenterPawn = 0;
 		if (E6.equals(to.getSquare()) || D6.equals(to.getSquare())) {
 			PlayerPiece blockedPiece = board.pieceAt(to.getSquare().addRow(1));
@@ -55,4 +60,48 @@ public class PawnHeuristics {
 		return pieceBlocksBlackCenterPawn;
 	}
 
+	private int getValueForPawnCapturingOtherPiece(Board board, Move move, BoardMutation from, BoardMutation to) {
+		if (!move.isCapture() || from.getPlayerPiece().getPiece() != PAWN) {
+			return 0;
+		}
+
+		int pawnCaptureValue = 0;
+		int toColumn = to.getSquare().column();
+		if (isNearerToCenter(from.getSquare(), to.getSquare())) {
+			pawnCaptureValue += 5;
+		} else {
+			pawnCaptureValue -= 5;
+		}
+
+		if (board.countNrPawnsInColumn(to.getPlayerPiece(), toColumn) > 1 && board.isIsolatedPawnInColumn(to.getPlayerPiece(), toColumn)) {
+			pawnCaptureValue -= 10;
+		}
+
+		if (move.capturedPlayerPiece().getPiece() == PAWN && (toColumn == 3 || toColumn == 4)) {
+			if (board.isIsolatedPawnInColumn(move.capturedPlayerPiece(), toColumn)) {
+				pawnCaptureValue += 50;
+			}
+			int rowDelta = negateForBlack(1, move);
+			Square leftForward = to.getSquare().addColumnAndRow(-1, rowDelta);
+			Square rightForward = to.getSquare().addColumnAndRow(1, rowDelta);
+			PlayerPiece pawnOfOpponent = new Pawn(move.getPlayer().other());
+			if ((leftForward != null && pawnOfOpponent.equals(board.pieceAt(leftForward)))
+					|| (rightForward != null && pawnOfOpponent.equals(board.pieceAt(rightForward)))) {
+				pawnCaptureValue -= 15;
+			}
+		}
+		return pawnCaptureValue;
+	}
+
+	private boolean isNearerToCenter(Square from, Square to) {
+		return (from.column() < 4 && to.column() > from.column())
+				|| (from.column() >= 4 && to.column() < from.column());
+	}
+
+	private int getValueForPawnOnSideOfBoard(BoardMutation from, BoardMutation to) {
+		if (from.getPlayerPiece().getPiece() == PAWN && (to.getSquare().column() == 0 || to.getSquare().column() == 7)) {
+			return -10;
+		}
+		return 0;
+	}
 }
