@@ -105,6 +105,62 @@ class PositionalAnalysisForOpeningTest {
 		assertThat(value).isEqualTo(50 - 9); // 50 for blocking pawn and -9 for centrality
 	}
 
+	@Test
+	void blackPawnCapturesBishopAndMovesRightTowardsCenterMustBeMinus5Points() {
+		int value = valueOfMove(new Move(WHITE, BLACK_PAWN.addTo(C7), WHITE_KNIGHT.addTo(D6)),
+				BLACK_PAWN.removeFrom(C7), WHITE_KNIGHT.removeFrom(D6), BLACK_PAWN.addTo(D6));
+		assertThat(value).isEqualTo(-8); // -5 for moving to center and -3 for centrality
+	}
+
+	@Test
+	void whitePawnCapturesKnightAndMovesRightTowardsCenterMustBe5Points() {
+		int value = valueOfMove(new Move(BLACK, WHITE_PAWN.addTo(B2), BLACK_BISHOP.addTo(C3)),
+				WHITE_PAWN.removeFrom(B2), BLACK_BISHOP.removeFrom(C3), WHITE_PAWN.addTo(C3));
+		assertThat(value).isEqualTo(8); // 5 for moving to center and 3 for centrality
+	}
+
+	@Test
+	void blackPawnCapturesBishopAndMovesLeftTowardsCenterMustBeMinus5Points() {
+		int value = valueOfMove(new Move(WHITE, BLACK_PAWN.addTo(G7), WHITE_KNIGHT.addTo(F6)),
+				BLACK_PAWN.removeFrom(G7), WHITE_KNIGHT.removeFrom(F6), BLACK_PAWN.addTo(F6));
+		assertThat(value).isEqualTo(-10); // -5 for moving to center, -3 for centrality and -2 for moving from king side
+	}
+
+	@Test
+	void whitePawnCapturesKnightAndMovesLeftTowardsCenterMustBeMinus5Points() {
+		int value = valueOfMove(new Move(BLACK, WHITE_PAWN.addTo(G2), BLACK_BISHOP.addTo(F3)),
+				WHITE_PAWN.removeFrom(G2), BLACK_BISHOP.removeFrom(F3), WHITE_PAWN.addTo(F3));
+		assertThat(value).isEqualTo(10); // 5 for moving to center, 3 for centrality and 2 for moving from king side
+	}
+
+	@Test
+	void blackPawnCapturesBishopAndMovesLeftAwayFromCenterMustBe5Points() {
+		int value = valueOfMove(new Move(WHITE, BLACK_PAWN.addTo(C7), WHITE_KNIGHT.addTo(B6)),
+				BLACK_PAWN.removeFrom(C7), WHITE_KNIGHT.removeFrom(B6), BLACK_PAWN.addTo(B6));
+		assertThat(value).isEqualTo(5); //5 for moving away from center
+	}
+
+	@Test
+	void whitePawnCapturesKnightAndMovesLeftAwayFromCenterMustBeMinus5Points() {
+		int value = valueOfMove(new Move(BLACK, WHITE_PAWN.addTo(C2), BLACK_BISHOP.addTo(B3)),
+				WHITE_PAWN.removeFrom(C2), BLACK_BISHOP.removeFrom(B3), WHITE_PAWN.addTo(B3));
+		assertThat(value).isEqualTo(-5); // -5 for moving away from center
+	}
+
+	@Test
+	void blackPawnCapturesBishopAndMovesRightAwayFromCenterMustBe5Points() {
+		int value = valueOfMove(new Move(WHITE, BLACK_PAWN.addTo(F7), WHITE_KNIGHT.addTo(G6)),
+				BLACK_PAWN.removeFrom(F7), WHITE_KNIGHT.removeFrom(G6), BLACK_PAWN.addTo(G6));
+		assertThat(value).isEqualTo(3); // 5 for moving to center and -2 for moving from king side
+	}
+
+	@Test
+	void whitePawnCapturesKnightAndMovesRightAwayFromCenterMustBeMinus5Points() {
+		int value = valueOfMove(new Move(BLACK, WHITE_PAWN.addTo(F2), BLACK_BISHOP.addTo(G3)),
+				WHITE_PAWN.removeFrom(F2), BLACK_BISHOP.removeFrom(G3), WHITE_PAWN.addTo(G3));
+		assertThat(value).isEqualTo(-3); // -5 for moving away from center and 2 for moving from king side
+	}
+
 	private int valueOfMove(BoardMutation... mutations) {
 		Move setup = buildSetupMove(mutations);
 		return valueOfMove(setup, mutations);

@@ -13,7 +13,7 @@ public class PawnHeuristics {
 		int value = getValueForWhitePawnMovingToD3_D4_E3_E4(from, to);
 		value += getValueForPieceBlocksWhiteCenterPawn(board, to);
 		value += getValueForPieceBlocksBlackCenterPawn(board, to);
-		value += getValueForPawnCapturingOtherPiece(board, move, from, to);
+		value += negateForBlack(getValueForPawnCapturingOtherPiece(board, move, from, to), move);
 		value += negateForBlack(getValueForPawnOnSideOfBoard(from, to), move);
 
 		return value;
