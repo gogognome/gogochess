@@ -1,18 +1,12 @@
 package nl.gogognome.gogochess.logic.ai;
 
-import static java.lang.Integer.MAX_VALUE;
-import static java.lang.Integer.MIN_VALUE;
-import static java.lang.Math.min;
-import static java.util.Arrays.asList;
+import static java.lang.Math.*;
+import static java.util.Arrays.*;
 import static nl.gogognome.gogochess.logic.Board.*;
-import static nl.gogognome.gogochess.logic.Board.BLACK_ROOK;
-import static nl.gogognome.gogochess.logic.Player.BLACK;
-import static nl.gogognome.gogochess.logic.Player.WHITE;
+import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
-import static nl.gogognome.gogochess.logic.Squares.C3;
-import static nl.gogognome.gogochess.logic.Status.CHECK_MATE;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static nl.gogognome.gogochess.logic.Status.*;
+import static org.assertj.core.api.Assertions.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
 import org.junit.jupiter.api.*;
@@ -32,7 +26,7 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 				WHITE_KING.addTo(F7),
 				BLACK_KING.addTo(H8)));
 
-		ArtificialIntelligence ai = buildAI(1, MAX_VALUE - 100, MAX_VALUE);
+		ArtificialIntelligence ai = buildAI(1);
 		Move move = ai.nextMove(board, WHITE, percentage -> {}, bestMoves -> {});
 
 		assertThat("Qg1-h1++, Qg1-h2++, Qg1-g7++, Qg1-g8++").contains(new ReverseAlgebraicNotation().format(move));
@@ -59,7 +53,7 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 				BLACK_KING.addTo(H8));
 		board.process(initialMove);
 
-		assertNextMoves(3, MIN_VALUE, MAX_VALUE,
+		assertNextMoves(3,
 				WHITE,
 				"Qh3xh7+", "Kh8xQh7", "Rf5-h5++");
 	}
@@ -94,7 +88,7 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 				BLACK_PAWN.addTo(G7));
 		board.process(initialMove);
 
-		assertNextMovesOneOf(5, MIN_VALUE, MIN_VALUE + 100,
+		assertNextMovesOneOf(5,
 				BLACK,
 				asList("Nc6-d4+", "Ke2xRd1", "Ng4-e3+", "Kd1-c1", "Nd4-e2++"),
 				asList("Rd1-h1", "Bc4xf7+", "Ke8xBf7", "Bd8xc7", "Nc6-d4++"),
@@ -113,7 +107,7 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 				BLACK_ROOK.addTo(C3));
 		board.process(initialMove);
 
-		assertNextMovesOneOf(2, MIN_VALUE, MAX_VALUE,
+		assertNextMovesOneOf(2,
 				BLACK,
 				asList("Qd4-f2", "Kh5-h6", "Rc3-c7", "Kh6-g6", "Qf2-f7+", "Kg6-h6", "Qf7-h7++"),
 				asList("Qd4-f2", "g5-g6", "Qf2-f5+", "Kh5-h6", "Rc3-c7", "g6-g7", "Rc7-c6++"),
@@ -123,8 +117,8 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 
 	}
 
-	private void assertNextMoves(int maxDepth, int initialAlpha, int initialBeta, Player player, String... expectedMoves) {
-		ArtificialIntelligence ai = buildAI(maxDepth, initialAlpha, initialBeta);
+	private void assertNextMoves(int maxDepth, Player player, String... expectedMoves) {
+		ArtificialIntelligence ai = buildAI(maxDepth);
 
 		AtomicReference<List<Move>> actualMoves = new AtomicReference<>();
 		ai.nextMove(board, player, percentage -> {}, actualMoves::set);
@@ -135,8 +129,8 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 	}
 
 	@SafeVarargs
-	private final void assertNextMovesOneOf(int maxDepth, int initialAlpha, int initialBeta, Player player, List<String>... possibleExpectedMoves) {
-		ArtificialIntelligence ai = buildAI(maxDepth, initialAlpha, initialBeta);
+	private final void assertNextMovesOneOf(int maxDepth, Player player, List<String>... possibleExpectedMoves) {
+		ArtificialIntelligence ai = buildAI(maxDepth);
 
 		AtomicReference<List<Move>> actualMoves = new AtomicReference<>();
 		ai.nextMove(board, player, percentage -> {}, actualMoves::set);
@@ -159,11 +153,9 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 		return expectedMoves.subList(0, min(actualMoves.size(), expectedMoves.size()));
 	}
 
-	private ArtificialIntelligence buildAI(int maxDepth, int initialAlpha, int initialBeta) {
+	private ArtificialIntelligence buildAI(int maxDepth) {
 		MiniMaxAlphaBetaArtificialIntelligence ai = Guice.createInjector(new Module()).getInstance(MiniMaxAlphaBetaArtificialIntelligence.class);
 		ai.setInitialMaxDepth(maxDepth);
-		ai.setInitialAlpha(initialAlpha);
-		ai.setInitialBeta(initialBeta);
 		return ai;
 	}
 }
