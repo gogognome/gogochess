@@ -18,27 +18,19 @@ class MoveValuesTest {
 
 	@Test
 	void maxValue() {
-		assertEquals(1_000_000, MoveValues.maxValue(WHITE));
-		assertEquals(-1_000_000, MoveValues.maxValue(BLACK));
+		assertEquals(10_000_000, MoveValues.maxValue(WHITE, 0));
+		assertEquals(10_000_000 - 1_000, MoveValues.maxValue(WHITE, 1));
+		assertEquals(10_000_000 - 2_000, MoveValues.maxValue(WHITE, 2));
+
+		assertEquals(-10_000_000, MoveValues.maxValue(BLACK, 0));
+		assertEquals(-10_000_000 + 1_000, MoveValues.maxValue(BLACK, 1));
+		assertEquals(-10_000_000 + 2_000, MoveValues.maxValue(BLACK, 2));
 	}
 
 	@Test
 	void minValue() {
 		assertEquals(-1_000_000, MoveValues.minValue(WHITE));
 		assertEquals(1_000_000, MoveValues.minValue(BLACK));
-	}
-
-	@Test
-	void reduceDoesNotReducePastZero() {
-		assertEquals(0, MoveValues.reduce(0, 10));
-		assertEquals(0, MoveValues.reduce(5, 10));
-		assertEquals(0, MoveValues.reduce(-5, 10));
-	}
-
-	@Test
-	void reduceBringsNumberNearerToZero() {
-		assertEquals(90, MoveValues.reduce(100, 10));
-		assertEquals(-90, MoveValues.reduce(-100, 10));
 	}
 
 }

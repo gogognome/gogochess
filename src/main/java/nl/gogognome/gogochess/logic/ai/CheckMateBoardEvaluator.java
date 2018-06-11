@@ -9,7 +9,7 @@ public class CheckMateBoardEvaluator implements BoardEvaluator {
 	public int value(Board board) {
 		Status status = board.lastMove().getStatus();
 		if (status == CHECK_MATE) {
-			return MoveValues.maxValue(board.lastMove().getPlayer());
+			return MoveValues.maxValue(board.lastMove().getPlayer(), board.lastMove().depthInTree());
 		}
 		return 0;
 	}
