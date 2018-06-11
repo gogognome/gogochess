@@ -5,6 +5,7 @@ public class Statistics {
 	private int nrPositionsEvaluated;
 	private int nrPositionsGenerated;
 	private int nrCutOffsByKillerMove;
+	private int nrCacheHits;
 
 	public void reset() {
 		nrPositionsEvaluated = 0;
@@ -24,6 +25,10 @@ public class Statistics {
 		nrCutOffsByKillerMove++;
 	}
 
+	public void onCacheHit() {
+		nrCacheHits++;
+	}
+
 	public int getNrPositionsEvaluated() {
 		return nrPositionsEvaluated;
 	}
@@ -34,5 +39,9 @@ public class Statistics {
 
 	public int getNrCutOffsByKillerMove() {
 		return nrCutOffsByKillerMove;
+	}
+
+	public int getNrCacheHits() {
+		return nrCacheHits;
 	}
 }

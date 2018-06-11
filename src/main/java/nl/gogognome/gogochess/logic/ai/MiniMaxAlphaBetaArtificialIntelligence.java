@@ -27,6 +27,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 	private final QuiescenceSearch quiescenceSearch;
 	private final Statistics statistics;
 	private final KillerHeuristic killerHeuristic;
+	private final TranspositionTable transpositionTable = new TranspositionTable();
 
 	@Inject
 	public MiniMaxAlphaBetaArtificialIntelligence(BoardEvaluator boardEvaluator, PositionalAnalysis positionalAnalysis, MoveSort moveSort,
@@ -58,6 +59,8 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 	public Move nextMove(Board board, Player player, Consumer<Integer> progressUpdateConsumer, Consumer<List<Move>> bestMovesConsumer) {
 		initMaxDepth(board);
 		statistics.reset();
+		transpositionTable.clear();
+
 		long startTime = System.nanoTime();
 		logger.debug("maxDepth: " + maxDepth);
 		List<Move> nextMoves = board.validMoves();
@@ -89,6 +92,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		logger.debug("evaluating " + statistics.getNrPositionsEvaluated()+ " positions took " + durationMillis + " s (" + (statistics.getNrPositionsEvaluated() / (durationMillis)) + " positions/s");
 		logger.debug("generating " + statistics.getNrPositionsGenerated() + " positions took " + durationMillis + " s (" + (statistics.getNrPositionsGenerated() / (durationMillis)) + " positions/s");
 		logger.debug("nr cut offs caused by killer heuristic: " + statistics.getNrCutOffsByKillerMove());
+		logger.debug("nr cache hits: " + statistics.getNrCacheHits());
 	}
 
 	private void initMaxDepth(Board board) {
@@ -106,25 +110,40 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 	}
 
 	private Move alphaBeta(Board board, Move move, int depth, int alpha, int beta, Progress progress) {
+		board.process(move);
+		long hash = board.getBoardHash();
+		{
+			TranspositionTable.BoardPosition cachedBoardPosition = transpositionTable.getCachedBoardPosition(hash, alpha, beta, move.depthInTree());
+			if (cachedBoardPosition != null) {
+				statistics.onCacheHit();
+				move.setValue(cachedBoardPosition.getValue());
+				return cachedBoardPosition.getBestDeepestMove();
+			}
+		}
+
 		if (move.getStatus().isGameOver()) {
 			evaluateMove(board, move);
-			statistics.onPositionEvaluated();
+			storeBestDeepestMoveInCache(move, hash, alpha, beta, move);
 			return move;
 		}
 		if (depth >= maxDepth) {
-			return quiescenceSearch.search(board, move, alpha, beta);
+			Move bestDeepestMove = quiescenceSearch.search(board, move, alpha, beta);
+			storeBestDeepestMoveInCache(move, hash, alpha, beta, bestDeepestMove);
+			return bestDeepestMove;
 		}
 
 		List<Move> childMoves = getChildMoves(board, move);
 		statistics.onPositionsGenerated(childMoves.size());
 		if (childMoves.isEmpty()) {
 			evaluateMove(board, move);
-			statistics.onPositionEvaluated();
+			storeBestDeepestMoveInCache(move, hash, alpha, beta, move);
 			return move;
 		}
 
 		killerHeuristic.putKillerMoveFirst(childMoves);
-		return alphaBetaWithChildMoves(board, move, depth, alpha, beta, progress, childMoves);
+		Move bestDeepestMove = alphaBetaWithChildMoves(board, move, depth, alpha, beta, progress, childMoves);
+		storeBestDeepestMoveInCache(move, hash, alpha, beta, bestDeepestMove);
+		return bestDeepestMove;
 	}
 
 	private Move alphaBetaWithChildMoves(Board board, Move move, int depth, int alpha, int beta, Progress progress, List<Move> childMoves) {
@@ -142,7 +161,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 			int value = Integer.MIN_VALUE;
 			for (Move childMove  : childMoves) {
 				Move deepestChildMove = alphaBeta(board, childMove, depth + 1, alpha, beta, progress);
-				int childMoveValue = MoveValues.reduce(childMove.getValue(), 1);
+				int childMoveValue = childMove.getValue();
 				if (childMoveValue > value) {
 					value = childMoveValue;
 					bestDeepestMove = deepestChildMove;
@@ -164,7 +183,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 			int value = Integer.MAX_VALUE;
 			for (Move childMove  : childMoves) {
 				Move deepestChildMove = alphaBeta(board, childMove, depth + 1, alpha, beta, progress);
-				int childMoveValue = MoveValues.reduce(childMove.getValue(), 1);
+				int childMoveValue = childMove.getValue();
 				if (childMoveValue < value) {
 					value = childMoveValue;
 					bestDeepestMove = deepestChildMove;
@@ -184,7 +203,12 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 			}
 			move.setValue(value);
 		}
+
 		return bestDeepestMove;
+	}
+
+	private void storeBestDeepestMoveInCache(Move move, long hash, int alpha, int beta, Move bestDeepestMove) {
+		transpositionTable.store(hash, alpha, beta, move.getValue(), move.depthInTree(), bestDeepestMove);
 	}
 
 	private List<Move> getChildMoves(Board board, Move move) {
@@ -206,6 +230,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 	private void evaluateMove(Board board, Move move) {
 		board.process(move);
 		move.setValue(boardEvaluator.value(board));
+		statistics.onPositionEvaluated();
 	}
 
 	public void cancel() {
