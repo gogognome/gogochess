@@ -4,6 +4,9 @@ import static nl.gogognome.gogochess.logic.Player.*;
 import java.util.*;
 import nl.gogognome.gogochess.logic.*;
 
+/**
+ * Implementation of quiescence search based on https://chessprogramming.wikispaces.com/Quiescence+Search
+ */
 public class QuiescenceSearch {
 
 	private final BoardEvaluator boardEvaluator;
