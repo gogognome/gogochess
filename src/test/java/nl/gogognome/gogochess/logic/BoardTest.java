@@ -62,14 +62,14 @@ class BoardTest {
 		String actualBoard = board.toString();
 
 		assertEquals(
-				"RKBQKBKR\n" +
+				"RNBQKBNR\n" +
 				"PPPPPPPP\n" +
 				"* * * * \n" +
 				" * * * *\n" +
 				"* * * * \n" +
 				" * * * *\n" +
 				"pppppppp\n" +
-				"rkbqkbkr\n",
+				"rnbqkbnr\n",
 				actualBoard);
 	}
 
@@ -87,14 +87,14 @@ class BoardTest {
 
 		String actualBoard = board.toString();
 		assertEquals(
-				"RKBQKBKR\n" +
+				"RNBQKBNR\n" +
 				"PPPPPPPP\n" +
 				"* * * * \n" +
 				" * * * *\n" +
 				"* * * * \n" +
 				" * * * *\n" +
 				"pppppppp\n" +
-				"rkbqkbkr\n",
+				"rnbqkbnr\n",
 				actualBoard);
 	}
 
@@ -107,14 +107,14 @@ class BoardTest {
 
 		String actualBoard = board.toString();
 		assertEquals(
-				"RKBQKBKR\n" +
+				"RNBQKBNR\n" +
 				"PPPPPPPP\n" +
 				"* * * * \n" +
 				" * * * *\n" +
 				"* *p* * \n" +
 				" * * * *\n" +
 				"ppp pppp\n" +
-				"rkbqkbkr\n",
+				"rnbqkbnr\n",
 				actualBoard);
 	}
 

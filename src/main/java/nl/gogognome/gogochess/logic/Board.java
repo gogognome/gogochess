@@ -25,11 +25,12 @@ public class Board {
 
 	private Move lastMove;
 
-	private PlayerPiece[] playerPiecesPerSquare = new PlayerPiece[8*8];
-	private Square[] whitePieceSquares = new Square[2*8];
+	private final PlayerPiece[] playerPiecesPerSquare = new PlayerPiece[8*8];
+	private final Square[] whitePieceSquares = new Square[2*8];
 	private int nrWhitePieces;
-	private Square[] blackPieceSquares = new Square[2*8];
+	private final Square[] blackPieceSquares = new Square[2*8];
 	private int nrBlackPieces;
+	private final BoardHash boardHash = new BoardHash();
 
 	public void process(Move move) {
 		Move commonAncestor = Move.findCommonAncestor(lastMove, move);
@@ -103,12 +104,13 @@ public class Board {
 		}
 		playerPiecesPerSquare[index] = playerPieceToAdd;
 
-
 		if (playerPieceToAdd.getPlayer() == WHITE) {
 			whitePieceSquares[nrWhitePieces++] = square;
 		} else {
 			blackPieceSquares[nrBlackPieces++] = square;
 		}
+
+		boardHash.addPlayerPiece(playerPieceToAdd, square);
 	}
 
 	private void removePlayerPiece(PlayerPiece playerPieceToRemove, Square square) {
@@ -137,6 +139,8 @@ public class Board {
 				}
 			}
 		}
+
+		boardHash.removePlayerPiece(playerPieceToRemove, square);
 	}
 
 	public PlayerPiece pieceAt(Square square) {
@@ -359,7 +363,7 @@ public class Board {
 		char c;
 		switch (playerPiece.getPiece()) {
 			case PAWN: c = 'p'; break;
-			case KNIGHT: c = 'k'; break;
+			case KNIGHT: c = 'n'; break;
 			case BISHOP: c = 'b'; break;
 			case ROOK: c = 'r'; break;
 			case QUEEN: c = 'q'; break;
@@ -374,4 +378,22 @@ public class Board {
 		}
 	}
 
+	public long getBoardHash() {
+		return boardHash.getHash(lastMove.getPlayer());
+	}
+
+	@Override
+	public int hashCode() {
+		return (int) boardHash.getHash(lastMove.getPlayer());
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null || obj.getClass() != Board.class) {
+			return false;
+		}
+
+		Board that = (Board) obj;
+		return this.hashCode() == that.hashCode();
+	}
 }
