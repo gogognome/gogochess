@@ -19,10 +19,10 @@ class MoveTest {
 		String boardWithoutEmptySquares = actualBoard.replaceAll("[ *\n]", "");
 
 		assertEquals(
-				"RKBQKBKR" +
+				"RNBQKBNR" +
 				"PPPPPPPP" +
 				"pppppppp" +
-				"rkbqkbkr",
+				"rnbqkbnr",
 				boardWithoutEmptySquares);
 	}
 
