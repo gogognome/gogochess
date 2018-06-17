@@ -73,12 +73,12 @@ public class PawnHeuristics {
 			pawnCaptureValue -= 5;
 		}
 
-		if (board.countNrPawnsInColumn(to.getPlayerPiece(), toColumn) > 1 && board.isIsolatedPawnInColumn(to.getPlayerPiece(), toColumn)) {
+		if (board.countNrOccurrencesInColumn(to.getPlayerPiece(), toColumn) > 1 && board.isIsolatedPawnInColumn(move.getPlayer(), toColumn)) {
 			pawnCaptureValue -= 10;
 		}
 
 		if (move.capturedPlayerPiece().getPiece() == PAWN && (toColumn == 3 || toColumn == 4)) {
-			if (board.isIsolatedPawnInColumn(move.capturedPlayerPiece(), toColumn)) {
+			if (board.isIsolatedPawnInColumn(move.getPlayer().other(), toColumn)) {
 				pawnCaptureValue += 50;
 			}
 			int rowDelta = negateForBlack(1, move);
