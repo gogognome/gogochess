@@ -321,7 +321,7 @@ public class Board {
 		return count;
 	}
 
-	public int countNrPawnsInColumn(PlayerPiece playerPiece, int column) {
+	public int countNrOccurrencesInColumn(PlayerPiece playerPiece, int column) {
 		int nrPawns = 0;
 		for (int row=0; row<8; row++) {
 			if (playerPiece.equals(pieceAt(new Square(column, row)))) {
@@ -331,15 +331,23 @@ public class Board {
 		return nrPawns;
 	}
 
-	public boolean isIsolatedPawnInColumn(PlayerPiece playerPiece, int column) {
+	/**
+	 * Determines if a pawn in the specified column is isolated, i.e., a pawn that has no pawns of the same player
+	 * in adjacent columns.
+	 * @param player the player whose pawn must be checked
+	 * @param column the column containing the pawn
+	 * @return true if the pawn is isolated; false otherwise
+	 */
+	public boolean isIsolatedPawnInColumn(Player player, int column) {
+		PlayerPiece pawn = new Pawn(player);
 		int nrPawnsInAdjacentColumns = 0;
 		if (column > 0) {
-			nrPawnsInAdjacentColumns += countNrPawnsInColumn(playerPiece, column - 1);
+			nrPawnsInAdjacentColumns += countNrOccurrencesInColumn(pawn, column - 1);
 		}
 		if (column < 7) {
-			nrPawnsInAdjacentColumns += countNrPawnsInColumn(playerPiece, column + 1);
+			nrPawnsInAdjacentColumns += countNrOccurrencesInColumn(pawn, column + 1);
 		}
-		return nrPawnsInAdjacentColumns > 0;
+		return nrPawnsInAdjacentColumns == 0;
 	}
 
 	@Override
