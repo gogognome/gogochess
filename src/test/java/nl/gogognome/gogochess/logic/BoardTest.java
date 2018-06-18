@@ -1,11 +1,12 @@
 package nl.gogognome.gogochess.logic;
 
-import static nl.gogognome.gogochess.logic.Board.*;
 import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.*;
-import static nl.gogognome.gogochess.logic.Moves.assertMovesContain;
+import static nl.gogognome.gogochess.logic.Moves.*;
 import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
 import static nl.gogognome.gogochess.logic.Status.*;
+import static nl.gogognome.gogochess.logic.asserters.BoardAsserter.*;
+import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.*;
 import org.junit.jupiter.api.*;
@@ -58,7 +59,7 @@ class BoardTest {
 
 	@Test
 	void toStringAfterInitialMove() {
-		board.process(Move.INITIAL_BOARD);
+		board.initBoard();
 		String actualBoard = board.toString();
 
 		assertEquals(
@@ -80,10 +81,10 @@ class BoardTest {
 
 	@Test
 	void undoMove() {
-		board.process(Move.INITIAL_BOARD);
+		board.initBoard();
 		List<Move> moves = board.validMoves();
 		board.process(find(moves, "e2-e4"));
-		board.process(Move.INITIAL_BOARD);
+		board.initBoard();
 
 		String actualBoard = board.toString();
 		assertEquals(
@@ -100,7 +101,7 @@ class BoardTest {
 
 	@Test
 	void automaticallyUndoMoveAndProcessNewMove() {
-		board.process(Move.INITIAL_BOARD);
+		board.initBoard();
 		List<Move> moves = board.validMoves();
 		board.process(find(moves, "e2-e4"));
 		board.process(find(moves, "d2-d4"));
@@ -164,6 +165,23 @@ class BoardTest {
 		assertEquals(STALE_MATE, find(moves, "Qg1-g6").getStatus());
 	}
 
+	@Test
+	void threeFoldRepetitionLeadsToDraw() {
+		board.initBoard(); // first occurrence
+		assertThat(board).lastMoveStatusIsEqualTo(Status.NORMAL);
+
+		board.process(WHITE_KNIGHT.removeFrom(B1), WHITE_KNIGHT.addTo(C3));
+		board.process(BLACK_KNIGHT.removeFrom(B8), BLACK_KNIGHT.addTo(C6));
+		board.process(WHITE_KNIGHT.removeFrom(C3), WHITE_KNIGHT.addTo(B1));
+		board.process(BLACK_KNIGHT.removeFrom(C6), BLACK_KNIGHT.addTo(B8)); // second occurrence
+		assertThat(board).lastMoveStatusIsEqualTo(Status.NORMAL);
+
+		board.process(WHITE_KNIGHT.removeFrom(B1), WHITE_KNIGHT.addTo(C3));
+		board.process(BLACK_KNIGHT.removeFrom(B8), BLACK_KNIGHT.addTo(C6));
+		board.process(WHITE_KNIGHT.removeFrom(C3), WHITE_KNIGHT.addTo(B1));
+		board.process(BLACK_KNIGHT.removeFrom(C6), BLACK_KNIGHT.addTo(B8)); // third occurrence
+		assertThat(board).lastMoveStatusIsEqualTo(Status.DRAW_BECAUSE_OF_THREEFOLD_REPETITION);
+	}
 
 	private Move find(List<Move> moves, String moveDescription) {
 		MoveNotation moveNotation = new ReverseAlgebraicNotation();

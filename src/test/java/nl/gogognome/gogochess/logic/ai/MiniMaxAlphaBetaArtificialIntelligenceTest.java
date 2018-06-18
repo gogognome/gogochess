@@ -2,10 +2,10 @@ package nl.gogognome.gogochess.logic.ai;
 
 import static java.lang.Math.*;
 import static java.util.Arrays.*;
-import static nl.gogognome.gogochess.logic.Board.*;
 import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
 import static nl.gogognome.gogochess.logic.Status.*;
+import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
 import static org.assertj.core.api.Assertions.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;

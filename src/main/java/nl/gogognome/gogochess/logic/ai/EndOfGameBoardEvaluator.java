@@ -3,7 +3,7 @@ package nl.gogognome.gogochess.logic.ai;
 import static nl.gogognome.gogochess.logic.Status.*;
 import nl.gogognome.gogochess.logic.*;
 
-public class CheckMateBoardEvaluator implements BoardEvaluator {
+public class EndOfGameBoardEvaluator implements BoardEvaluator {
 
 	@Override
 	public int value(Board board) {

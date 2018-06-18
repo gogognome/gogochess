@@ -1,11 +1,11 @@
 package nl.gogognome.gogochess.logic.piece;
 
 import static java.util.stream.Collectors.*;
-import static nl.gogognome.gogochess.logic.Board.*;
 import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.*;
 import static nl.gogognome.gogochess.logic.Moves.*;
 import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
+import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.*;

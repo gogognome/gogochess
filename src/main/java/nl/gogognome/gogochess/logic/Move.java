@@ -1,12 +1,8 @@
 package nl.gogognome.gogochess.logic;
 
 import static java.util.Arrays.*;
-import static nl.gogognome.gogochess.logic.Board.*;
-import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.ADD;
-import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.REMOVE;
+import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.*;
 import static nl.gogognome.gogochess.logic.Piece.*;
-import static nl.gogognome.gogochess.logic.Player.*;
-import static nl.gogognome.gogochess.logic.Squares.*;
 import static nl.gogognome.gogochess.logic.Status.*;
 import java.util.*;
 import java.util.function.*;
@@ -158,37 +154,4 @@ public class Move {
 		return boardMutations.toString();
 	}
 
-	public final static Move INITIAL_BOARD = new Move(BLACK,
-			WHITE_ROOK.addTo(A1),
-			WHITE_KNIGHT.addTo(B1),
-			WHITE_BISHOP.addTo(C1),
-			WHITE_QUEEN.addTo(D1),
-			WHITE_KING.addTo(E1),
-			WHITE_BISHOP.addTo(F1),
-			WHITE_KNIGHT.addTo(G1),
-			WHITE_ROOK.addTo(H1),
-			WHITE_PAWN.addTo(A2),
-			WHITE_PAWN.addTo(B2),
-			WHITE_PAWN.addTo(C2),
-			WHITE_PAWN.addTo(D2),
-			WHITE_PAWN.addTo(E2),
-			WHITE_PAWN.addTo(F2),
-			WHITE_PAWN.addTo(G2),
-			WHITE_PAWN.addTo(H2),
-			BLACK_PAWN.addTo(A7),
-			BLACK_PAWN.addTo(B7),
-			BLACK_PAWN.addTo(C7),
-			BLACK_PAWN.addTo(D7),
-			BLACK_PAWN.addTo(E7),
-			BLACK_PAWN.addTo(F7),
-			BLACK_PAWN.addTo(G7),
-			BLACK_PAWN.addTo(H7),
-			BLACK_ROOK.addTo(A8),
-			BLACK_KNIGHT.addTo(B8),
-			BLACK_BISHOP.addTo(C8),
-			BLACK_QUEEN.addTo(D8),
-			BLACK_KING.addTo(E8),
-			BLACK_BISHOP.addTo(F8),
-			BLACK_KNIGHT.addTo(G8),
-			BLACK_ROOK.addTo(H8));
 }

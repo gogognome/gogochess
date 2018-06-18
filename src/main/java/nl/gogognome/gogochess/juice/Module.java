@@ -18,7 +18,7 @@ public class Module extends AbstractModule {
 	@Singleton
 	BoardEvaluator provideBoardEvaluator() {
 		return new CompositeBoardEvaluator(
-				new CheckMateBoardEvaluator(),
+				new EndOfGameBoardEvaluator(),
 				new PieceValueEvaluator());
 	}
 

@@ -1,11 +1,10 @@
 package nl.gogognome.gogochess.logic.ai.positionalanalysis;
 
 import static java.util.Arrays.*;
-import static nl.gogognome.gogochess.logic.Board.*;
 import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.*;
-import static nl.gogognome.gogochess.logic.Player.BLACK;
-import static nl.gogognome.gogochess.logic.Player.WHITE;
+import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
+import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
 import static org.assertj.core.api.Assertions.*;
 import java.util.*;
 import org.junit.jupiter.api.*;
@@ -235,6 +234,6 @@ class PositionalAnalysisForOpeningTest {
 				Arrays.stream(mutations)
 						.filter(m -> m.getMutation() == REMOVE)
 						.map(m -> new BoardMutation(m.getPlayerPiece(), m.getSquare(), ADD))
-						.toArray(size -> new BoardMutation[size]));
+						.toArray(BoardMutation[]::new));
 	}
 }

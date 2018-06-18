@@ -52,7 +52,7 @@ public class GamePresentationModel {
 	public GamePresentationModel(ArtificialIntelligence ai, Board board) {
 		this.ai = ai;
 		this.board = board;
-		board.process(Move.INITIAL_BOARD);
+		board.initBoard();
 	}
 
 	public void addListener(Consumer<Event> listener) {

@@ -1,27 +1,18 @@
 package nl.gogognome.gogochess.logic;
 
+import static java.util.Arrays.asList;
 import static nl.gogognome.gogochess.logic.Piece.PAWN;
+import static nl.gogognome.gogochess.logic.Squares.*;
+import static nl.gogognome.gogochess.logic.Squares.H8;
 import static nl.gogognome.gogochess.logic.Status.*;
 import static nl.gogognome.gogochess.logic.Player.*;
+import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
 import java.util.function.*;
 import nl.gogognome.gogochess.logic.piece.*;
 
 public class Board {
-
-	public static final PlayerPiece WHITE_PAWN = new Pawn(WHITE);
-	public static final PlayerPiece WHITE_KNIGHT = new Knight(WHITE);
-	public static final PlayerPiece WHITE_BISHOP = new Bishop(WHITE);
-	public static final PlayerPiece WHITE_ROOK = new Rook(WHITE);
-	public static final PlayerPiece WHITE_QUEEN = new Queen(WHITE);
-	public static final PlayerPiece WHITE_KING = new King(WHITE);
-	public static final PlayerPiece BLACK_PAWN = new Pawn(BLACK);
-	public static final PlayerPiece BLACK_KNIGHT = new Knight(BLACK);
-	public static final PlayerPiece BLACK_BISHOP = new Bishop(BLACK);
-	public static final PlayerPiece BLACK_ROOK = new Rook(BLACK);
-	public static final PlayerPiece BLACK_QUEEN = new Queen(BLACK);
-	public static final PlayerPiece BLACK_KING = new King(BLACK);
 
 	private Move lastMove;
 
@@ -31,6 +22,16 @@ public class Board {
 	private final Square[] blackPieceSquares = new Square[2*8];
 	private int nrBlackPieces;
 	private final BoardHash boardHash = new BoardHash();
+	private final Map<Long, Integer> hashToNumberOfRepetitions = new HashMap<>();
+
+	public void process(BoardMutation... boardMutations) {
+		List<Move> moves = validMoves();
+		List<BoardMutation> boardMutationsList = asList(boardMutations);
+		Optional<Move> moveIncludingStatus = moves.stream()
+				.filter(m -> m.getBoardMutations().containsAll(boardMutationsList))
+				.findFirst();
+		process(moveIncludingStatus.orElseThrow(() -> new IllegalArgumentException("Board mutations " + boardMutations + " not found in moves: " + moves)));
+	}
 
 	public void process(Move move) {
 		Move commonAncestor = Move.findCommonAncestor(lastMove, move);
@@ -60,14 +61,27 @@ public class Board {
 			process(boardMutation);
 		}
 		lastMove = move;
+		updateRepetionCount(count -> count+1);
 	}
 
 	private void undoSingleMove(Move move) {
+		updateRepetionCount(count -> count-1);
 		List<BoardMutation> boardMutations = move.getBoardMutations();
 		for (int i=boardMutations.size() - 1; i >=0; i--) {
 			undo(boardMutations.get(i));
 		}
 		lastMove = move.getPrecedingMove();
+	}
+
+	private void updateRepetionCount(Function<Integer, Integer> countChanger) {
+		long hash = getBoardHash();
+		int count = hashToNumberOfRepetitions.getOrDefault(hash, 0);
+		count = countChanger.apply(count);
+		if (count > 0) {
+			hashToNumberOfRepetitions.put(hash, count++);
+		} else {
+			hashToNumberOfRepetitions.remove(hash);
+		}
 	}
 
 	void process(BoardMutation mutation) {
@@ -171,7 +185,7 @@ public class Board {
 		List<Move> moves = new ArrayList<>(40);
 		addMovesIgnoringCheck(player, moves);
 		removeMovesCausingCheckForOwnPlayer(moves);
-		determineCheckAndMate(player, moves);
+		updateStatusForMoves(player, moves);
 		return moves;
 	}
 
@@ -179,20 +193,24 @@ public class Board {
 		forEachPlayerPiece(player, (playerPiece, square) -> playerPiece.addPossibleMoves(moves, square, this));
 	}
 
-	private void determineCheckAndMate(Player player, List<Move> moves) {
+	private void updateStatusForMoves(Player player, List<Move> moves) {
 		for (Move move : moves) {
-			determineCheckAndMate(player, move);
+			updateStatusForMove(player, move);
 		}
 	}
 
-	private void determineCheckAndMate(Player player, Move move) {
+	private void updateStatusForMove(Player player, Move move) {
 		Square oppositeKingSquare = kingSquareOf(player.other());
 		if (oppositeKingSquare == null) {
 			return; // can happen in tests where board contains just a few pieces but not the opponent's king
 		}
 		processSingleMove(move);
-		determineCheck(move, oppositeKingSquare);
-		determineCheckMateAndStaleMate(move);
+		if (hashToNumberOfRepetitions.get(getBoardHash()) >= 3) {
+			move.setStatus(DRAW_BECAUSE_OF_THREEFOLD_REPETITION);
+		} else {
+			determineCheck(move, oppositeKingSquare);
+			determineCheckMateAndStaleMate(move);
+		}
 		undoSingleMove(move);
 	}
 
@@ -404,4 +422,43 @@ public class Board {
 		Board that = (Board) obj;
 		return this.hashCode() == that.hashCode();
 	}
+
+	public void initBoard() {
+		process(INITIAL_BOARD);
+	}
+
+	final static Move INITIAL_BOARD = new Move(BLACK,
+			WHITE_ROOK.addTo(A1),
+			WHITE_KNIGHT.addTo(B1),
+			WHITE_BISHOP.addTo(C1),
+			WHITE_QUEEN.addTo(D1),
+			WHITE_KING.addTo(E1),
+			WHITE_BISHOP.addTo(F1),
+			WHITE_KNIGHT.addTo(G1),
+			WHITE_ROOK.addTo(H1),
+			WHITE_PAWN.addTo(A2),
+			WHITE_PAWN.addTo(B2),
+			WHITE_PAWN.addTo(C2),
+			WHITE_PAWN.addTo(D2),
+			WHITE_PAWN.addTo(E2),
+			WHITE_PAWN.addTo(F2),
+			WHITE_PAWN.addTo(G2),
+			WHITE_PAWN.addTo(H2),
+			BLACK_PAWN.addTo(A7),
+			BLACK_PAWN.addTo(B7),
+			BLACK_PAWN.addTo(C7),
+			BLACK_PAWN.addTo(D7),
+			BLACK_PAWN.addTo(E7),
+			BLACK_PAWN.addTo(F7),
+			BLACK_PAWN.addTo(G7),
+			BLACK_PAWN.addTo(H7),
+			BLACK_ROOK.addTo(A8),
+			BLACK_KNIGHT.addTo(B8),
+			BLACK_BISHOP.addTo(C8),
+			BLACK_QUEEN.addTo(D8),
+			BLACK_KING.addTo(E8),
+			BLACK_BISHOP.addTo(F8),
+			BLACK_KNIGHT.addTo(G8),
+			BLACK_ROOK.addTo(H8));
+
 }

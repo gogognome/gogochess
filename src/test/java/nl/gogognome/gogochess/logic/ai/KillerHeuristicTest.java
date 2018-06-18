@@ -1,10 +1,10 @@
 package nl.gogognome.gogochess.logic.ai;
 
 import static java.util.Arrays.*;
-import static java.util.Collections.emptyList;
-import static nl.gogognome.gogochess.logic.Board.*;
-import static nl.gogognome.gogochess.logic.Player.WHITE;
+import static java.util.Collections.*;
+import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
+import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
 import static org.assertj.core.api.Assertions.*;
 import java.util.*;
 import org.junit.jupiter.api.*;

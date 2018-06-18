@@ -1,9 +1,9 @@
 package nl.gogognome.gogochess.logic.ai.positionalanalysis;
 
-import static nl.gogognome.gogochess.logic.Board.*;
-import static nl.gogognome.gogochess.logic.MoveValues.negateForBlack;
-import static nl.gogognome.gogochess.logic.Piece.PAWN;
+import static nl.gogognome.gogochess.logic.MoveValues.*;
+import static nl.gogognome.gogochess.logic.Piece.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
+import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
 import nl.gogognome.gogochess.logic.*;
 import nl.gogognome.gogochess.logic.piece.*;
 

@@ -1,9 +1,9 @@
 package nl.gogognome.gogochess.logic.ai;
 
 import static java.lang.Integer.*;
-import static nl.gogognome.gogochess.logic.Board.*;
 import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
+import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
 import static org.assertj.core.api.Assertions.*;
 import org.junit.jupiter.api.*;
 import com.google.inject.*;

@@ -1,11 +1,10 @@
 package nl.gogognome.gogochess.logic;
 
-import static nl.gogognome.gogochess.logic.Board.*;
-import static nl.gogognome.gogochess.logic.Player.BLACK;
-import static nl.gogognome.gogochess.logic.Player.WHITE;
+import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
+import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.*;
 
 class MoveTest {
@@ -13,7 +12,7 @@ class MoveTest {
 	@Test
 	void initalBoard() {
 		Board board = new Board();
-		board.process(Move.INITIAL_BOARD);
+		board.initBoard();
 		String actualBoard = board.toString();
 
 		String boardWithoutEmptySquares = actualBoard.replaceAll("[ *\n]", "");

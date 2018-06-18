@@ -1,7 +1,7 @@
 package nl.gogognome.gogochess.logic.piece;
 
-import static nl.gogognome.gogochess.logic.Board.*;
 import static nl.gogognome.gogochess.logic.Player.*;
+import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.*;
 
