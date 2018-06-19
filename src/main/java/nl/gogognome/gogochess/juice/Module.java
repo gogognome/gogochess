@@ -31,12 +31,12 @@ public class Module extends AbstractModule {
 	@Provides
 	MiniMaxAlphaBetaArtificialIntelligence provideMiniMaxAlphaBetaArtificialIntelligence(
 			BoardEvaluator boardEvaluator,
-			PositionalAnalysis positionalAnalysis,
+			PositionalAnalysis posAnalysis, // the name positionalAnalysis leads to ambiguous reference on my Java compiler in Linux
 			MoveSort moveSort) {
 		Statistics statistics = new Statistics();
 		KillerHeuristic killerHeuristic = new KillerHeuristic();
 		QuiescenceSearch quiescenceSearch = new QuiescenceSearch(boardEvaluator, statistics, killerHeuristic);
-		return new MiniMaxAlphaBetaArtificialIntelligence(boardEvaluator, positionalAnalysis, moveSort, quiescenceSearch, statistics, killerHeuristic);
+		return new MiniMaxAlphaBetaArtificialIntelligence(boardEvaluator, posAnalysis, moveSort, quiescenceSearch, statistics, killerHeuristic);
 	}
 
 	@Provides
