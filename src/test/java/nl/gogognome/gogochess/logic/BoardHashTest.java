@@ -25,7 +25,7 @@ class BoardHashTest {
 			if (previousBoard != null) {
 				assertThat(previousBoard).isEqualTo(newBoard);
 			}
-			remainingMoves.addAll(board.validMoves());
+			remainingMoves.addAll(board.currentPlayer().validMoves(board));
 		}
 	}
 

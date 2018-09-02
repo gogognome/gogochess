@@ -33,6 +33,6 @@ class PositionalAnalysisForMiddleGame {
 
 	private int mobilityAfterMove(Board board, Move move) {
 		board.process(move);
-		return board.validMovesFor(WHITE).size() - board.validMovesFor(BLACK).size();
+		return WHITE.validMoves(board).size() - BLACK.validMoves(board).size();
 	}
 }

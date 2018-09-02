@@ -50,7 +50,7 @@ public class MovesPanel extends JPanel {
 		for (String move : moves) {
 			int textX =  player == WHITE ? left + margin : left + (getWidth()-left) / 2;
 			g.drawString(move, textX, y);
-			player = player.other();
+			player = player.opponent();
 			if (player == WHITE) {
 				y += g.getFontMetrics().getHeight() * 150 / 100;
 			}

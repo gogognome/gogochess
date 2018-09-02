@@ -69,7 +69,7 @@ public class King extends PlayerPiece {
 		boolean blockedByAttack = false;
 		for (int col = leftMostSquare.column(); col<= rightMostSquare.column(); col++) {
 			Square squareThatMustNotBeAttacked = new Square(col, row);
-			blockedByAttack = blockedByAttack || board.anyPieceAttacks(getPlayer().other(), squareThatMustNotBeAttacked);
+			blockedByAttack = blockedByAttack || board.anyPieceAttacks(getPlayer().opponent(), squareThatMustNotBeAttacked);
 		}
 		return blockedByAttack;
 	}

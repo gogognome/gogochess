@@ -24,7 +24,7 @@ class PawnTest {
 				new BoardMutation(WHITE_PAWN, A2, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves();
+		List<Move> moves = board.currentPlayer().validMoves(board);
 
 		assertMovesContainsExactlyInAnyOrder(moves, "a2-a3", "a2-a4");
 		assertThat(moves.stream().map(Move::getPrecedingMove).collect(toSet())).containsExactly(setup);
@@ -40,7 +40,7 @@ class PawnTest {
 				new BoardMutation(BLACK_PAWN, A3, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves();
+		List<Move> moves = board.currentPlayer().validMoves(board);
 
 		assertEquals("[]", moves.toString());
 		assertEquals(emptySet(), moves.stream().map(Move::getPrecedingMove).collect(toSet()));
@@ -56,7 +56,7 @@ class PawnTest {
 				new BoardMutation(BLACK_PAWN, A4, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves();
+		List<Move> moves = board.currentPlayer().validMoves(board);
 
 		assertMovesContainsExactlyInAnyOrder(moves, "a2-a3");
 		assertThat(moves.stream().map(Move::getPrecedingMove).collect(toSet())).containsExactly(setup);
@@ -71,7 +71,7 @@ class PawnTest {
 				new BoardMutation(BLACK_PAWN, A3, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves();
+		List<Move> moves = board.currentPlayer().validMoves(board);
 
 		assertMovesContain(moves, "b2xa3");
 		assertMovesContain(moves,
@@ -91,7 +91,7 @@ class PawnTest {
 				new BoardMutation(BLACK_PAWN, A5, ADD));
 		board.process(blackPawnMoves2);
 
-		List<Move> moves = board.validMoves();
+		List<Move> moves = board.currentPlayer().validMoves(board);
 
 		assertMovesContain(moves, "b5xa6");
 		assertMovesContain(moves,
@@ -111,7 +111,7 @@ class PawnTest {
 				new BoardMutation(BLACK_PAWN, A5, ADD));
 		board.process(blackPawnMoves2);
 
-		List<Move> moves = board.validMoves();
+		List<Move> moves = board.currentPlayer().validMoves(board);
 
 		assertFalse(moves.toString().contains("b5xa6"), "actual moves: " + moves);
 	}
@@ -123,7 +123,7 @@ class PawnTest {
 				new BoardMutation(BLACK_PAWN, B2, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves();
+		List<Move> moves = board.currentPlayer().validMoves(board);
 
 		assertFalse(moves.toString().contains("x"), "actual moves: " + moves);
 	}
@@ -135,7 +135,7 @@ class PawnTest {
 				new BoardMutation(BLACK_PAWN, B7, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves();
+		List<Move> moves = board.currentPlayer().validMoves(board);
 
 		assertFalse(moves.toString().contains("x"), "actual moves: " + moves);
 	}
@@ -146,7 +146,7 @@ class PawnTest {
 				new BoardMutation(WHITE_PAWN, B7, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves();
+		List<Move> moves = board.currentPlayer().validMoves(board);
 
 		assertMovesContain(moves, "b7-b8(N)");
 		assertMovesContain(moves, "b7-b8(B)");
@@ -167,7 +167,7 @@ class PawnTest {
 				new BoardMutation(BLACK_ROOK, A8, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves();
+		List<Move> moves = board.currentPlayer().validMoves(board);
 
 		assertMovesContain(moves, "b7xRa8(N)");
 		assertMovesContain(moves, "b7xRa8(B)");

@@ -63,11 +63,13 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 
 		long startTime = System.nanoTime();
 		logger.debug("maxDepth: " + maxDepth);
-		List<Move> nextMoves = board.validMoves();
+		List<Move> nextMoves = board.currentPlayer().validMoves(board);
 		positonalAnalysis.evaluate(board, nextMoves);
 		moveSort.sort(nextMoves);
 		ReverseAlgebraicNotation notation = new ReverseAlgebraicNotation();
-		nextMoves.stream().forEach(m -> logger.debug(notation.format(m) + "\t" + m.getValue()));
+		for (Move m : nextMoves) {
+			logger.debug(notation.format(m) + "\t" + m.getValue());
+		}
 
 		statistics.onPositionsGenerated(nextMoves.size());
 		Progress progress = new Progress(progressUpdateConsumer);
@@ -213,7 +215,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 
 	private List<Move> getChildMoves(Board board, Move move) {
 		board.process(move);
-		List<Move> childMoves = board.validMoves();
+		List<Move> childMoves = board.currentPlayer().validMoves(board);
 
 		evaluateMoves(board, childMoves);
 		moveSort.sort(childMoves);

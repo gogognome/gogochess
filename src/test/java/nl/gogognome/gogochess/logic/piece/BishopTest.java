@@ -23,7 +23,7 @@ class BishopTest {
 				new BoardMutation(WHITE_BISHOP, E4, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves();
+		List<Move> moves = board.currentPlayer().validMoves(board);
 
 		assertMovesContainsExactlyInAnyOrder(moves, "Be4-f5", "Be4-g6", "Be4-h7", "Be4-f3", "Be4-g2", "Be4-h1", "Be4-d5", "Be4-c6", "Be4-b7", "Be4-a8", "Be4-d3", "Be4-c2", "Be4-b1");
 		assertThat(moves.stream().map(Move::getPrecedingMove).collect(toSet())).containsExactly(setup);
@@ -50,7 +50,7 @@ class BishopTest {
 				new BoardMutation(WHITE_QUEEN, F5, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves();
+		List<Move> moves = board.currentPlayer().validMoves(board);
 
 		assertFalse(moves.toString().contains("Be4xQf5"), moves.toString());
 		assertFalse(moves.toString().contains("Be4-g6"), moves.toString());
@@ -63,7 +63,7 @@ class BishopTest {
 				new BoardMutation(BLACK_QUEEN, F5, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves();
+		List<Move> moves = board.currentPlayer().validMoves(board);
 
 		assertMovesContain(moves, "Be4xQf5");
 		assertMovesContain(moves,

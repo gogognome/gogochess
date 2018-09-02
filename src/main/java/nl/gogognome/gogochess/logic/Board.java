@@ -1,11 +1,9 @@
 package nl.gogognome.gogochess.logic;
 
-import static java.util.Arrays.asList;
-import static nl.gogognome.gogochess.logic.Piece.PAWN;
-import static nl.gogognome.gogochess.logic.Squares.*;
-import static nl.gogognome.gogochess.logic.Squares.H8;
-import static nl.gogognome.gogochess.logic.Status.*;
+import static java.util.Arrays.*;
+import static nl.gogognome.gogochess.logic.Piece.*;
 import static nl.gogognome.gogochess.logic.Player.*;
+import static nl.gogognome.gogochess.logic.Squares.*;
 import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
@@ -25,12 +23,12 @@ public class Board {
 	private final Map<Long, Integer> hashToNumberOfRepetitions = new HashMap<>();
 
 	public void process(BoardMutation... boardMutations) {
-		List<Move> moves = validMoves();
+		List<Move> moves = lastMove.getPlayer().opponent().validMoves(this);
 		List<BoardMutation> boardMutationsList = asList(boardMutations);
 		Optional<Move> moveIncludingStatus = moves.stream()
 				.filter(m -> m.getBoardMutations().containsAll(boardMutationsList))
 				.findFirst();
-		process(moveIncludingStatus.orElseThrow(() -> new IllegalArgumentException("Board mutations " + boardMutations + " not found in moves: " + moves)));
+		process(moveIncludingStatus.orElseThrow(() -> new IllegalArgumentException("Board mutations " + Arrays.toString(boardMutations) + " not found in moves: " + moves)));
 	}
 
 	public void process(Move move) {
@@ -56,16 +54,25 @@ public class Board {
 		}
 	}
 
+	void tryWithMove(Move move, Runnable runnable) {
+		try {
+			processSingleMove(move);
+			runnable.run();
+		} finally {
+			undoSingleMove(move);
+		}
+	}
+
 	private void processSingleMove(Move move) {
 		for (BoardMutation boardMutation : move.getBoardMutations()) {
 			process(boardMutation);
 		}
 		lastMove = move;
-		updateRepetionCount(count -> count+1);
+		updateRepetitionCount(count -> count + 1);
 	}
 
 	private void undoSingleMove(Move move) {
-		updateRepetionCount(count -> count-1);
+		updateRepetitionCount(count -> count-1);
 		List<BoardMutation> boardMutations = move.getBoardMutations();
 		for (int i=boardMutations.size() - 1; i >=0; i--) {
 			undo(boardMutations.get(i));
@@ -73,12 +80,12 @@ public class Board {
 		lastMove = move.getPrecedingMove();
 	}
 
-	private void updateRepetionCount(Function<Integer, Integer> countChanger) {
+	private void updateRepetitionCount(Function<Integer, Integer> countChanger) {
 		long hash = getBoardHash();
 		int count = hashToNumberOfRepetitions.getOrDefault(hash, 0);
 		count = countChanger.apply(count);
 		if (count > 0) {
-			hashToNumberOfRepetitions.put(hash, count++);
+			hashToNumberOfRepetitions.put(hash, count);
 		} else {
 			hashToNumberOfRepetitions.remove(hash);
 		}
@@ -174,97 +181,6 @@ public class Board {
 		return playerPiecesPerSquare[column*8 + row] == null;
 	}
 
-	public List<Move> validMoves() {
-		if (lastMove == null) {
-			throw new IllegalStateException("No moves can be determined when the board is empty");
-		}
-		return validMovesFor(currentPlayer());
-	}
-
-	public List<Move> validMovesFor(Player player) {
-		List<Move> moves = new ArrayList<>(40);
-		addMovesIgnoringCheck(player, moves);
-		removeMovesCausingCheckForOwnPlayer(moves);
-		updateStatusForMoves(player, moves);
-		return moves;
-	}
-
-	private void addMovesIgnoringCheck(Player player, List<Move> moves) {
-		forEachPlayerPiece(player, (playerPiece, square) -> playerPiece.addPossibleMoves(moves, square, this));
-	}
-
-	private void updateStatusForMoves(Player player, List<Move> moves) {
-		for (Move move : moves) {
-			updateStatusForMove(player, move);
-		}
-	}
-
-	private void updateStatusForMove(Player player, Move move) {
-		Square oppositeKingSquare = kingSquareOf(player.other());
-		if (oppositeKingSquare == null) {
-			return; // can happen in tests where board contains just a few pieces but not the opponent's king
-		}
-		processSingleMove(move);
-		if (hashToNumberOfRepetitions.get(getBoardHash()) >= 3) {
-			move.setStatus(DRAW_BECAUSE_OF_THREEFOLD_REPETITION);
-		} else {
-			determineCheck(move, oppositeKingSquare);
-			determineCheckMateAndStaleMate(move);
-		}
-		undoSingleMove(move);
-	}
-
-	private void determineCheck(Move move, Square oppositeKingSquare) {
-		AtomicBoolean attacksKing = new AtomicBoolean();
-		forEachPlayerPiece(
-				move.getPlayer(),
-				(playerPiece, square) -> attacksKing.set(attacksKing.get() || playerPiece.attacks(square, oppositeKingSquare, this)),
-				() -> attacksKing.get());
-
-		if (attacksKing.get()) {
-			move.setStatus(CHECK);
-		}
-	}
-
-	private void determineCheckMateAndStaleMate(Move move) {
-		List<Move> otherPlayerMoves = new ArrayList<>();
-		Player otherPlayer = move.getPlayer().other();
-		forEachPlayerPiece(
-				otherPlayer,
-				(playerPiece, square) -> {
-					playerPiece.addPossibleMoves(otherPlayerMoves, square, this);
-					removeMovesCausingCheckForOwnPlayer(otherPlayerMoves);
-				},
-				() -> !otherPlayerMoves.isEmpty());
-
-		if (otherPlayerMoves.isEmpty()) {
-			move.setStatus(move.getStatus() == CHECK ? CHECK_MATE : STALE_MATE);
-		}
-	}
-
-	private void removeMovesCausingCheckForOwnPlayer(List<Move> moves) {
-		int index = 0;
-		while (index < moves.size()) {
-			Move move = moves.get(index);
-			Player player = move.getPlayer();
-			processSingleMove(move);
-			Square kingSquare = kingSquareOf(player);
-
-			AtomicBoolean attacksKing = new AtomicBoolean();
-			if (kingSquare != null) {
-				forEachPlayerPiece(player.other(), (playerPiece, square) -> attacksKing.set(attacksKing.get() || playerPiece.attacks(square, kingSquare, this)), attacksKing::get);
-			}
-
-			undoSingleMove(move);
-
-			if (attacksKing.get()) {
-				moves.remove(index);
-			} else {
-				index++;
-			}
-		}
-	}
-
 	public Square kingSquareOf(Player player) {
 		King king = new King(player);
 		if (player == WHITE) {
@@ -287,7 +203,7 @@ public class Board {
 		forEachPlayerPiece(player, action, () -> false);
 	}
 
-	public void forEachPlayerPiece(Player player, BiConsumer<PlayerPiece, Square> action, Supplier<Boolean> terminateIf) {
+	void forEachPlayerPiece(Player player, BiConsumer<PlayerPiece, Square> action, Supplier<Boolean> terminateIf) {
 		Square[] tempSquares;
 		int nrTempSquares;
 		if (player == WHITE) {
@@ -313,7 +229,7 @@ public class Board {
 		if (lastMove == null) {
 			throw new IllegalStateException("No moves can be determined when the board is empty");
 		}
-		return lastMove().getPlayer().other();
+		return lastMove().getPlayer().opponent();
 	}
 
 	/**
@@ -406,6 +322,10 @@ public class Board {
 
 	public long getBoardHash() {
 		return boardHash.getHash(lastMove.getPlayer());
+	}
+
+	int getNumberOfRepetitionsOfCurrentPosition() {
+		return hashToNumberOfRepetitions.get(getBoardHash());
 	}
 
 	@Override

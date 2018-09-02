@@ -76,13 +76,13 @@ class BoardTest {
 
 	@Test
 	void validMovesForEmptyBoard() {
-		assertThrows(IllegalStateException.class, () -> board.validMoves());
+		assertThrows(IllegalStateException.class, () -> board.currentPlayer().validMoves(board));
 	}
 
 	@Test
 	void undoMove() {
 		board.initBoard();
-		List<Move> moves = board.validMoves();
+		List<Move> moves = board.currentPlayer().validMoves(board);
 		board.process(find(moves, "e2-e4"));
 		board.initBoard();
 
@@ -102,7 +102,7 @@ class BoardTest {
 	@Test
 	void automaticallyUndoMoveAndProcessNewMove() {
 		board.initBoard();
-		List<Move> moves = board.validMoves();
+		List<Move> moves = board.currentPlayer().validMoves(board);
 		board.process(find(moves, "e2-e4"));
 		board.process(find(moves, "d2-d4"));
 
@@ -125,7 +125,7 @@ class BoardTest {
 				WHITE_PAWN.addTo(E6),
 				BLACK_KING.addTo(F8)));
 
-		List<Move> moves = board.validMoves();
+		List<Move> moves = board.currentPlayer().validMoves(board);
 		assertMovesContain(moves, "e6-e7+");
 		assertEquals(CHECK, find(moves, "e6-e7+").getStatus());
 	}
@@ -137,7 +137,7 @@ class BoardTest {
 				WHITE_KING.addTo(A6),
 				BLACK_QUEEN.addTo(H6)));
 
-		String moves = board.validMoves().toString();
+		String moves = board.currentPlayer().validMoves(board).toString();
 		assertFalse(moves.contains("e6-e7"), moves);
 	}
 
@@ -148,7 +148,7 @@ class BoardTest {
 				WHITE_KING.addTo(F7),
 				BLACK_KING.addTo(H8)));
 
-		List<Move> moves = board.validMoves();
+		List<Move> moves = board.currentPlayer().validMoves(board);
 		assertMovesContain(moves, "Qg1-g7++");
 		assertEquals(CHECK_MATE, find(moves, "Qg1-g7++").getStatus());
 	}
@@ -160,7 +160,7 @@ class BoardTest {
 				WHITE_KING.addTo(F7),
 				BLACK_KING.addTo(H8)));
 
-		List<Move> moves = board.validMoves();
+		List<Move> moves = board.currentPlayer().validMoves(board);
 		assertMovesContain(moves, "Qg1-g6");
 		assertEquals(STALE_MATE, find(moves, "Qg1-g6").getStatus());
 	}

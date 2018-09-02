@@ -130,7 +130,7 @@ public class GamePresentationModel {
 
 	public void onPlayerMove(Square startSquare, Square targetSquare) {
 		targets = null;
-		Optional<Move> move = board.validMoves().stream()
+		Optional<Move> move = board.currentPlayer().validMoves(board).stream()
 				.filter(m -> startAndTargetSquareMatchMove(m, startSquare, targetSquare))
 				.findFirst();
 		if (move.isPresent()) {
@@ -187,14 +187,16 @@ public class GamePresentationModel {
 	}
 
 	private List<Square> determineTargetsForValidMoves(Square startSquare) {
-		return board.validMoves().stream()
+		return board.currentPlayer().validMoves(board).stream()
 				// Move must remove piece from startSquare
 				.filter(m -> m.getBoardMutations().stream()
 						.anyMatch(mut -> mut.isRemoveFrom(startSquare)))
 				// Find square where piece is added
 				.map(m -> m.getBoardMutations().stream()
 						.filter(mut -> mut.getMutation() == ADD)
-						.map(BoardMutation::getSquare).findFirst().get())
+						.map(BoardMutation::getSquare)
+						.findFirst()
+						.get())
 				.collect(toList());
 	}
 

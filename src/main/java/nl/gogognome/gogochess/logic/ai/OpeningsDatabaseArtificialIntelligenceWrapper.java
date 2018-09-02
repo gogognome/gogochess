@@ -51,10 +51,10 @@ public class OpeningsDatabaseArtificialIntelligenceWrapper implements Artificial
 
 		int opening = random.nextInt(matchingOpenings.size());
 		String followingMoveDescription = OPENINGS[matchingOpenings.get(opening)][board.lastMove().depthInTree()];
-		Move nextMove = board.validMoves().stream()
+		Move nextMove = board.currentPlayer().validMoves(board).stream()
 				.filter(move -> moveNotation.format(move).equals(followingMoveDescription))
 				.findFirst()
-				.orElseThrow(() -> new IllegalStateException("Could not find next move " + followingMoveDescription + " in valid moves " + board.validMoves()));
+				.orElseThrow(() -> new IllegalStateException("Could not find next move " + followingMoveDescription + " in valid moves " + board.currentPlayer().validMoves(board)));
 		bestMovesConsumer.accept(singletonList(nextMove));
 		return nextMove;
 	}

@@ -22,7 +22,7 @@ class QueenTest {
 				new BoardMutation(WHITE_QUEEN, E4, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves();
+		List<Move> moves = board.currentPlayer().validMoves(board);
 
 		assertMovesContainsExactlyInAnyOrder(moves, "Qe4-f5", "Qe4-g6", "Qe4-h7", "Qe4-f3", "Qe4-g2", "Qe4-h1", "Qe4-d5", "Qe4-c6", "Qe4-b7", "Qe4-a8",
 				"Qe4-d3", "Qe4-c2", "Qe4-b1", "Qe4-f4", "Qe4-g4", "Qe4-h4", "Qe4-d4", "Qe4-c4", "Qe4-b4", "Qe4-a4", "Qe4-e5", "Qe4-e6", "Qe4-e7", "Qe4-e8",
@@ -43,7 +43,7 @@ class QueenTest {
 				new BoardMutation(WHITE_ROOK, E5, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves();
+		List<Move> moves = board.currentPlayer().validMoves(board);
 
 		assertFalse(moves.toString().contains("Qe4xRe5"), moves.toString());
 		assertFalse(moves.toString().contains("Qe4-e6"), moves.toString());
@@ -56,7 +56,7 @@ class QueenTest {
 				new BoardMutation(BLACK_ROOK, E5, ADD));
 		board.process(setup);
 
-		List<Move> moves = board.validMoves();
+		List<Move> moves = board.currentPlayer().validMoves(board);
 
 		assertMovesContain(moves, "Qe4xRe5");
 		assertMovesContain(moves,

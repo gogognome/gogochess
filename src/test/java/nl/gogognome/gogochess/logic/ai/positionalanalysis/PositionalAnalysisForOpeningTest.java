@@ -229,7 +229,7 @@ class PositionalAnalysisForOpeningTest {
 	}
 
 	private Move buildSetupMove(BoardMutation[] mutations) {
-		Player player = mutations[0].getPlayerPiece().getPlayer().other();
+		Player player = mutations[0].getPlayerPiece().getPlayer().opponent();
 		return new Move(player,
 				Arrays.stream(mutations)
 						.filter(m -> m.getMutation() == REMOVE)

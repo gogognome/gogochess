@@ -18,7 +18,7 @@ public class Move {
 	private int value;
 
 	public Move(Move precedingMove, BoardMutation... boardMutations) {
-		this(precedingMove, precedingMove.player.other(), asList(boardMutations));
+		this(precedingMove, precedingMove.player.opponent(), asList(boardMutations));
 	}
 
 	public Move(Player player, BoardMutation... boardMutations) {

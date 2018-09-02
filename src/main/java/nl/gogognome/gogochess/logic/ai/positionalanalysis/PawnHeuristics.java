@@ -78,13 +78,13 @@ public class PawnHeuristics {
 		}
 
 		if (move.capturedPlayerPiece().getPiece() == PAWN && (toColumn == 3 || toColumn == 4)) {
-			if (board.isIsolatedPawnInColumn(move.getPlayer().other(), toColumn)) {
+			if (board.isIsolatedPawnInColumn(move.getPlayer().opponent(), toColumn)) {
 				pawnCaptureValue += 50;
 			}
 			int rowDelta = negateForBlack(1, move);
 			Square leftForward = to.getSquare().addColumnAndRow(-1, rowDelta);
 			Square rightForward = to.getSquare().addColumnAndRow(1, rowDelta);
-			PlayerPiece pawnOfOpponent = new Pawn(move.getPlayer().other());
+			PlayerPiece pawnOfOpponent = new Pawn(move.getPlayer().opponent());
 			if ((leftForward != null && pawnOfOpponent.equals(board.pieceAt(leftForward)))
 					|| (rightForward != null && pawnOfOpponent.equals(board.pieceAt(rightForward)))) {
 				pawnCaptureValue -= 15;

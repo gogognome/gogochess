@@ -27,7 +27,7 @@ public class QuiescenceSearch {
 		int value = boardEvaluator.value(board);
 		move.setValue(value);
 
-		Player playerForNextMove = move.getPlayer().other();
+		Player playerForNextMove = move.getPlayer().opponent();
 		if (playerForNextMove == WHITE) {
 			if (value >= beta) {
 				move.setValue(beta);
@@ -53,7 +53,7 @@ public class QuiescenceSearch {
 		}
 
 		Move bestDeepestMove = move;
-		List<Move> childMoves = board.validMoves();
+		List<Move> childMoves = board.currentPlayer().validMoves(board);
 		statistics.onPositionsGenerated(childMoves.size());
 		for (Move childMove : childMoves) {
 			killerHeuristic.putKillerMoveFirst(childMoves);
