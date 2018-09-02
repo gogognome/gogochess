@@ -85,20 +85,26 @@ public class GamePresentationModel {
 
 	public void onWhitePlayerAI(boolean whitePlayerAi) {
 		this.whitePlayerAi = whitePlayerAi;
-		if (state == State.COMPUTER_THINKING) {
-			ai.cancel();
-		}
 		fireEvent(Event.SETTING_CHANGED);
-		onStartThinking();
+
+		cancelOrStartThinkingFor(WHITE);
 	}
 
 	public void onBlackPlayerAI(boolean blackPlayerAi) {
 		this.blackPlayerAi = blackPlayerAi;
-		if (state == State.COMPUTER_THINKING) {
-			ai.cancel();
-		}
 		fireEvent(Event.SETTING_CHANGED);
-		onStartThinking();
+
+		cancelOrStartThinkingFor(BLACK);
+	}
+
+	private void cancelOrStartThinkingFor(Player player) {
+		if (board.currentPlayer() == player) {
+			if (state == State.COMPUTER_THINKING) {
+				ai.cancel();
+			}
+
+			onStartThinking();
+		}
 	}
 
 	public void playGame() {
@@ -107,15 +113,18 @@ public class GamePresentationModel {
 	}
 
 	private void computerThinking() {
+		logger.debug("Start thinking...");
 		try {
+			Board boardForArtificialIntelligence = new Board();
+			boardForArtificialIntelligence.process(board.lastMove());
 			Move move = ai.nextMove(
-					board,
-					board.currentPlayer(),
+					boardForArtificialIntelligence,
+					boardForArtificialIntelligence.currentPlayer(),
 					percentage -> setPercentage(percentage),
 					bestMoves -> logger.debug(bestMoves.stream().map(m -> m.toString()).collect(joining(", "))));
 			SwingUtilities.invokeLater(() -> onMove(move));
 		} catch (ArtificalIntelligenceCanceledException e) {
-			// ignored intentionally
+			logger.debug("Canceled thinking");
 		} catch (Exception e) {
 			logger.error("Problem occurred: " + e.getMessage(), e);
 		}
@@ -206,7 +215,20 @@ public class GamePresentationModel {
 	}
 
 	private void fireEvent(Event event) {
+		logEvent(event);
 		listeners.forEach(l -> l.accept(event));
+	}
+
+	private void logEvent(Event event) {
+		if (event == Event.PERCENTAGE_CHANGED) {
+			return;
+		}
+
+		logger.debug("Fired event: " + event);
+
+		if (event == Event.STATE_CHANGED) {
+			logger.debug("New state: " + state);
+		}
 	}
 
 }

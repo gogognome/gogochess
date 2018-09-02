@@ -57,6 +57,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 
 	@Override
 	public Move nextMove(Board board, Player player, Consumer<Integer> progressUpdateConsumer, Consumer<List<Move>> bestMovesConsumer) {
+		canceled.set(false);
 		initMaxDepth(board);
 		statistics.reset();
 		transpositionTable.clear();
@@ -67,9 +68,9 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		positonalAnalysis.evaluate(board, nextMoves);
 		moveSort.sort(nextMoves);
 		ReverseAlgebraicNotation notation = new ReverseAlgebraicNotation();
-		for (Move m : nextMoves) {
-			logger.debug(notation.format(m) + "\t" + m.getValue());
-		}
+//		for (Move m : nextMoves) {
+//			logger.debug(notation.format(m) + "\t" + m.getValue());
+//		}
 
 		statistics.onPositionsGenerated(nextMoves.size());
 		Progress progress = new Progress(progressUpdateConsumer);
