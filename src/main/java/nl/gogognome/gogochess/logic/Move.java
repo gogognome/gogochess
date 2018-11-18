@@ -6,6 +6,7 @@ import static nl.gogognome.gogochess.logic.Piece.*;
 import static nl.gogognome.gogochess.logic.Status.*;
 import java.util.*;
 import java.util.function.*;
+import com.google.common.collect.*;
 import nl.gogognome.gogochess.logic.piece.*;
 
 public class Move {
@@ -28,7 +29,7 @@ public class Move {
 	public Move(Move precedingMove, Player player, List<BoardMutation> boardMutations) {
 		this.precedingMove = precedingMove;
 		this.player = player;
-		this.boardMutations = Collections.unmodifiableList(boardMutations);
+		this.boardMutations = ImmutableList.copyOf(boardMutations);
 		this.depthInTree = precedingMove == null ? 0 : precedingMove.depthInTree + 1;
 	}
 
@@ -134,7 +135,7 @@ public class Move {
 		Square squareOfCapturedPiece = getMutationAddingPieceAtDestination().getSquare();
 		return getBoardMutations().stream()
 				.filter(mutation -> mutation.getMutation() == REMOVE && squareOfCapturedPiece.equals(mutation.getSquare()))
-				.map(mutation -> mutation.getPlayerPiece())
+				.map(BoardMutation::getPlayerPiece)
 				.findFirst()
 				.orElseThrow(() -> new IllegalArgumentException("This move is not a capture"));
 	}
