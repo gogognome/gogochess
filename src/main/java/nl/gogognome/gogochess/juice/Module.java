@@ -15,7 +15,6 @@ public class Module extends AbstractModule {
 	}
 
 	@Provides
-	@Singleton
 	BoardEvaluator provideBoardEvaluator() {
 		return new CompositeBoardEvaluator(
 				new EndOfGameBoardEvaluator(),
@@ -46,11 +45,16 @@ public class Module extends AbstractModule {
 	}
 
 	@Provides
-	BoardMovesAndSettingsPanel boardMovesAndSettingsPanel(GamePresentationModel presentationModel, MoveNotation moveNotation) {
+	BoardMovesAndSettingsPanel provideBoardMovesAndSettingsPanel(GamePresentationModel presentationModel, MoveNotation moveNotation) {
 		BoardPanel boardPanel = new BoardPanel(presentationModel);
 		MovesPanel movesPanel = new MovesPanel(moveNotation, presentationModel);
 		ProgressBar progressBar = new ProgressBar(presentationModel);
 		SettingsPanel settingsPanel = new SettingsPanel(presentationModel);
 		return new BoardMovesAndSettingsPanel(boardPanel, movesPanel, progressBar, settingsPanel);
+	}
+	
+	@Provides
+	PositionalAnalysis providePositionalAnalysis(PieceValueEvaluator pieceValueEvaluator) {
+		return new PositionalAnalysis(pieceValueEvaluator);
 	}
 }

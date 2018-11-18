@@ -12,11 +12,23 @@ public class PositionalAnalysis {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
+	public PositionalAnalysis(PieceValueEvaluator pieceValueEvaluator) {
+		this.pieceValueEvaluator = pieceValueEvaluator;
+	}
+
+	private enum Phase {
+		OPENING,
+		MIDDLE_GAME,
+		END_GAME
+	}
+	
 	private final CentralControlHeuristic centralControlHeuristic = new CentralControlHeuristic();
 	private final PawnHeuristics pawnHeuristics = new PawnHeuristics();
 	private final PositionalAnalysisForOpening positionalAnalysisForOpening = new PositionalAnalysisForOpening(centralControlHeuristic, pawnHeuristics);
 	private final PositionalAnalysisForMiddleGame positionalAnalysisForMiddleGame = new PositionalAnalysisForMiddleGame(centralControlHeuristic, new KingField());
-	private final PieceValueEvaluator pieceValueEvaluator = new PieceValueEvaluator();
+	private final PieceValueEvaluator pieceValueEvaluator;
+	
+	private Phase currentPhase;
 
 	public void evaluate(Board board, List<Move> moves) {
 		if (moves.isEmpty()) {
@@ -24,13 +36,24 @@ public class PositionalAnalysis {
 		}
 
 		if (isOpening(board)) {
-			logger.debug("Using positional analysis for opening");
+			if (currentPhase != Phase.OPENING) {
+				currentPhase = Phase.OPENING;
+				logger.debug("Using positional analysis for opening");
+			}
 			positionalAnalysisForOpening.evaluate(board, moves);
 		} else if (isMiddleGame(board)) {
-			logger.debug("Using positional analysis for middle game");
+			if (currentPhase != Phase.MIDDLE_GAME) {
+				readjusePieceValues(board);
+				currentPhase = Phase.MIDDLE_GAME;
+				logger.debug("Using positional analysis for middle game");
+			}
 			positionalAnalysisForMiddleGame.evaluate(board, moves);
 		} else {
-			logger.debug("Using positional analysis for end game");
+			if (currentPhase != Phase.END_GAME) {
+				readjusePieceValues(board);
+				currentPhase = Phase.END_GAME;
+				logger.debug("Using positional analysis for end game");
+			}
 			positionalAnalysisForMiddleGame.evaluate(board, moves);
 		}
 	}
@@ -48,6 +71,19 @@ public class PositionalAnalysis {
 			}
 		}
 		return false;
+	}
+
+	private void readjusePieceValues(Board board) {
+		int whiteMatieral = pieceValueEvaluator.getValueForPieces(board, Player.WHITE);
+		int blackMaterial = pieceValueEvaluator.getValueForPieces(board, Player.BLACK);
+		if (board.currentPlayer() == Player.WHITE && whiteMatieral - blackMaterial >= 200) {
+			pieceValueEvaluator.readjustWhitePieceValues(Math.max(0.6f, ((float) blackMaterial) / ((float) whiteMatieral)));
+			logger.debug("Piece values have been readjusted to: " + pieceValueEvaluator);
+		}
+		if (board.currentPlayer() == Player.BLACK && blackMaterial - whiteMatieral >= 200) {
+			pieceValueEvaluator.readjustBlackPieceValues(Math.max(0.6f, ((float) whiteMatieral) / ((float) blackMaterial)));
+			logger.debug("Piece values have been readjusted to: " + pieceValueEvaluator);
+		}
 	}
 
 }
