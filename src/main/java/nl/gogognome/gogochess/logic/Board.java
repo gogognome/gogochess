@@ -226,10 +226,14 @@ public class Board {
 	}
 
 	public Player currentPlayer() {
+		return currentPlayerOpponent().opponent();
+	}
+	
+	public Player currentPlayerOpponent() {
 		if (lastMove == null) {
 			throw new IllegalStateException("No moves can be determined when the board is empty");
 		}
-		return lastMove().getPlayer().opponent();
+		return lastMove().getPlayer();
 	}
 
 	/**
