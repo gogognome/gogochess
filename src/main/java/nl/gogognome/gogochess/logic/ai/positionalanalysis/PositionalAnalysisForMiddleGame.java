@@ -19,7 +19,7 @@ class PositionalAnalysisForMiddleGame {
 	}
 
 	public void evaluate(Board board, List<Move> moves) {
-		Square opponentKingSquare = board.kingSquareOf(board.lastMove().getPlayer());
+		Square opponentKingSquare = board.kingSquareOf(board.currentPlayer().opponent());
 		for (Move move : moves) {
 			BoardMutation from = move.getMutationRemovingPieceFromStart();
 			BoardMutation to = move.getMutationAddingPieceAtDestination();
@@ -33,6 +33,6 @@ class PositionalAnalysisForMiddleGame {
 
 	private int mobilityAfterMove(Board board, Move move) {
 		board.process(move);
-		return WHITE.validMoves(board).size() - BLACK.validMoves(board).size();
+		return board.currentPlayerOpponent().validMoves(board).size();
 	}
 }
