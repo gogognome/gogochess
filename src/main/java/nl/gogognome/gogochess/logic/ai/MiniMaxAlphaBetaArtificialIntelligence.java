@@ -67,7 +67,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		List<Move> nextMoves = board.currentPlayer().validMoves(board);
 		positonalAnalysis.evaluate(board, nextMoves);
 		moveSort.sort(nextMoves);
-		ReverseAlgebraicNotation notation = new ReverseAlgebraicNotation();
+//		ReverseAlgebraicNotation notation = new ReverseAlgebraicNotation();
 //		for (Move m : nextMoves) {
 //			logger.debug(notation.format(m) + "\t" + m.getValue());
 //		}
