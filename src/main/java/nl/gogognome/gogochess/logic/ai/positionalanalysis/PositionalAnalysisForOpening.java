@@ -11,7 +11,7 @@ import nl.gogognome.gogochess.logic.*;
 /**
  * This class evaluates the opening positions. Based on James J.Gillogly, "The Technology Chess Program" (1972).
  */
-class PositionalAnalysisForOpening {
+class PositionalAnalysisForOpening implements MovesEvaluator {
 
 	private final CentralControlHeuristic centralControlHeuristic;
 	private final PawnHeuristics pawnHeuristics;

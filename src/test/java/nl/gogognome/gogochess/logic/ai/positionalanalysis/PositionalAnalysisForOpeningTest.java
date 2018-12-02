@@ -1,18 +1,19 @@
 package nl.gogognome.gogochess.logic.ai.positionalanalysis;
 
-import static java.util.Arrays.*;
-import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.*;
-import static nl.gogognome.gogochess.logic.Player.*;
+import nl.gogognome.gogochess.logic.Move;
+import org.junit.jupiter.api.Test;
+
+import static nl.gogognome.gogochess.logic.Player.BLACK;
+import static nl.gogognome.gogochess.logic.Player.WHITE;
 import static nl.gogognome.gogochess.logic.Squares.*;
 import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
-import static org.assertj.core.api.Assertions.*;
-import java.util.*;
-import org.junit.jupiter.api.*;
-import nl.gogognome.gogochess.logic.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-class PositionalAnalysisForOpeningTest {
+class PositionalAnalysisForOpeningTest extends PositionalAnalysisBaseTest {
 
-	private PositionalAnalysisForOpening analysis = new PositionalAnalysisForOpening(new CentralControlHeuristic(), new PawnHeuristics());
+	PositionalAnalysisForOpeningTest() {
+		super(new PositionalAnalysisForOpening(new CentralControlHeuristic(), new PawnHeuristics()));
+	}
 
 	@Test
 	void whiteKnightMovingToCenterScoresBetterThanKnightMovingAwayFromCenter() {
@@ -215,25 +216,5 @@ class PositionalAnalysisForOpeningTest {
 		assertThat(value).isEqualTo(-8); // -10 for advancing wing pawn and 2 for moving towards center
 	}
 
-	private int valueOfMove(BoardMutation... mutations) {
-		Move setup = buildSetupMove(mutations);
-		return valueOfMove(setup, mutations);
-	}
 
-	private int valueOfMove(Move setup, BoardMutation... mutations) {
-		Move move = new Move(setup, mutations);
-		Board board = new Board();
-		board.process(move);
-		analysis.evaluate(board, asList(move));
-		return move.getValue();
-	}
-
-	private Move buildSetupMove(BoardMutation[] mutations) {
-		Player player = mutations[0].getPlayerPiece().getPlayer().opponent();
-		return new Move(player,
-				Arrays.stream(mutations)
-						.filter(m -> m.getMutation() == REMOVE)
-						.map(m -> new BoardMutation(m.getPlayerPiece(), m.getSquare(), ADD))
-						.toArray(BoardMutation[]::new));
-	}
 }
