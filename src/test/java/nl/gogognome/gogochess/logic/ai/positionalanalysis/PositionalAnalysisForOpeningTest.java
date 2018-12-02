@@ -216,5 +216,20 @@ class PositionalAnalysisForOpeningTest extends PositionalAnalysisBaseTest {
 		assertThat(value).isEqualTo(-8); // -10 for advancing wing pawn and 2 for moving towards center
 	}
 
+	@Test
+	void pawnHeuristicsDoNotThrowExceptionForWhiteEnPassentCapture() {
+		Move setup = new Move(WHITE, BLACK_PAWN.addTo(D7), WHITE_PAWN.addTo(E5));
+		int value = valueOfMove(new Move(setup, BLACK_PAWN.removeFrom(D7), BLACK_PAWN.addTo(D5)),
+				WHITE_PAWN.removeFrom(E5), BLACK_PAWN.removeFrom(D5), WHITE_PAWN.addTo(D6));
+		assertThat(value).isEqualTo(56);
+	}
+
+	@Test
+	void pawnHeuristicsDoNotThrowExceptionForBlackEnPassentCapture() {
+		Move setup = new Move(BLACK, WHITE_PAWN.addTo(D2), BLACK_PAWN.addTo(E4));
+		int value = valueOfMove(new Move(setup, WHITE_PAWN.removeFrom(D2), WHITE_PAWN.addTo(D4)),
+				BLACK_PAWN.removeFrom(E4), WHITE_PAWN.removeFrom(D4), BLACK_PAWN.addTo(D3));
+		assertThat(value).isEqualTo(-56);
+	}
 
 }

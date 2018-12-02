@@ -49,7 +49,7 @@ public class Move {
 		return depthInTree;
 	}
 
-	public static Move findCommonAncestor(Move left, Move right) {
+	static Move findCommonAncestor(Move left, Move right) {
 		if (left == null || right == null) {
 			return null;
 		}
@@ -66,7 +66,7 @@ public class Move {
 		return left;
 	}
 
-	public void setStatus(Status status) {
+	void setStatus(Status status) {
 		this.status = status;
 	}
 
@@ -134,10 +134,25 @@ public class Move {
 	public PlayerPiece capturedPlayerPiece() {
 		Square squareOfCapturedPiece = getMutationAddingPieceAtDestination().getSquare();
 		return getBoardMutations().stream()
-				.filter(mutation -> mutation.getMutation() == REMOVE && squareOfCapturedPiece.equals(mutation.getSquare()))
+				.filter(mutation -> mutation.getMutation() == REMOVE && (squareOfCapturedPiece.equals(mutation.getSquare()) || isEnPassentCapture()))
 				.map(BoardMutation::getPlayerPiece)
 				.findFirst()
 				.orElseThrow(() -> new IllegalArgumentException("This move is not a capture"));
+	}
+
+	private boolean isEnPassentCapture() {
+		if (boardMutations.size() != 3) {
+			return false;
+		}
+		if (!boardMutations.stream().allMatch(mutation -> mutation.getPlayerPiece().getPiece() == PAWN)) {
+			return false;
+		}
+		Square takenPawnSquare = getBoardMutations().stream()
+				.filter(mutation -> mutation.getPlayerPiece().getPlayer() != getPlayer() && mutation.getMutation() == REMOVE)
+				.map(BoardMutation::getSquare)
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("Expected one pawn to be removed in en passent capture."));
+		return getMutationRemovingPieceFromStart().getSquare().column() != takenPawnSquare.column();
 	}
 
 	private Predicate<BoardMutation> filterForKingDuringCastling() {
