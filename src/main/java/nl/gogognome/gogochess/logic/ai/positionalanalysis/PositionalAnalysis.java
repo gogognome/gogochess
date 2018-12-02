@@ -6,9 +6,10 @@ import nl.gogognome.gogochess.logic.*;
 import nl.gogognome.gogochess.logic.ai.*;
 
 /**
- * This class evaluates the opening positions. Based on James J.Gillogly, "The Technology Chess Program" (1972).
+ * This class evaluates the opening positions. The implementation is based on the article
+ * James J.Gillogly, "The Technology Chess Program" (1972).
  */
-public class PositionalAnalysis {
+public class PositionalAnalysis implements MovesEvaluator {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -25,7 +26,7 @@ public class PositionalAnalysis {
 	private final CentralControlHeuristic centralControlHeuristic = new CentralControlHeuristic();
 	private final PawnHeuristics pawnHeuristics = new PawnHeuristics();
 	private final PositionalAnalysisForOpening positionalAnalysisForOpening = new PositionalAnalysisForOpening(centralControlHeuristic, pawnHeuristics);
-	private final PositionalAnalysisForMiddleGame positionalAnalysisForMiddleGame = new PositionalAnalysisForMiddleGame(centralControlHeuristic, new KingField());
+	private final PositionalAnalysisForMiddleGame positionalAnalysisForMiddleGame = new PositionalAnalysisForMiddleGame(centralControlHeuristic, new KingFieldHeuristic());
 	private final PieceValueEvaluator pieceValueEvaluator;
 	
 	private Phase currentPhase;
@@ -35,27 +36,29 @@ public class PositionalAnalysis {
 			return;
 		}
 
+		MovesEvaluator evaluator;
 		if (isOpening(board)) {
 			if (currentPhase != Phase.OPENING) {
 				currentPhase = Phase.OPENING;
 				logger.debug("Using positional analysis for opening");
 			}
-			positionalAnalysisForOpening.evaluate(board, moves);
+			evaluator = positionalAnalysisForOpening;
 		} else if (isMiddleGame(board)) {
 			if (currentPhase != Phase.MIDDLE_GAME) {
 				readjusePieceValues(board);
 				currentPhase = Phase.MIDDLE_GAME;
 				logger.debug("Using positional analysis for middle game");
 			}
-			positionalAnalysisForMiddleGame.evaluate(board, moves);
+			evaluator = positionalAnalysisForMiddleGame;
 		} else {
 			if (currentPhase != Phase.END_GAME) {
 				readjusePieceValues(board);
 				currentPhase = Phase.END_GAME;
 				logger.debug("Using positional analysis for end game");
 			}
-			positionalAnalysisForMiddleGame.evaluate(board, moves);
+			evaluator = positionalAnalysisForMiddleGame;
 		}
+		evaluator.evaluate(board, moves);
 	}
 
 	private boolean isOpening(Board board) {

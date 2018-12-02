@@ -9,13 +9,18 @@ import nl.gogognome.gogochess.logic.piece.*;
 
 public class PawnHeuristics {
 
-	public int getPawnHeuristicsForOpening(Board board, Move move, BoardMutation from, BoardMutation to) {
+	int getPawnHeuristicsForOpening(Board board, Move move, BoardMutation from, BoardMutation to) {
+		Move lastMove = board.lastMove();
+		board.process(move);
+
 		int value = getValueForWhitePawnMovingToD3_D4_E3_E4(from, to);
 		value += getValueForPieceBlocksWhiteCenterPawn(board, to);
 		value += getValueForPieceBlocksBlackCenterPawn(board, to);
 		value += negateForBlack(getValueForPawnCapturingOtherPiece(board, move, from, to), move);
 		value += negateForBlack(getValueForPawnOnSideOfBoard(from, to), move);
 
+		board.process(lastMove)
+		;
 		return value;
 	}
 
