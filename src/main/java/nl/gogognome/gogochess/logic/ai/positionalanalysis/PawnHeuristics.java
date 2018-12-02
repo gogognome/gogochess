@@ -7,21 +7,23 @@ import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
 import nl.gogognome.gogochess.logic.*;
 import nl.gogognome.gogochess.logic.piece.*;
 
-public class PawnHeuristics {
+class PawnHeuristics {
+
+	private final int wingPawnAdvancementValue;
+
+	PawnHeuristics(int wingPawnAdvancementValue) {
+		this.wingPawnAdvancementValue = wingPawnAdvancementValue;
+	}
 
 	int getPawnHeuristicsForOpening(Board board, Move move, BoardMutation from, BoardMutation to) {
-		Move lastMove = board.lastMove();
-		board.process(move);
-
-		int value = getValueForWhitePawnMovingToD3_D4_E3_E4(from, to);
-		value += getValueForPieceBlocksWhiteCenterPawn(board, to);
-		value += getValueForPieceBlocksBlackCenterPawn(board, to);
-		value += negateForBlack(getValueForPawnCapturingOtherPiece(board, move, from, to), move);
-		value += negateForBlack(getValueForPawnOnSideOfBoard(from, to), move);
-
-		board.process(lastMove)
-		;
-		return value;
+		return board.temporarilyMove(move, () -> {
+			int value = getValueForWhitePawnMovingToD3_D4_E3_E4(from, to);
+			value += getValueForPieceBlocksWhiteCenterPawn(board, to);
+			value += getValueForPieceBlocksBlackCenterPawn(board, to);
+			value += negateForBlack(getValueForPawnCapturingOtherPiece(board, move, from, to), move);
+			value += negateForBlack(getValueForPawnOnSideOfBoard(from, to), move);
+			return value;
+		});
 	}
 
 	private int getValueForWhitePawnMovingToD3_D4_E3_E4(BoardMutation from, BoardMutation to) {
@@ -105,7 +107,7 @@ public class PawnHeuristics {
 
 	private int getValueForPawnOnSideOfBoard(BoardMutation from, BoardMutation to) {
 		if (from.getPlayerPiece().getPiece() == PAWN && (to.getSquare().column() == 0 || to.getSquare().column() == 7)) {
-			return -10;
+			return wingPawnAdvancementValue;
 		}
 		return 0;
 	}

@@ -15,6 +15,13 @@ public class PositionalAnalysis implements MovesEvaluator {
 
 	public PositionalAnalysis(PieceValueEvaluator pieceValueEvaluator) {
 		this.pieceValueEvaluator = pieceValueEvaluator;
+
+		positionalAnalysisForMiddleGame = new PositionalAnalysisForMiddleGame(
+				new CastlingHeuristics(),
+				centralControlHeuristic,
+				new KingFieldHeuristic(),
+				new PawnHeuristics(-5),
+				pieceValueEvaluator);
 	}
 
 	private enum Phase {
@@ -24,9 +31,11 @@ public class PositionalAnalysis implements MovesEvaluator {
 	}
 	
 	private final CentralControlHeuristic centralControlHeuristic = new CentralControlHeuristic();
-	private final PawnHeuristics pawnHeuristics = new PawnHeuristics();
-	private final PositionalAnalysisForOpening positionalAnalysisForOpening = new PositionalAnalysisForOpening(centralControlHeuristic, pawnHeuristics);
-	private final PositionalAnalysisForMiddleGame positionalAnalysisForMiddleGame = new PositionalAnalysisForMiddleGame(centralControlHeuristic, new KingFieldHeuristic());
+	private final PositionalAnalysisForOpening positionalAnalysisForOpening = new PositionalAnalysisForOpening(
+			new CastlingHeuristics(),
+			centralControlHeuristic,
+			new PawnHeuristics(-10));
+	private final PositionalAnalysisForMiddleGame positionalAnalysisForMiddleGame;
 	private final PieceValueEvaluator pieceValueEvaluator;
 	
 	private Phase currentPhase;

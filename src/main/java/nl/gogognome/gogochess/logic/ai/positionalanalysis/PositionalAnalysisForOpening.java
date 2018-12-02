@@ -1,7 +1,6 @@
 package nl.gogognome.gogochess.logic.ai.positionalanalysis;
 
 import static nl.gogognome.gogochess.logic.MoveValues.*;
-import static nl.gogognome.gogochess.logic.Piece.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
 import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
 import java.util.*;
@@ -13,6 +12,7 @@ import nl.gogognome.gogochess.logic.*;
  */
 class PositionalAnalysisForOpening implements MovesEvaluator {
 
+	private final CastlingHeuristics castlingHeuristics;
 	private final CentralControlHeuristic centralControlHeuristic;
 	private final PawnHeuristics pawnHeuristics;
 
@@ -24,9 +24,10 @@ class PositionalAnalysisForOpening implements MovesEvaluator {
 			.build();
 
 
-	public PositionalAnalysisForOpening(
-			CentralControlHeuristic centralControlHeuristic,
+	PositionalAnalysisForOpening(
+			CastlingHeuristics castlingHeuristics, CentralControlHeuristic centralControlHeuristic,
 			PawnHeuristics pawnHeuristics) {
+		this.castlingHeuristics = castlingHeuristics;
 		this.centralControlHeuristic = centralControlHeuristic;
 		this.pawnHeuristics = pawnHeuristics;
 	}
@@ -44,9 +45,9 @@ class PositionalAnalysisForOpening implements MovesEvaluator {
 		int toColumn = to.getSquare().column();
 
 		int value = negateForBlack(centralControlHeuristic.getCenterControlDeltaForOpening(from, to), move);
+		value += negateForBlack(castlingHeuristics.getCastlingValue(from.getPlayerPiece().getPiece(), fromColumn, toColumn), move);
 		value += pawnHeuristics.getPawnHeuristicsForOpening(board, move, from, to);
 		value += negateForBlack(getKnightMoveValue(from, to), move);
-		value += negateForBlack(getCastlingValue(from.getPlayerPiece().getPiece(), fromColumn, toColumn), move);
 		value += negateForBlack(getPieceMovingFromKingSideValue(fromColumn), move);
 
 		move.setValue(value);
@@ -67,18 +68,6 @@ class PositionalAnalysisForOpening implements MovesEvaluator {
 			pieceMovingFromKingSideValue = 2;
 		}
 		return pieceMovingFromKingSideValue;
-	}
-
-	private int getCastlingValue(Piece movedPiece, int fromColumn, int toColumn) {
-		int castlingValue = 0;
-		if (movedPiece == KING && toColumn - fromColumn == 2) {
-			castlingValue = 30;
-		}
-
-		if (movedPiece == KING && fromColumn - toColumn == 2) {
-			castlingValue = 10;
-		}
-		return castlingValue;
 	}
 
 	private static class SimpleMove {

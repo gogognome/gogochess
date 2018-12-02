@@ -164,6 +164,24 @@ public class Board {
 		boardHash.removePlayerPiece(playerPieceToRemove, square);
 	}
 
+	/**
+	 * Process a move, call the supplier and undo the move.
+	 *
+	 * @param move the move
+	 * @param supplier the supplier
+	 * @param <T> type of the return value
+	 * @return the value provided by the supplier
+	 */
+	public <T> T temporarilyMove(Move move, Supplier<T> supplier) {
+		Move lastMove = lastMove();
+		process(move);
+
+		T value = supplier.get();
+
+		process(lastMove);
+		return value;
+	}
+
 	public PlayerPiece pieceAt(Square square) {
 		return playerPiecesPerSquare[square.boardIndex()];
 	}

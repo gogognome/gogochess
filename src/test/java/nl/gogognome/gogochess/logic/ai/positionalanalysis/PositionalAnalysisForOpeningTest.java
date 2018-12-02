@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PositionalAnalysisForOpeningTest extends PositionalAnalysisBaseTest {
 
 	PositionalAnalysisForOpeningTest() {
-		super(new PositionalAnalysisForOpening(new CentralControlHeuristic(), new PawnHeuristics()));
+		super(new PositionalAnalysisForOpening(new CastlingHeuristics(), new CentralControlHeuristic(), new PawnHeuristics(-10)));
 	}
 
 	@Test
