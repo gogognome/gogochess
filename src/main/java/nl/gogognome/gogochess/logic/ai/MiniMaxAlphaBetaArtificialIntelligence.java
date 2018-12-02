@@ -1,14 +1,21 @@
 package nl.gogognome.gogochess.logic.ai;
 
-import static java.lang.Math.*;
-import java.util.*;
-import java.util.concurrent.atomic.*;
-import java.util.function.*;
-import javax.inject.*;
-import org.slf4j.*;
-import nl.gogognome.gogochess.logic.*;
-import nl.gogognome.gogochess.logic.ai.positionalanalysis.*;
-import nl.gogognome.gogochess.logic.movenotation.*;
+import nl.gogognome.gogochess.logic.Board;
+import nl.gogognome.gogochess.logic.Move;
+import nl.gogognome.gogochess.logic.Player;
+import nl.gogognome.gogochess.logic.ai.positionalanalysis.PositionalAnalysis;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelligence {
 
@@ -38,7 +45,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		this.quiescenceSearch = quiescenceSearch;
 		this.statistics = statistics;
 		this.killerHeuristic = killerHeuristic;
-		this.initialMaxDepth = 4;
+		this.initialMaxDepth = 3;
 		this.initialAlpha = Integer.MIN_VALUE;
 		this.initialBeta = Integer.MAX_VALUE;
 	}
