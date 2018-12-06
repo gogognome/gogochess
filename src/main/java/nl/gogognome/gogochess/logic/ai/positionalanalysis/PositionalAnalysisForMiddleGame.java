@@ -45,7 +45,7 @@ class PositionalAnalysisForMiddleGame implements MovesEvaluator {
 			value += negateForBlack(castlingHeuristics.getCastlingValue(from.getPlayerPiece().getPiece(), from.getSquare().file(), to.getSquare().file()), move);
 			value += negateForBlack(kingFieldHeuristic.getKingFieldDeltaForMiddleGame(from, to, opponentKingSquare), move);
 			value += negateForBlack(mobilityAfterMove(board, move), move);
-			value += pawnHeuristics.getPawnHeuristicsForOpening(board, move, from, to);
+			value += pawnHeuristics.getPawnHeuristicsForOpeningAndMiddleGame(board, move, from, to);
 			value += move.isCapture() ? captureBonus : 0;
 			value += negateForBlack(unblocksKingsOrQueensBishopPawn(from, move.getPlayer(), board), move);
 

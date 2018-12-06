@@ -15,7 +15,7 @@ class PawnHeuristics {
 		this.wingPawnAdvancementValue = wingPawnAdvancementValue;
 	}
 
-	int getPawnHeuristicsForOpening(Board board, Move move, BoardMutation from, BoardMutation to) {
+	int getPawnHeuristicsForOpeningAndMiddleGame(Board board, Move move, BoardMutation from, BoardMutation to) {
 		return board.temporarilyMove(move, () -> {
 			int value = getValueForWhitePawnMovingToD3_D4_E3_E4(from, to);
 			value += getValueForPieceBlocksWhiteCenterPawn(board, to);
