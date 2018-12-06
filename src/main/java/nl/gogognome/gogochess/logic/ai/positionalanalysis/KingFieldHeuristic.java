@@ -36,11 +36,11 @@ class KingFieldHeuristic {
 	}
 
 	private int valueOf(int pieceFactor, Square square, Square opponentKingSquare) {
-		int rank = square.rank() - opponentKingSquare.rank() + 3;
-		int file = square.file() - opponentKingSquare.file() + 3;
+		int fieldColumn = square.rank() - opponentKingSquare.rank() + 3;
+		int fieldRow = square.file() - opponentKingSquare.file() + 3;
 		int centerControlValue;
-		if (0 <= rank && rank < 7 && 0 <= file && file < 7) {
-			centerControlValue = MIDDLE_GAME_KING_FIELD[rank][file];
+		if (0 <= fieldColumn && fieldColumn < 7 && 0 <= fieldRow && fieldRow < 7) {
+			centerControlValue = MIDDLE_GAME_KING_FIELD[fieldRow][fieldColumn];
 		} else {
 			centerControlValue = 0;
 		}
