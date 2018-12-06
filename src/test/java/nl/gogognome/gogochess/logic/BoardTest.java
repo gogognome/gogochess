@@ -8,7 +8,10 @@ import static nl.gogognome.gogochess.logic.Status.*;
 import static nl.gogognome.gogochess.logic.asserters.BoardAsserter.*;
 import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
 import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.*;
+
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.*;
 import nl.gogognome.gogochess.logic.movenotation.*;
 
@@ -20,7 +23,7 @@ class BoardTest {
 	void processAddMutationToEmptySquareSucceeds() {
 		board.process(new BoardMutation(WHITE_PAWN, A2, ADD));
 
-		assertEquals(WHITE_PAWN, board.pieceAt(A2));
+		Assertions.assertThat(board.pieceAt(A2)).isEqualTo(WHITE_PAWN);
 	}
 
 	@Test
@@ -181,6 +184,60 @@ class BoardTest {
 		board.process(WHITE_KNIGHT.removeFrom(C3), WHITE_KNIGHT.addTo(B1));
 		board.process(BLACK_KNIGHT.removeFrom(C6), BLACK_KNIGHT.addTo(B8)); // third occurrence
 		assertThat(board).lastMoveStatusIsEqualTo(Status.DRAW_BECAUSE_OF_THREEFOLD_REPETITION);
+	}
+
+	@Test
+	void singleWhitePawnIsPassedPawn() {
+		board.process(new Move(BLACK, WHITE_PAWN.addTo(E4)));
+		assertTrue(board.isPassedPawn(WHITE_PAWN, E4));
+	}
+
+	@Test
+	void singleBlackPawnInFileAIsPassedPawn() {
+		board.process(new Move(WHITE, BLACK_PAWN.addTo(A4)));
+		assertTrue(board.isPassedPawn(BLACK_PAWN, A4));
+	}
+
+	@Test
+	void singleWhitePawnInFileHIsPassedPawn() {
+		board.process(new Move(BLACK, WHITE_PAWN.addTo(H4)));
+		assertTrue(board.isPassedPawn(WHITE_PAWN, H4));
+	}
+
+	@Test
+	void blackPawnWithWhitePawnBehindItIsPassedPawn() {
+		board.process(new Move(WHITE, BLACK_PAWN.addTo(A4), WHITE_PAWN.addTo(A5)));
+		assertTrue(board.isPassedPawn(BLACK_PAWN, A4));
+	}
+
+	@Test
+	void whitePawnWithBlackPawnBehindItInAdjacentFileIsPassedPawn() {
+		board.process(new Move(BLACK, WHITE_PAWN.addTo(A4), BLACK_PAWN.addTo(B3)));
+		assertTrue(board.isPassedPawn(WHITE_PAWN, A4));
+	}
+
+	@Test
+	void whitePawnWithBlackPawnNextToItInAdjacentFileIsPassedPawn() {
+		board.process(new Move(BLACK, WHITE_PAWN.addTo(E7), BLACK_PAWN.addTo(F7)));
+		assertTrue(board.isPassedPawn(WHITE_PAWN, E7));
+	}
+
+	@Test
+	void blackPawnWithWhitePawnInFrontOfItIsNotPassedPawn() {
+		board.process(new Move(WHITE, BLACK_PAWN.addTo(B4), WHITE_PAWN.addTo(B2)));
+		assertFalse(board.isPassedPawn(BLACK_PAWN, B4));
+	}
+
+	@Test
+	void blackPawnWithWhitePawnInFrontOfItAdjacentFileIsNotPassedPawn() {
+		board.process(new Move(WHITE, BLACK_PAWN.addTo(H4), WHITE_PAWN.addTo(G2)));
+		assertFalse(board.isPassedPawn(BLACK_PAWN, H4));
+	}
+
+	@Test
+	void blackPawnWithWhitePawnInFrontOfItAdjacentAdjacentFileIsPassedPawn() {
+		board.process(new Move(WHITE, BLACK_PAWN.addTo(H4), WHITE_PAWN.addTo(F2)));
+		assertTrue(board.isPassedPawn(BLACK_PAWN, H4));
 	}
 
 	private Move find(List<Move> moves, String moveDescription) {

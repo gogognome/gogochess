@@ -3,6 +3,7 @@ package nl.gogognome.gogochess.logic;
 import static java.util.Arrays.*;
 import static nl.gogognome.gogochess.logic.Piece.*;
 import static nl.gogognome.gogochess.logic.Player.*;
+import static nl.gogognome.gogochess.logic.Square.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
 import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
 import java.util.*;
@@ -310,6 +311,31 @@ public class Board {
 			nrPawnsInAdjacentColumns += countNrOccurrencesInFile(pawn, file + 1);
 		}
 		return nrPawnsInAdjacentColumns == 0;
+	}
+
+	/**
+	 * Determines if the pawn at the specified square is a passed pawn. A passed pawn is a pawn with no opposing pawns
+	 * to prevent it from advancing to the eighth rank ; i.e. there are no opposing pawns in front of it on either
+	 * the same file or adjacent files.
+	 * @param pawn the pawn
+	 * @param square the square of the pawn
+ 	 * @return true if the pawn is a passed pawn; false otherwise.
+	 */
+	public boolean isPassedPawn(PlayerPiece pawn, Square square) {
+		if (pawn.getPiece() != PAWN) {
+			throw new IllegalArgumentException("Expected a pawn as piece, but got a " + pawn.getPiece());
+		}
+		int delta = pawn.getPlayer() == WHITE ? 1 : -1;
+		int finalRank = pawn.getPlayer() == WHITE ? RANK_8 : RANK_1;
+		for (int file = Math.max(FILE_A, square.file() - 1); file <= Math.min(FILE_H, square.file()); file++) {
+			for (int rank = square.rank() + delta; rank != finalRank; rank += delta) {
+				PlayerPiece otherPiece = pieceAt(new Square(file, rank));
+				if (otherPiece != null && otherPiece.getPiece() == PAWN && otherPiece.getPlayer() != pawn.getPlayer()) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	@Override
