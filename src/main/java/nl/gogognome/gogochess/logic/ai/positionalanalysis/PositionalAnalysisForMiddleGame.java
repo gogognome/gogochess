@@ -1,11 +1,16 @@
 package nl.gogognome.gogochess.logic.ai.positionalanalysis;
 
-import static nl.gogognome.gogochess.logic.MoveValues.negateForBlack;
-import static nl.gogognome.gogochess.logic.Player.*;
-
-import java.util.*;
 import nl.gogognome.gogochess.logic.*;
 import nl.gogognome.gogochess.logic.ai.PieceValueEvaluator;
+import nl.gogognome.gogochess.logic.piece.Pawn;
+
+import java.util.List;
+
+import static nl.gogognome.gogochess.logic.MoveValues.negateForBlack;
+import static nl.gogognome.gogochess.logic.Player.BLACK;
+import static nl.gogognome.gogochess.logic.Player.WHITE;
+import static nl.gogognome.gogochess.logic.Square.FILE_C;
+import static nl.gogognome.gogochess.logic.Square.FILE_F;
 
 class PositionalAnalysisForMiddleGame implements MovesEvaluator {
 
@@ -42,6 +47,7 @@ class PositionalAnalysisForMiddleGame implements MovesEvaluator {
 			value += negateForBlack(mobilityAfterMove(board, move), move);
 			value += pawnHeuristics.getPawnHeuristicsForOpening(board, move, from, to);
 			value += move.isCapture() ? captureBonus : 0;
+			value += negateForBlack(unblocksKingsOrQueensBishopPawn(from, move.getPlayer(), board), move);
 
 			move.setValue(value);
 		}
@@ -60,5 +66,19 @@ class PositionalAnalysisForMiddleGame implements MovesEvaluator {
 			captureBonus = -10;
 		}
 		return captureBonus;
+	}
+
+	private int unblocksKingsOrQueensBishopPawn(BoardMutation from, Player player, Board board) {
+		int file = from.getSquare().column();
+		if (file != FILE_C && file != FILE_F) {
+			return 0;
+		}
+		Square blockedSquare = from.getSquare().addRow(player == WHITE ? -1 : 1);
+		if (blockedSquare == null) {
+			return 0;
+		}
+
+		Pawn pawn = new Pawn(player);
+		return pawn.equals(board.pieceAt(blockedSquare)) ? 5 : 0;
 	}
 }

@@ -104,4 +104,48 @@ class PositionalAnalysisForMiddleGameTest extends PositionalAnalysisBaseTest {
         assertThat(highPriorityPieceNearOpponentsKing).isLessThan(lowPriorityPieceNearOpponentsKing);
     }
 
+    @Test
+    void moveWhiteBishopWhichBlocksKingsBishopPawnScoresBetterThanBishopThatDoesNotBlockKingsBishopPawn() {
+        int bishopWhichBlocksKingsBishopPawn = valueOfMove(new Move(BLACK, BLACK_KING.addTo(H8), WHITE_BISHOP.addTo(C3), WHITE_PAWN.addTo(C2)),
+                WHITE_BISHOP.removeFrom(C3), WHITE_BISHOP.addTo(B2));
+
+        int bishopWhichDoesNotBlocksKingsBishopPawn = valueOfMove(new Move(BLACK, BLACK_KING.addTo(H8), WHITE_BISHOP.addTo(C3)),
+                WHITE_BISHOP.removeFrom(C3), WHITE_BISHOP.addTo(B2));
+
+        assertThat(bishopWhichBlocksKingsBishopPawn).isGreaterThan(bishopWhichDoesNotBlocksKingsBishopPawn);
+    }
+
+    @Test
+    void moveWhiteBishopWhichBlocksQueensBishopPawnScoresBetterThanBishopThatDoesNotBlockQueebsBishopPawn() {
+        int bishopWhichBlocksKingsBishopPawn = valueOfMove(new Move(BLACK, BLACK_KING.addTo(A8), WHITE_BISHOP.addTo(F3), WHITE_PAWN.addTo(F2)),
+                WHITE_BISHOP.removeFrom(F3), WHITE_BISHOP.addTo(G2));
+
+        int bishopWhichDoesNotBlocksKingsBishopPawn = valueOfMove(new Move(BLACK, BLACK_KING.addTo(A8), WHITE_BISHOP.addTo(F3)),
+                WHITE_BISHOP.removeFrom(F3), WHITE_BISHOP.addTo(G2));
+
+        assertThat(bishopWhichBlocksKingsBishopPawn).isGreaterThan(bishopWhichDoesNotBlocksKingsBishopPawn);
+    }
+
+    @Test
+    void moveBlackBishopWhichBlocksKingsBishopPawnScoresBetterThanBishopThatDoesNotBlockKingsBishopPawn() {
+        int bishopWhichBlocksKingsBishopPawn = valueOfMove(new Move(WHITE, WHITE_KING.addTo(H1), BLACK_BISHOP.addTo(C6), BLACK_PAWN.addTo(C7)),
+                BLACK_BISHOP.removeFrom(C6), BLACK_BISHOP.addTo(B7));
+
+        int bishopWhichDoesNotBlocksKingsBishopPawn = valueOfMove(new Move(WHITE, WHITE_KING.addTo(H1), BLACK_BISHOP.addTo(C6)),
+                BLACK_BISHOP.removeFrom(C6), BLACK_BISHOP.addTo(B7));
+
+        assertThat(bishopWhichBlocksKingsBishopPawn).isLessThan(bishopWhichDoesNotBlocksKingsBishopPawn);
+    }
+
+    @Test
+    void moveBlackBishopWhichBlocksQueensBishopPawnScoresBetterThanBishopThatDoesNotBlockQueebsBishopPawn() {
+        int bishopWhichBlocksKingsBishopPawn = valueOfMove(new Move(WHITE, WHITE_KING.addTo(A1), BLACK_BISHOP.addTo(F6), BLACK_PAWN.addTo(F7)),
+                BLACK_BISHOP.removeFrom(F6), BLACK_BISHOP.addTo(G7));
+
+        int bishopWhichDoesNotBlocksKingsBishopPawn = valueOfMove(new Move(WHITE, WHITE_KING.addTo(H1), BLACK_BISHOP.addTo(F6)),
+                BLACK_BISHOP.removeFrom(F6), BLACK_BISHOP.addTo(G7));
+
+        assertThat(bishopWhichBlocksKingsBishopPawn).isLessThan(bishopWhichDoesNotBlocksKingsBishopPawn);
+    }
+
 }
