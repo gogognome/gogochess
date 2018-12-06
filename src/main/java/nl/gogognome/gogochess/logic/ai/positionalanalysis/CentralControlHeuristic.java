@@ -53,7 +53,7 @@ class CentralControlHeuristic {
 
 	private int valueOf(Piece piece, Square square, Map<Piece, Integer> pieceToValue) {
 		int pieceFactor = pieceToValue.get(piece);
-		int centerControlValue = CentralControlHeuristic.CENTER_CONTORL_ARRAY[square.row()][square.column()];
+		int centerControlValue = CentralControlHeuristic.CENTER_CONTORL_ARRAY[square.rank()][square.file()];
 		return pieceFactor * centerControlValue;
 	}
 

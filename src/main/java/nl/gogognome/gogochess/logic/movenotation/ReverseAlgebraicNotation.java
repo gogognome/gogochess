@@ -46,7 +46,7 @@ public class ReverseAlgebraicNotation implements MoveNotation {
 	}
 
 	private boolean isShortCastling(BoardMutation removeMutation, BoardMutation addMutation) {
-		return removeMutation.getPlayerPiece().getPiece() == KING && removeMutation.getSquare().column() == 4 && addMutation.getSquare().column() == 6;
+		return removeMutation.getPlayerPiece().getPiece() == KING && removeMutation.getSquare().file() == 4 && addMutation.getSquare().file() == 6;
 	}
 
 	private void appendShortCastling(StringBuilder result) {
@@ -54,7 +54,7 @@ public class ReverseAlgebraicNotation implements MoveNotation {
 	}
 
 	private boolean isLongCastling(BoardMutation removeMutation, BoardMutation addMutation) {
-		return removeMutation.getPlayerPiece().getPiece() == KING && removeMutation.getSquare().column() == 4 && addMutation.getSquare().column() == 2;
+		return removeMutation.getPlayerPiece().getPiece() == KING && removeMutation.getSquare().file() == 4 && addMutation.getSquare().file() == 2;
 	}
 
 	private void appendLongCastling(StringBuilder result) {
@@ -98,7 +98,7 @@ public class ReverseAlgebraicNotation implements MoveNotation {
 	}
 
 	private void appendSquare(StringBuilder stringBuilder, Square square) {
-		stringBuilder.append((char) ('a' + square.column())).append(((char)('1' + square.row())));
+		stringBuilder.append((char) ('a' + square.file())).append(((char)('1' + square.rank())));
 	}
 
 	private void appendPromotionPiece(StringBuilder result, BoardMutation removeMutation, BoardMutation addMutation) {

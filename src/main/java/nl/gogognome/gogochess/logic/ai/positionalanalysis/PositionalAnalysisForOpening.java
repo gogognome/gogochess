@@ -41,8 +41,8 @@ class PositionalAnalysisForOpening implements MovesEvaluator {
 	private void determineOpeningValue(Board board, Move move) {
 		BoardMutation from = move.getMutationRemovingPieceFromStart();
 		BoardMutation to = move.getMutationAddingPieceAtDestination();
-		int fromColumn = from.getSquare().column();
-		int toColumn = to.getSquare().column();
+		int fromColumn = from.getSquare().file();
+		int toColumn = to.getSquare().file();
 
 		int value = negateForBlack(centralControlHeuristic.getCenterControlDeltaForOpening(from, to), move);
 		value += negateForBlack(castlingHeuristics.getCastlingValue(from.getPlayerPiece().getPiece(), fromColumn, toColumn), move);

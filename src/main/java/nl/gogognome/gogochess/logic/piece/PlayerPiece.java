@@ -60,13 +60,13 @@ public abstract class PlayerPiece {
 	 * @return true if this player piece attacks attackedSquare; false otherwise
 	 */
 	public boolean attacks(Square pieceSquare, Square attackedSquare, Board board) {
-		int deltaX = attackedSquare.column() - pieceSquare.column();
-		int deltaY = attackedSquare.row() - pieceSquare.row();
+		int deltaX = attackedSquare.file() - pieceSquare.file();
+		int deltaY = attackedSquare.rank() - pieceSquare.rank();
 		return attacks(pieceSquare, attackedSquare, board, deltaX, deltaY);
 	}
 
 	/**
-	 * Same method as {@link #attacks(Square, Square, Board, int, int)} above, except that deltaX and deltaY are filled
+	 * Same method as {@link #attacks(Square, Square, Board)} above, except that deltaX and deltaY are filled
 	 * in with the deltas to get from pieceSquare to attackedSquare.
 	 */
 	protected abstract boolean attacks(Square pieceSquare, Square attackedSquare, Board board, int deltaX, int deltaY);

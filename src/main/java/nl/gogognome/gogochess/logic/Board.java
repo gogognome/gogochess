@@ -195,8 +195,14 @@ public class Board {
 		return pieceAt(square) == null;
 	}
 
-	public boolean empty(int column, int row) {
-		return playerPiecesPerSquare[column*8 + row] == null;
+	/**
+	 * Checks if the square is empty.
+	 * @param file the file in the range [0..7]
+	 * @param rank the rank in the range [0..7]
+	 * @return true if the square contains no piece; false if the square contains a piece
+	 */
+	public boolean empty(int file, int rank) {
+		return playerPiecesPerSquare[file*8 + rank] == null;
 	}
 
 	public Square kingSquareOf(Player player) {
@@ -277,10 +283,10 @@ public class Board {
 		return count;
 	}
 
-	public int countNrOccurrencesInColumn(PlayerPiece playerPiece, int column) {
+	public int countNrOccurrencesInFile(PlayerPiece playerPiece, int file) {
 		int nrPawns = 0;
-		for (int row=0; row<8; row++) {
-			if (playerPiece.equals(pieceAt(new Square(column, row)))) {
+		for (int rank=0; rank<8; rank++) {
+			if (playerPiece.equals(pieceAt(new Square(file, rank)))) {
 				nrPawns++;
 			}
 		}
@@ -288,20 +294,20 @@ public class Board {
 	}
 
 	/**
-	 * Determines if a pawn in the specified column is isolated, i.e., a pawn that has no pawns of the same player
-	 * in adjacent columns.
+	 * Determines if a pawn in the specified file is isolated, i.e., a pawn that has no pawns of the same player
+	 * in adjacent files.
 	 * @param player the player whose pawn must be checked
-	 * @param column the column containing the pawn
+	 * @param file the file containing the pawn
 	 * @return true if the pawn is isolated; false otherwise
 	 */
-	public boolean isIsolatedPawnInColumn(Player player, int column) {
+	public boolean isIsolatedPawnInFile(Player player, int file) {
 		PlayerPiece pawn = new Pawn(player);
 		int nrPawnsInAdjacentColumns = 0;
-		if (column > 0) {
-			nrPawnsInAdjacentColumns += countNrOccurrencesInColumn(pawn, column - 1);
+		if (file > 0) {
+			nrPawnsInAdjacentColumns += countNrOccurrencesInFile(pawn, file - 1);
 		}
-		if (column < 7) {
-			nrPawnsInAdjacentColumns += countNrOccurrencesInColumn(pawn, column + 1);
+		if (file < 7) {
+			nrPawnsInAdjacentColumns += countNrOccurrencesInFile(pawn, file + 1);
 		}
 		return nrPawnsInAdjacentColumns == 0;
 	}
@@ -309,10 +315,10 @@ public class Board {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(9*8);
-		for (int row = 7; row >= 0; row--) {
-			for (int column = 0; column < 8; column++) {
-				char c = ((row ^ column) & 1) == 1 ? '*' : ' ';
-				PlayerPiece playerPiece = playerPiecesPerSquare[new Square(column, row).boardIndex()];
+		for (int rank = 7; rank >= 0; rank--) {
+			for (int file = 0; file < 8; file++) {
+				char c = ((rank ^ file) & 1) == 1 ? '*' : ' ';
+				PlayerPiece playerPiece = playerPiecesPerSquare[new Square(file, rank).boardIndex()];
 				if (playerPiece != null) {
 					c = formatPiece(playerPiece);
 				}

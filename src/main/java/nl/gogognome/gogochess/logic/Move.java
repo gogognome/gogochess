@@ -152,7 +152,7 @@ public class Move {
 				.map(BoardMutation::getSquare)
 				.findFirst()
 				.orElseThrow(() -> new IllegalArgumentException("Expected one pawn to be removed in en passent capture."));
-		return getMutationRemovingPieceFromStart().getSquare().column() != takenPawnSquare.column();
+		return getMutationRemovingPieceFromStart().getSquare().file() != takenPawnSquare.file();
 	}
 
 	private Predicate<BoardMutation> filterForKingDuringCastling() {

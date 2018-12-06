@@ -6,7 +6,7 @@ import java.util.*;
 import com.google.common.collect.*;
 import nl.gogognome.gogochess.logic.*;
 
-public class KingFieldHeuristic {
+class KingFieldHeuristic {
 
 	private final static int[][] MIDDLE_GAME_KING_FIELD = new int[][]{
 			{2, 8, 8, 8, 8, 8, 2},
@@ -36,11 +36,11 @@ public class KingFieldHeuristic {
 	}
 
 	private int valueOf(int pieceFactor, Square square, Square opponentKingSquare) {
-		int row = square.row() - opponentKingSquare.row() + 3;
-		int column = square.column() - opponentKingSquare.column() + 3;
+		int rank = square.rank() - opponentKingSquare.rank() + 3;
+		int file = square.file() - opponentKingSquare.file() + 3;
 		int centerControlValue;
-		if (0 <= row && row < 7 && 0 <= column && column < 7) {
-			centerControlValue = MIDDLE_GAME_KING_FIELD[row][column];
+		if (0 <= rank && rank < 7 && 0 <= file && file < 7) {
+			centerControlValue = MIDDLE_GAME_KING_FIELD[rank][file];
 		} else {
 			centerControlValue = 0;
 		}

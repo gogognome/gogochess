@@ -103,14 +103,14 @@ public class BoardPanel extends JPanel {
 		if (playerPiece != null) {
 			g.drawImage(
 					piecesImage,
-					left(square.column()) + deltaX, top(square.row()) + deltaY, left(square.column()+1) + deltaX, top(square.row()-1) + deltaY,
+					left(square.file()) + deltaX, top(square.rank()) + deltaY, left(square.file()+1) + deltaX, top(square.rank()-1) + deltaY,
 					pieceLeft(playerPiece), pieceTop(playerPiece), pieceRight(playerPiece), pieceBottom(playerPiece),
 					null);
 		}
 	}
 
 	private int pieceLeft(PlayerPiece playerPiece) {
-		return columnOfPlayerPiece(playerPiece) * piecesImage.getWidth() / PIECES_IN_IMAGE.length;
+		return fileOfPlayerPiece(playerPiece) * piecesImage.getWidth() / PIECES_IN_IMAGE.length;
 	}
 
 	private int pieceTop(PlayerPiece playerPiece) {
@@ -118,14 +118,14 @@ public class BoardPanel extends JPanel {
 	}
 
 	private int pieceRight(PlayerPiece playerPiece) {
-		return (columnOfPlayerPiece(playerPiece) + 1) * piecesImage.getWidth() / PIECES_IN_IMAGE.length;
+		return (fileOfPlayerPiece(playerPiece) + 1) * piecesImage.getWidth() / PIECES_IN_IMAGE.length;
 	}
 
 	private int pieceBottom(PlayerPiece playerPiece) {
 		return playerPiece.getPlayer() == WHITE ? piecesImage.getHeight() / 2 : piecesImage.getHeight();
 	}
 
-	private int columnOfPlayerPiece(PlayerPiece playerPiece) {
+	private int fileOfPlayerPiece(PlayerPiece playerPiece) {
 		Piece piece = playerPiece.getPiece();
 		for (int i = 0; i<PIECES_IN_IMAGE.length; i++) {
 			if (piece == PIECES_IN_IMAGE[i]) {

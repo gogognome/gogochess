@@ -16,7 +16,7 @@ public class Knight extends PlayerPiece {
 
 	public void addPossibleMoves(List<Move> moves, Square square, Board board) {
 		for (int i=0; i<DELTA_X.length; i++) {
-			Square to = square.addColumnAndRow(DELTA_X[i], DELTA_Y[i]);
+			Square to = square.addFilesAndRanks(DELTA_X[i], DELTA_Y[i]);
 			addMoveToEmptyFieldOrCapture(moves, board, square, to);
 		}
 	}

@@ -19,17 +19,17 @@ public abstract class MultiStepPlayerPiece extends PlayerPiece {
 			Square to = square;
 			boolean toIsEmptySquare;
 			do {
-				to = to.addColumnAndRow(deltaX[i], deltaY[i]);
+				to = to.addFilesAndRanks(deltaX[i], deltaY[i]);
 				toIsEmptySquare = addMoveToEmptyFieldOrCapture(moves, board, square, to);
 			} while (toIsEmptySquare);
 		}
 	}
 
-	protected boolean allSquaresEmptyBetweenPieceSquareAndAttackedSquare(Square pieceSquare, Square attackedSquare, Board board, int deltaX, int deltaY) {
-		int toX = pieceSquare.column();
-		int toY = pieceSquare.row();
-		int attackedSquareX = attackedSquare.column();
-		int attackedSquareY = attackedSquare.row();
+	boolean allSquaresEmptyBetweenPieceSquareAndAttackedSquare(Square pieceSquare, Square attackedSquare, Board board, int deltaX, int deltaY) {
+		int toX = pieceSquare.file();
+		int toY = pieceSquare.rank();
+		int attackedSquareX = attackedSquare.file();
+		int attackedSquareY = attackedSquare.rank();
 		boolean toIsEmptySquare;
 		do {
 			toX += deltaX;
@@ -48,7 +48,7 @@ public abstract class MultiStepPlayerPiece extends PlayerPiece {
 	 * @param n a number
 	 * @return 0 if n = 0, -1 if n is negative, 1 if n is positive
 	 */
-	protected int signum(int n) {
+	int signum(int n) {
 		return n == 0 ? 0 : n < 0 ? -1 : 1;
 	}
 

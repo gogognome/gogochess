@@ -28,20 +28,20 @@ public class Square {
 		if (square == null || square.length() != 2) {
 			throw new IllegalArgumentException("Square must be a string of length 2 like B6");
 		}
-		int column = square.charAt(0) - 'a';
-		int row = square.charAt(1) - '1';
-		validateColumnAndRow(column, row);
-		boardIndex = column * 8 + row;
+		int file = square.charAt(0) - 'a';
+		int rank = square.charAt(1) - '1';
+		validateFileAndRank(file, rank);
+		boardIndex = file * 8 + rank;
 	}
 
-	public Square(int column, int row) {
-		validateColumnAndRow(column, row);
-		this.boardIndex = column * 8 + row;
+	public Square(int file, int rank) {
+		validateFileAndRank(file, rank);
+		this.boardIndex = file * 8 + rank;
 	}
 
-	private void validateColumnAndRow(int column, int row) {
-		if (((column | row) & MASK) != 0) {
-			throw new IllegalArgumentException("column and row must be in the range [0..7]");
+	private void validateFileAndRank(int file, int rank) {
+		if (((file | rank) & MASK) != 0) {
+			throw new IllegalArgumentException("file and rank must be in the range [0..7]");
 		}
 	}
 
@@ -57,38 +57,38 @@ public class Square {
 	}
 
 	/**
-	 * @return the column in the range [0..7]
+	 * @return the file in the range [0..7]
 	 */
-	public int column() {
+	public int file() {
 		return boardIndex / 8;
 	}
 
 	/**
-	 * @return the row in the range [0..7]
+	 * @return the rank in the range [0..7]
 	 */
-	public int row() {
+	public int rank() {
 		return boardIndex % 8;
 	}
 
 	@Override
 	public String toString() {
-		return Character.toString((char)('a' + column())) + (row() + 1);
+		return Character.toString((char)('a' + file())) + (rank() + 1);
 	}
 
 	int boardIndex() {
 		return boardIndex;
 	}
 
-	public Square addRow(int nrRows) {
-		return buildSquareIfValid(column(), row() + nrRows);
+	public Square addRanks(int nrRanks) {
+		return buildSquareIfValid(file(), rank() + nrRanks);
 	}
 
-	public Square addColumnAndRow(int nrColumns, int nrRows) {
-		return buildSquareIfValid(column() + nrColumns, row() + nrRows);
+	public Square addFilesAndRanks(int nrFiles, int nrRanks) {
+		return buildSquareIfValid(file() + nrFiles, rank() + nrRanks);
 	}
 
-	private Square buildSquareIfValid(int newColumn, int newRow) {
-		return ((newColumn | newRow) & MASK) == 0 ? new Square(newColumn, newRow) : null;
+	private Square buildSquareIfValid(int newFile, int newRank) {
+		return ((newFile | newRank) & MASK) == 0 ? new Square(newFile, newRank) : null;
 	}
 
 	@Override

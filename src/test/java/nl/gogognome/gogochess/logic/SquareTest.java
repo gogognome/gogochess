@@ -51,8 +51,8 @@ class SquareTest {
 		assertInvalidRowOrColumn(-1, 8);
 	}
 
-	private void assertInvalidRowOrColumn(int col, int row) {
-		assertThrows(IllegalArgumentException.class, () -> new Square(col, row));
+	private void assertInvalidRowOrColumn(int file, int rank) {
+		assertThrows(IllegalArgumentException.class, () -> new Square(file, rank));
 	}
 
 	@Test
@@ -65,22 +65,22 @@ class SquareTest {
 		assertToString(7, 7, "h8");
 	}
 
-	private void assertToString(int column, int row, String expectedValue) {
-		assertEquals(expectedValue, new Square(column, row).toString());
+	private void assertToString(int file, int rank, String expectedValue) {
+		assertEquals(expectedValue, new Square(file, rank).toString());
 	}
 
 	@Test
-	void columnReturnsCorrectValue() {
-		assertEquals(0, new Square(0, 5).column());
-		assertEquals(3, new Square(3, 1).column());
-		assertEquals(7, new Square(7, 5).column());
+	void fileReturnsCorrectValue() {
+		assertEquals(0, new Square(0, 5).file());
+		assertEquals(3, new Square(3, 1).file());
+		assertEquals(7, new Square(7, 5).file());
 	}
 
 	@Test
-	void rowReturnsCorrectValue() {
-		assertEquals(0, new Square(5, 0).row());
-		assertEquals(3, new Square(1, 3).row());
-		assertEquals(7, new Square(5, 7).row());
+	void rankReturnsCorrectValue() {
+		assertEquals(0, new Square(5, 0).rank());
+		assertEquals(3, new Square(1, 3).rank());
+		assertEquals(7, new Square(5, 7).rank());
 	}
 
 	@Test

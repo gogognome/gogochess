@@ -42,7 +42,7 @@ class PositionalAnalysisForMiddleGame implements MovesEvaluator {
 			BoardMutation to = move.getMutationAddingPieceAtDestination();
 
 			int value = negateForBlack(centralControlHeuristic.getCenterControlDeltaForMiddleGame(from, to), move);
-			value += negateForBlack(castlingHeuristics.getCastlingValue(from.getPlayerPiece().getPiece(), from.getSquare().column(), to.getSquare().column()), move);
+			value += negateForBlack(castlingHeuristics.getCastlingValue(from.getPlayerPiece().getPiece(), from.getSquare().file(), to.getSquare().file()), move);
 			value += negateForBlack(kingFieldHeuristic.getKingFieldDeltaForMiddleGame(from, to, opponentKingSquare), move);
 			value += negateForBlack(mobilityAfterMove(board, move), move);
 			value += pawnHeuristics.getPawnHeuristicsForOpening(board, move, from, to);
@@ -69,11 +69,11 @@ class PositionalAnalysisForMiddleGame implements MovesEvaluator {
 	}
 
 	private int unblocksKingsOrQueensBishopPawn(BoardMutation from, Player player, Board board) {
-		int file = from.getSquare().column();
+		int file = from.getSquare().file();
 		if (file != FILE_C && file != FILE_F) {
 			return 0;
 		}
-		Square blockedSquare = from.getSquare().addRow(player == WHITE ? -1 : 1);
+		Square blockedSquare = from.getSquare().addRanks(player == WHITE ? -1 : 1);
 		if (blockedSquare == null) {
 			return 0;
 		}

@@ -20,23 +20,23 @@ public class Pawn extends PlayerPiece {
 	}
 
 	public void addPossibleMoves(List<Move> moves, Square from, Board board) {
-		Square to1 = from.addRow(forwardRowDelta);
+		Square to1 = from.addRanks(forwardRowDelta);
 		if (board.empty(to1)) {
 			addMoveIncludingPromotions(moves, new Move(board.lastMove(), removeFrom(from), addTo(to1)));
 		}
 
-		Square to2 = from.addRow(2 * forwardRowDelta);
-		if (from.row() == initialRow && board.empty(to1) && board.empty(to2)) {
+		Square to2 = from.addRanks(2 * forwardRowDelta);
+		if (from.rank() == initialRow && board.empty(to1) && board.empty(to2)) {
 			addMoveIncludingPromotions(moves, new Move(board.lastMove(), removeFrom(from), addTo(to2)));
 		}
 
-		if (from.column() > 0) {
-			Square to = from.addColumnAndRow(-1, forwardRowDelta);
+		if (from.file() > 0) {
+			Square to = from.addFilesAndRanks(-1, forwardRowDelta);
 			addCaptureMove(moves, from, board, to);
 			addEnPassantCaptureMove(moves, from, board, to);
 		}
-		if (from.column() < 7) {
-			Square to = from.addColumnAndRow(1, forwardRowDelta);
+		if (from.file() < 7) {
+			Square to = from.addFilesAndRanks(1, forwardRowDelta);
 			addCaptureMove(moves, from, board, to);
 			addEnPassantCaptureMove(moves, from, board, to);
 		}
@@ -50,7 +50,7 @@ public class Pawn extends PlayerPiece {
 	}
 
 	private void addEnPassantCaptureMove(List<Move> moves, Square square, Board board, Square to) {
-		Square capturedPawnSquare = to.addRow(-forwardRowDelta);
+		Square capturedPawnSquare = to.addRanks(-forwardRowDelta);
 		PlayerPiece capturedPiece = board.pieceAt(capturedPawnSquare);
 		if (canCaptureEnPassant(board, capturedPawnSquare, capturedPiece)) {
 			addMoveIncludingPromotions(moves, new Move(board.lastMove(), removeFrom(square), capturedPiece.removeFrom(capturedPawnSquare), addTo(to)));
@@ -58,7 +58,7 @@ public class Pawn extends PlayerPiece {
 	}
 
 	private boolean canCaptureEnPassant(Board board, Square capturedPawnSquare, PlayerPiece capturedPiece) {
-		Square previousMoveStartSquare = capturedPawnSquare.addRow(2 * forwardRowDelta);
+		Square previousMoveStartSquare = capturedPawnSquare.addRanks(2 * forwardRowDelta);
 		return capturedPiece != null && capturedPiece.getPlayer() == getPlayer().opponent() && capturedPiece.getPiece() == PAWN
 				&& board.lastMove().getBoardMutations().contains(capturedPiece.addTo(capturedPawnSquare))
 				&& previousMoveStartSquare != null && board.lastMove().getBoardMutations().contains(capturedPiece.removeFrom(previousMoveStartSquare));
@@ -66,7 +66,7 @@ public class Pawn extends PlayerPiece {
 
 	private void addMoveIncludingPromotions(List<Move> moves, Move move) {
 		BoardMutation lastMutation = move.getBoardMutations().get(move.getBoardMutations().size() - 1);
-		if (lastMutation.getSquare().row() == promotionRow) {
+		if (lastMutation.getSquare().rank() == promotionRow) {
 			Player player = lastMutation.getPlayerPiece().getPlayer();
 			for (PlayerPiece promotedPlayerPiece : new PlayerPiece[] { new Knight(player), new Bishop(player), new Rook(player), new Queen(player) }) {
 				List<BoardMutation> modifiedMutations = new ArrayList<>(move.getBoardMutations());

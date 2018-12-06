@@ -48,7 +48,7 @@ class PawnHeuristics {
 	private int getValueForPieceBlocksWhiteCenterPawn(Board board, BoardMutation to) {
 		int pieceBlocksWhiteCenterPawn = 0;
 		if (E3.equals(to.getSquare()) || D3.equals(to.getSquare())) {
-			PlayerPiece blockedPiece = board.pieceAt(to.getSquare().addRow(-1));
+			PlayerPiece blockedPiece = board.pieceAt(to.getSquare().addRanks(-1));
 			if (blockedPiece != null && blockedPiece.getPiece() == PAWN) {
 				pieceBlocksWhiteCenterPawn = -50;
 			}
@@ -59,7 +59,7 @@ class PawnHeuristics {
 	private int getValueForPieceBlocksBlackCenterPawn(Board board, BoardMutation to) {
 		int pieceBlocksBlackCenterPawn = 0;
 		if (E6.equals(to.getSquare()) || D6.equals(to.getSquare())) {
-			PlayerPiece blockedPiece = board.pieceAt(to.getSquare().addRow(1));
+			PlayerPiece blockedPiece = board.pieceAt(to.getSquare().addRanks(1));
 			if (blockedPiece != null && blockedPiece.getPiece() == PAWN) {
 				pieceBlocksBlackCenterPawn = 50;
 			}
@@ -73,24 +73,24 @@ class PawnHeuristics {
 		}
 
 		int pawnCaptureValue = 0;
-		int toColumn = to.getSquare().column();
+		int toColumn = to.getSquare().file();
 		if (isNearerToCenter(from.getSquare(), to.getSquare())) {
 			pawnCaptureValue += 5;
 		} else {
 			pawnCaptureValue -= 5;
 		}
 
-		if (board.countNrOccurrencesInColumn(to.getPlayerPiece(), toColumn) > 1 && board.isIsolatedPawnInColumn(move.getPlayer(), toColumn)) {
+		if (board.countNrOccurrencesInFile(to.getPlayerPiece(), toColumn) > 1 && board.isIsolatedPawnInFile(move.getPlayer(), toColumn)) {
 			pawnCaptureValue -= 10;
 		}
 
 		if (move.capturedPlayerPiece().getPiece() == PAWN && (toColumn == 3 || toColumn == 4)) {
-			if (board.isIsolatedPawnInColumn(move.getPlayer().opponent(), toColumn)) {
+			if (board.isIsolatedPawnInFile(move.getPlayer().opponent(), toColumn)) {
 				pawnCaptureValue += 50;
 			}
 			int rowDelta = negateForBlack(1, move);
-			Square leftForward = to.getSquare().addColumnAndRow(-1, rowDelta);
-			Square rightForward = to.getSquare().addColumnAndRow(1, rowDelta);
+			Square leftForward = to.getSquare().addFilesAndRanks(-1, rowDelta);
+			Square rightForward = to.getSquare().addFilesAndRanks(1, rowDelta);
 			PlayerPiece pawnOfOpponent = new Pawn(move.getPlayer().opponent());
 			if ((leftForward != null && pawnOfOpponent.equals(board.pieceAt(leftForward)))
 					|| (rightForward != null && pawnOfOpponent.equals(board.pieceAt(rightForward)))) {
@@ -101,12 +101,12 @@ class PawnHeuristics {
 	}
 
 	private boolean isNearerToCenter(Square from, Square to) {
-		return (from.column() < 4 && to.column() > from.column())
-				|| (from.column() >= 4 && to.column() < from.column());
+		return (from.file() < 4 && to.file() > from.file())
+				|| (from.file() >= 4 && to.file() < from.file());
 	}
 
 	private int getValueForPawnOnSideOfBoard(BoardMutation from, BoardMutation to) {
-		if (from.getPlayerPiece().getPiece() == PAWN && (to.getSquare().column() == 0 || to.getSquare().column() == 7)) {
+		if (from.getPlayerPiece().getPiece() == PAWN && (to.getSquare().file() == 0 || to.getSquare().file() == 7)) {
 			return wingPawnAdvancementValue;
 		}
 		return 0;
