@@ -24,11 +24,11 @@ public class KillerHeuristic {
 			return move;
 		}
 
-		public void incrementCount() {
+		void incrementCount() {
 			count++;
 		}
 
-		public int getCount() {
+		int getCount() {
 			return count;
 		}
 	}
@@ -43,7 +43,7 @@ public class KillerHeuristic {
 	 * @param move the killer move
 	 * @return true if the move was already the killer move at the move's level (tree depth); false otherwise
 	 */
-	public boolean markAsKiller(Move move) {
+	boolean markAsKiller(Move move) {
 		int level = move.depthInTree();
 		while (levelToKillerMove1.size() <= level) {
 			levelToKillerMove1.add(NullMove);
@@ -69,7 +69,7 @@ public class KillerHeuristic {
 		return false;
 	}
 
-	public List<Move> putKillerMoveFirst(List<Move> moves) {
+	List<Move> putKillerMoveFirst(List<Move> moves) {
 		if (moves.isEmpty()) {
 			return moves;
 		}
@@ -106,6 +106,6 @@ public class KillerHeuristic {
 	}
 
 	private boolean areEqual(Move m1, Move m2) {
-		return m1.getBoardMutations().equals(m2.getBoardMutations());
+		return m1.boarMutationsEqual(m2);
 	}
 }

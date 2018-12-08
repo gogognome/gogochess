@@ -147,14 +147,14 @@ public class Board {
 		playerPiecesPerSquare[index] = null;
 
 		if (playerPieceToRemove.getPlayer() == WHITE) {
-			for (int i=0; i<nrWhitePieces; i++) {
+			for (int i=nrWhitePieces-1; i>=0; i--) {
 				if (whitePieceSquares[i].equals(square)) {
 					whitePieceSquares[i] = whitePieceSquares[--nrWhitePieces];
 					break;
 				}
 			}
 		} else {
-			for (int i=0; i<nrBlackPieces; i++) {
+			for (int i=nrBlackPieces-1; i>=0; i--) {
 				if (blackPieceSquares[i].equals(square)) {
 					blackPieceSquares[i] = blackPieceSquares[--nrBlackPieces];
 					break;

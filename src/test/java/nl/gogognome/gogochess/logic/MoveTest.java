@@ -54,4 +54,22 @@ class MoveTest {
 
 		assertThat(move.isCapture()).isFalse();
 	}
+
+	@Test
+	void differentPrecedingMoveButEqualsBoardMuations_BoardMutationsEqual() {
+		Move move1 = new Move(BLACK, BLACK_PAWN.removeFrom(E7), BLACK_PAWN.addTo(E5));
+		Move precedingMove = new Move(WHITE, WHITE_PAWN.removeFrom(E2), WHITE_PAWN.addTo(E4));
+		Move move2 = new Move(precedingMove, BLACK_PAWN.removeFrom(E7), BLACK_PAWN.addTo(E5));
+
+		assertThat(move1.boarMutationsEqual(move2)).isTrue();
+	}
+
+	@Test
+	void equalPrecedingMoveButDifferentBoardMuations_BoardMutationsNotEqual() {
+		Move move1 = new Move(BLACK, BLACK_PAWN.removeFrom(E7), BLACK_PAWN.addTo(E5));
+		Move move2 = new Move(BLACK, BLACK_PAWN.removeFrom(E7), BLACK_PAWN.addTo(E6));
+
+		assertThat(move1.boarMutationsEqual(move2)).isFalse();
+	}
+
 }

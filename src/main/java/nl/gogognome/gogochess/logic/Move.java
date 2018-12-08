@@ -14,22 +14,22 @@ public class Move {
 	private Status status = NORMAL;
 	private int depthInTree;
 	private final Move precedingMove;
-	private final List<BoardMutation> boardMutations;
+	private final ImmutableList<BoardMutation> boardMutations;
 	private final Player player;
 	private int value;
 
 	public Move(Move precedingMove, BoardMutation... boardMutations) {
-		this(precedingMove, precedingMove.player.opponent(), asList(boardMutations));
+		this(precedingMove, precedingMove.player.opponent(), ImmutableList.copyOf(boardMutations));
 	}
 
 	public Move(Player player, BoardMutation... boardMutations) {
-		this(null, player, asList(boardMutations));
+		this(null, player, ImmutableList.copyOf(boardMutations));
 	}
 
 	public Move(Move precedingMove, Player player, List<BoardMutation> boardMutations) {
 		this.precedingMove = precedingMove;
 		this.player = player;
-		this.boardMutations = ImmutableList.copyOf(boardMutations);
+		this.boardMutations = boardMutations instanceof ImmutableList ? (ImmutableList<BoardMutation>) boardMutations : ImmutableList.copyOf(boardMutations);
 		this.depthInTree = precedingMove == null ? 0 : precedingMove.depthInTree + 1;
 	}
 
@@ -165,9 +165,12 @@ public class Move {
 		return extraFilter;
 	}
 
+	public boolean boarMutationsEqual(Move that) {
+		return this.boardMutations.equals(that.boardMutations);
+	}
+
 	@Override
 	public String toString() {
 		return boardMutations.toString();
 	}
-
 }
