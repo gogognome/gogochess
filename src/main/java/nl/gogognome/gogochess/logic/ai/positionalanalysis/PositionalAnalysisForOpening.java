@@ -46,7 +46,7 @@ class PositionalAnalysisForOpening implements MovesEvaluator {
 
 		int value = negateForBlack(centralControlHeuristic.getCenterControlDeltaForOpening(from, to), move);
 		value += negateForBlack(castlingHeuristics.getCastlingValue(from.getPlayerPiece().getPiece(), fromColumn, toColumn), move);
-		value += pawnHeuristics.getPawnHeuristicsForOpening(board, move, from, to);
+		value += pawnHeuristics.getPawnHeuristicsForOpeningAndMiddleGame(board, move, from, to);
 		value += negateForBlack(getKnightMoveValue(from, to), move);
 		value += negateForBlack(getPieceMovingFromKingSideValue(fromColumn), move);
 
