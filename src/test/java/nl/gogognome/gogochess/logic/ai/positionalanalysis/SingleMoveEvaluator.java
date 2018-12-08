@@ -6,20 +6,20 @@ import nl.gogognome.gogochess.logic.Move;
 import nl.gogognome.gogochess.logic.Player;
 
 import java.util.Arrays;
+import java.util.function.BiConsumer;
 
-import static java.util.Arrays.asList;
 import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.ADD;
 import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.REMOVE;
 
-abstract class PositionalAnalysisBaseTest {
+class SingleMoveEvaluator {
 
-    private final MovesEvaluator movesEvaluator;
+    private final BiConsumer<Board, Move> moveEvaluator;
 
-    protected PositionalAnalysisBaseTest(MovesEvaluator movesEvaluator) {
-        this.movesEvaluator = movesEvaluator;
+    SingleMoveEvaluator(BiConsumer<Board, Move> moveEvaluator) {
+        this.moveEvaluator = moveEvaluator;
     }
 
-    protected int valueOfMove(BoardMutation... mutations) {
+    int valueOfMove(BoardMutation... mutations) {
         Move setup = buildSetupMove(mutations);
         return valueOfMove(setup, mutations);
     }
@@ -28,7 +28,7 @@ abstract class PositionalAnalysisBaseTest {
         Move move = new Move(setup, mutations);
         Board board = new Board();
         board.process(setup);
-        movesEvaluator.evaluate(board, asList(move));
+        moveEvaluator.accept(board, move);
         return move.getValue();
     }
 
