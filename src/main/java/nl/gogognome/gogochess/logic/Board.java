@@ -274,14 +274,9 @@ public class Board {
 	}
 
 	public int numberNonPawnPieces() {
-		int count = 0;
-		for (int i=0; i<playerPiecesPerSquare.length; i++) {
-			PlayerPiece playerPiece = playerPiecesPerSquare[i];
-			if (playerPiece != null && playerPiece.getPiece() != PAWN) {
-				count++;
-			}
-		}
-		return count;
+		return (int) Arrays.stream(playerPiecesPerSquare)
+				.filter(playerPiece -> playerPiece != null && playerPiece.getPiece() != PAWN)
+				.count();
 	}
 
 	public int countNrOccurrencesInFile(PlayerPiece playerPiece, int file) {
