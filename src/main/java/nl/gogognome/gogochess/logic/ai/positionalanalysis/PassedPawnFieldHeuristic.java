@@ -1,16 +1,15 @@
 package nl.gogognome.gogochess.logic.ai.positionalanalysis;
 
-import nl.gogognome.gogochess.logic.Board;
-import nl.gogognome.gogochess.logic.Player;
-import nl.gogognome.gogochess.logic.Square;
+import nl.gogognome.gogochess.logic.*;
 import nl.gogognome.gogochess.logic.piece.PlayerPiece;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiPredicate;
 
 import static nl.gogognome.gogochess.logic.Piece.PAWN;
-import static nl.gogognome.gogochess.logic.Player.WHITE;
+import static nl.gogognome.gogochess.logic.Player.BLACK;
 
-public class PassedPawnFieldHeuristic {
+class PassedPawnFieldHeuristic {
 
     private final static int[][] OWN_WHITE_PASSED_PAWN_FIELD = new int[][]{
             {0, 0, 0, 0, 0},
@@ -36,18 +35,39 @@ public class PassedPawnFieldHeuristic {
             {0, 0, 1, 0, 0}
     };
 
-    int getDeltaForPassedPawns(Board board, Square from, Square to, Player player) {
+    int getDeltaForPassedPawns(Board board, Move move) {
+        BoardMutation mutationRemovingPieceFromStart = move.getMutationRemovingPieceFromStart();
+        Square from = mutationRemovingPieceFromStart.getSquare();
+        Square to = move.getMutationAddingPieceAtDestination().getSquare();
+        Player player = move.getPlayer();
+        PlayerPiece movedPlayerPiece = mutationRemovingPieceFromStart.getPlayerPiece();
+
         AtomicInteger delta = new AtomicInteger(0);
-        board.forEachPlayerPiece(player, (playerPiece, square) -> delta.addAndGet(deltaForPawnAt(board, playerPiece, square, from , to, player)));
-        board.forEachPlayerPiece(player.opponent(), (playerPiece, square) -> delta.addAndGet(deltaForPawnAt(board, playerPiece, square, from , to, player)));
+        if (movedPlayerPiece.getPiece() == PAWN && board.isPassedPawn(movedPlayerPiece, from)) {
+            BiPredicate<PlayerPiece, Square> isNotMovedPiece =
+                    (playerPiece, square) -> !playerPiece.equals(movedPlayerPiece);
+            board.forEachPlayerPieceWhere(player, isNotMovedPiece,
+                    (playerPiece, square) -> delta.addAndGet(deltaForPieceAt(playerPiece, square, from, to, player)));
+            board.forEachPlayerPieceWhere(player.opponent(), isNotMovedPiece,
+                    (playerPiece, square) -> delta.addAndGet(deltaForPieceAt(playerPiece, square, from, to, player)));
+        }
+
+        BiPredicate<PlayerPiece, Square> isNotMovedPieceAndIsPassedPawn =
+                (playerPiece, square) -> !playerPiece.equals(movedPlayerPiece) && playerPiece.getPiece() == PAWN && board.isPassedPawn(playerPiece, square);
+        board.forEachPlayerPieceWhere(player, isNotMovedPieceAndIsPassedPawn,
+                (playerPiece, square) -> delta.addAndGet(deltaForPawnAt(playerPiece, square, from, to, player)));
+        board.forEachPlayerPieceWhere(player.opponent(), isNotMovedPieceAndIsPassedPawn,
+                (playerPiece, square) -> delta.addAndGet(deltaForPawnAt(playerPiece, square, from, to, player)));
+
         return delta.get();
     }
 
-    private int deltaForPawnAt(Board board, PlayerPiece playerPiece, Square playerPieceSquare, Square from, Square to, Player currentPlayer) {
-        if (playerPiece.getPiece() != PAWN || !board.isPassedPawn(playerPiece, playerPieceSquare)) {
-            return 0;
-        }
+    private int deltaForPieceAt(PlayerPiece playerPiece, Square square, Square from, Square to, Player currentPlayer) {
+        boolean ownPawn = playerPiece.getPlayer() == currentPlayer;
+        return fieldValue(playerPiece.getPlayer(), ownPawn, from, square) - fieldValue(currentPlayer, ownPawn, to, square);
+    }
 
+    private int deltaForPawnAt(PlayerPiece playerPiece, Square playerPieceSquare, Square from, Square to, Player currentPlayer) {
         boolean ownPawn = playerPiece.getPlayer() == currentPlayer;
         return fieldValue(playerPiece.getPlayer(), ownPawn, playerPieceSquare, to) - fieldValue(playerPiece.getPlayer(), ownPawn, playerPieceSquare, from);
     }
@@ -55,7 +75,7 @@ public class PassedPawnFieldHeuristic {
     private int fieldValue(Player pawnPlayer, boolean ownPawn, Square pawnSquare, Square square) {
         int[][] field = ownPawn ? OWN_WHITE_PASSED_PAWN_FIELD : OPPONENTS_WHITE_PASSED_PAWN_FIELD;
         int fieldColumn = square.file() - pawnSquare.file() + 2;
-        int fieldRow = (pawnPlayer == WHITE ? -1 : 1) * (square.file() - pawnSquare.file()) + 4;
+        int fieldRow = (pawnPlayer == BLACK ? -1 : 1) * (square.rank() - pawnSquare.rank()) + 4;
 
         if (0 <= fieldColumn && fieldColumn < 5 && 0 <= fieldRow && fieldRow < 9) {
             return field[fieldRow][fieldColumn];

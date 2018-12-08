@@ -224,6 +224,13 @@ public class Board {
 		return null;
 	}
 
+	public void forEachPlayerPieceWhere(Player player, BiPredicate<PlayerPiece, Square> where, BiConsumer<PlayerPiece, Square> action) {
+		BiConsumer<PlayerPiece, Square> actionForMatchingPlayerPieceAndSquare = (playerPiece, square) -> {
+			if (where.test(playerPiece, square)) action.accept(playerPiece, square);
+		};
+		forEachPlayerPiece(player, actionForMatchingPlayerPieceAndSquare, () -> false);
+	}
+
 	public void forEachPlayerPiece(Player player, BiConsumer<PlayerPiece, Square> action) {
 		forEachPlayerPiece(player, action, () -> false);
 	}

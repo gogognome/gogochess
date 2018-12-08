@@ -36,6 +36,7 @@ public class PositionalAnalysis implements MovesEvaluator {
 			centralControlHeuristic,
 			new PawnHeuristics(-10));
 	private final PositionalAnalysisForMiddleGame positionalAnalysisForMiddleGame;
+	private final PositionalAnalysisForEndGame positionalAnalysisForEndGame = new PositionalAnalysisForEndGame(new PassedPawnFieldHeuristic());
 	private final PieceValueEvaluator pieceValueEvaluator;
 	
 	private Phase currentPhase;
@@ -65,7 +66,7 @@ public class PositionalAnalysis implements MovesEvaluator {
 				currentPhase = Phase.END_GAME;
 				logger.debug("Using positional analysis for end game");
 			}
-			evaluator = positionalAnalysisForMiddleGame;
+			evaluator = positionalAnalysisForEndGame;
 		}
 		evaluator.evaluate(board, moves);
 	}
