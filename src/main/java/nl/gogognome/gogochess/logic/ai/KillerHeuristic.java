@@ -106,6 +106,6 @@ public class KillerHeuristic {
 	}
 
 	private boolean areEqual(Move m1, Move m2) {
-		return m1.boarMutationsEqual(m2);
+		return m1.boardMutationsEqual(m2);
 	}
 }

@@ -403,7 +403,7 @@ public class Board {
 		process(INITIAL_BOARD);
 	}
 
-	final static Move INITIAL_BOARD = new Move(BLACK,
+	public final static Move INITIAL_BOARD = new Move(BLACK,
 			WHITE_ROOK.addTo(A1),
 			WHITE_KNIGHT.addTo(B1),
 			WHITE_BISHOP.addTo(C1),

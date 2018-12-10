@@ -1,19 +1,27 @@
 package nl.gogognome.gogochess.logic.ai;
 
-import static java.lang.Math.*;
-import static java.util.Arrays.*;
-import static nl.gogognome.gogochess.logic.Player.*;
-import static nl.gogognome.gogochess.logic.Squares.*;
-import static nl.gogognome.gogochess.logic.Status.*;
-import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
-import static org.assertj.core.api.Assertions.*;
-import java.util.*;
-import java.util.concurrent.atomic.*;
-import org.junit.jupiter.api.*;
-import com.google.inject.*;
+import com.google.inject.Guice;
 import nl.gogognome.gogochess.juice.Module;
-import nl.gogognome.gogochess.logic.*;
-import nl.gogognome.gogochess.logic.movenotation.*;
+import nl.gogognome.gogochess.logic.Board;
+import nl.gogognome.gogochess.logic.Move;
+import nl.gogognome.gogochess.logic.Moves;
+import nl.gogognome.gogochess.logic.Player;
+import nl.gogognome.gogochess.logic.movenotation.ReverseAlgebraicNotation;
+import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static java.lang.Math.min;
+import static java.util.Arrays.asList;
+import static nl.gogognome.gogochess.logic.Player.BLACK;
+import static nl.gogognome.gogochess.logic.Player.WHITE;
+import static nl.gogognome.gogochess.logic.Squares.*;
+import static nl.gogognome.gogochess.logic.Status.CHECK_MATE;
+import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 class MiniMaxAlphaBetaArtificialIntelligenceTest {
 
@@ -116,6 +124,38 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 				asList("d3-d2", "Kh5-g6", "Qd4-e5", "Kg6-h7", "Qe5xg5", "Kh7-h8", "Rc3-h3++"),
 				asList("Qd4-f2", "g5-g6", "Rc3-c7", "g6-g7", "Qf2-f5+", "Kh5-h6", "Rc7-c6++"));
 
+	}
+
+	@Test
+	void aiShouldNotThrowNullPointerException() {
+		Move[] moves = new Move[12];
+		moves[0] = new Move(Board.INITIAL_BOARD, WHITE_PAWN.removeFrom(E2), WHITE_PAWN.addTo(E4));
+		moves[1] = new Move(moves[0], BLACK_PAWN.removeFrom(D7), BLACK_PAWN.addTo(D5));
+		moves[2] = new Move(moves[1], WHITE_KNIGHT.removeFrom(B1), WHITE_KNIGHT.addTo(C3));
+		moves[3] = new Move(moves[2], BLACK_PAWN.removeFrom(D5), BLACK_PAWN.addTo(D4));
+		moves[4] = new Move(moves[3], WHITE_KNIGHT.removeFrom(C3), WHITE_KNIGHT.addTo(D5));
+		moves[5] = new Move(moves[4], BLACK_PAWN.removeFrom(C7), BLACK_PAWN.addTo(C6));
+		moves[6] = new Move(moves[5], WHITE_KNIGHT.removeFrom(D5), WHITE_KNIGHT.addTo(F4));
+		moves[7] = new Move(moves[6], BLACK_PAWN.removeFrom(E7), BLACK_PAWN.addTo(E5));
+		moves[8] = new Move(moves[7], WHITE_KNIGHT.removeFrom(F4), WHITE_KNIGHT.addTo(E2));
+		moves[9] = new Move(moves[8], BLACK_PAWN.removeFrom(D4), BLACK_PAWN.addTo(D3));
+		moves[10] = new Move(moves[9], WHITE_KNIGHT.removeFrom(E2), WHITE_KNIGHT.addTo(C3));
+		moves[11] = new Move(moves[10], BLACK_PAWN.removeFrom(D3), WHITE_PAWN.removeFrom(C2), BLACK_PAWN.addTo(C2));
+
+		ArtificialIntelligence ai = buildAI(3);
+
+		board.process(Board.INITIAL_BOARD);
+		for (int i=0; i<moves.length; i+=2) {
+			ai.nextMove(board, WHITE, percentage -> {
+			}, list -> {
+			});
+			board.process(moves[i]);
+			board.process(moves[i + 1]);
+		}
+
+		Move nextMove = ai.nextMove(board, WHITE, percentage -> {}, list -> {});
+
+		assertThat(new ReverseAlgebraicNotation().format(nextMove)).isEqualTo("Qd1xc2");
 	}
 
 	private void assertNextMoves(int maxDepth, Player player, String... expectedMoves) {

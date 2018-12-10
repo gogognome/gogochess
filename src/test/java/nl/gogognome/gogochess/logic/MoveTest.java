@@ -61,7 +61,7 @@ class MoveTest {
 		Move precedingMove = new Move(WHITE, WHITE_PAWN.removeFrom(E2), WHITE_PAWN.addTo(E4));
 		Move move2 = new Move(precedingMove, BLACK_PAWN.removeFrom(E7), BLACK_PAWN.addTo(E5));
 
-		assertThat(move1.boarMutationsEqual(move2)).isTrue();
+		assertThat(move1.boardMutationsEqual(move2)).isTrue();
 	}
 
 	@Test
@@ -69,7 +69,24 @@ class MoveTest {
 		Move move1 = new Move(BLACK, BLACK_PAWN.removeFrom(E7), BLACK_PAWN.addTo(E5));
 		Move move2 = new Move(BLACK, BLACK_PAWN.removeFrom(E7), BLACK_PAWN.addTo(E6));
 
-		assertThat(move1.boarMutationsEqual(move2)).isFalse();
+		assertThat(move1.boardMutationsEqual(move2)).isFalse();
+	}
+
+	@Test
+	void hashCodeAndEqualsAreObjectIdentity() {
+		Move e2e4_1 = new Move(Board.INITIAL_BOARD, WHITE_PAWN.removeFrom(E2), WHITE_PAWN.addTo(E4));
+		Move e2e4_2 = new Move(Board.INITIAL_BOARD, WHITE_PAWN.removeFrom(E2), WHITE_PAWN.addTo(E4));
+		Move e2e3 = new Move(Board.INITIAL_BOARD, WHITE_PAWN.removeFrom(E2), WHITE_PAWN.addTo(E3));
+
+		assertThat(e2e4_1).isEqualTo(e2e4_1);
+		assertThat(e2e4_1).isNotEqualTo(e2e4_2);
+		assertThat(e2e4_2).isNotEqualTo(e2e4_1);
+		assertThat(e2e4_1).isNotEqualTo(e2e3);
+
+		assertThat(e2e4_1.hashCode()).isEqualTo(e2e4_1.hashCode());
+		assertThat(e2e4_1.hashCode()).isNotEqualTo(e2e4_2.hashCode());
+		assertThat(e2e4_2.hashCode()).isNotEqualTo(e2e4_1.hashCode());
+		assertThat(e2e4_1.hashCode()).isNotEqualTo(e2e3.hashCode());
 	}
 
 }

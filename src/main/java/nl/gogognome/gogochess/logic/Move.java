@@ -17,6 +17,7 @@ public class Move {
 	private final ImmutableList<BoardMutation> boardMutations;
 	private final Player player;
 	private int value;
+	private int boardMutationsHashCode;
 
 	public Move(Move precedingMove, BoardMutation... boardMutations) {
 		this(precedingMove, precedingMove.player.opponent(), ImmutableList.copyOf(boardMutations));
@@ -110,6 +111,9 @@ public class Move {
 		while (!this.equals(move)) {
 			moves.addFirst(move);
 			move = move.getPrecedingMove();
+			if (move == null) {
+				return asList(this); // can happen if lastMove comes from the cache
+			}
 		}
 		moves.addFirst(this);
 		return moves;
@@ -165,8 +169,16 @@ public class Move {
 		return extraFilter;
 	}
 
-	public boolean boarMutationsEqual(Move that) {
-		return this.boardMutations.equals(that.boardMutations);
+	public boolean boardMutationsEqual(Move that) {
+		return this.getBoardMutationsHashcode() == that.getBoardMutationsHashcode()
+				&& this.boardMutations.equals(that.boardMutations);
+	}
+
+	private int getBoardMutationsHashcode() {
+		if (boardMutationsHashCode == 0) {
+			boardMutationsHashCode = boardMutations.hashCode();
+		}
+		return boardMutationsHashCode;
 	}
 
 	@Override
