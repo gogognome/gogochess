@@ -5,6 +5,8 @@ import static nl.gogognome.gogochess.gui.GamePresentationModel.State.INITIALIZIN
 import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.*;
 import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
+import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
+
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
@@ -21,7 +23,6 @@ public class GamePresentationModel {
 
 	public enum Event {
 		STATE_CHANGED,
-		DRAGGING_PIECE,
 		PERCENTAGE_CHANGED,
 		SETTING_CHANGED
 	}
@@ -31,12 +32,13 @@ public class GamePresentationModel {
 		COMPUTER_THINKING,
 		WAITING_FOR_DRAG,
 		DRAGGING,
+		PROMOTING_WHITE_PAWN,
+		PROMOTING_BLACK_PAWN,
 		GAME_OVER
 	}
 
 	private final Board board;
 
-	private final List<Move> moves = new ArrayList<>();
 	private State state = INITIALIZING;
 	private ExecutorService executorService = Executors.newFixedThreadPool(1);
 	private ArtificialIntelligence ai;
@@ -47,6 +49,7 @@ public class GamePresentationModel {
 	private List<Square> targets;
 	private int percentage;
 	private final List<Consumer<Event>> listeners = new ArrayList<>();
+	private List<Move> promotionMoves;
 
 	@Inject
 	public GamePresentationModel(ArtificialIntelligence ai, Board board) {
@@ -55,7 +58,7 @@ public class GamePresentationModel {
 		board.initBoard();
 	}
 
-	public void addListener(Consumer<Event> listener) {
+	void addListener(Consumer<Event> listener) {
 		listeners.add(listener);
 	}
 
@@ -63,34 +66,34 @@ public class GamePresentationModel {
 		return board;
 	}
 
-	public State getState() {
+	State getState() {
 		return state;
 	}
 
-	public List<Square> getTargets() {
+	List<Square> getTargets() {
 		return targets;
 	}
 
-	public int getPercentage() {
+	int getPercentage() {
 		return percentage;
 	}
 
-	public boolean isWhitePlayerAi() {
+	boolean isWhitePlayerAi() {
 		return whitePlayerAi;
 	}
 
-	public boolean isBlackPlayerAi() {
+	boolean isBlackPlayerAi() {
 		return blackPlayerAi;
 	}
 
-	public void onWhitePlayerAI(boolean whitePlayerAi) {
+	void onWhitePlayerAI(boolean whitePlayerAi) {
 		this.whitePlayerAi = whitePlayerAi;
 		fireEvent(Event.SETTING_CHANGED);
 
 		cancelOrStartThinkingFor(WHITE);
 	}
 
-	public void onBlackPlayerAI(boolean blackPlayerAi) {
+	void onBlackPlayerAI(boolean blackPlayerAi) {
 		this.blackPlayerAi = blackPlayerAi;
 		fireEvent(Event.SETTING_CHANGED);
 
@@ -107,7 +110,7 @@ public class GamePresentationModel {
 		}
 	}
 
-	public void playGame() {
+	void playGame() {
 		onStartThinking();
 		fireEvent(Event.STATE_CHANGED);
 	}
@@ -120,8 +123,8 @@ public class GamePresentationModel {
 			Move move = ai.nextMove(
 					boardForArtificialIntelligence,
 					boardForArtificialIntelligence.currentPlayer(),
-					percentage -> setPercentage(percentage),
-					bestMoves -> logger.debug(bestMoves.stream().map(m -> m.toString()).collect(joining(", "))));
+					this::setPercentage,
+					bestMoves -> logger.debug(bestMoves.stream().map(Move::toString).collect(joining(", "))));
 			SwingUtilities.invokeLater(() -> onMove(move));
 		} catch (ArtificalIntelligenceCanceledException e) {
 			logger.debug("Canceled thinking");
@@ -137,15 +140,15 @@ public class GamePresentationModel {
 		}
 	}
 
-	public void onPlayerMove(Square startSquare, Square targetSquare) {
+	void onPlayerMove(Square startSquare, Square targetSquare) {
 		targets = null;
-		Optional<Move> move = board.currentPlayer().validMoves(board).stream()
+		List<Move> moves = board.currentPlayer().validMoves(board).stream()
 				.filter(m -> startAndTargetSquareMatchMove(m, startSquare, targetSquare))
-				.findFirst();
-		if (move.isPresent()) {
-			onMove(move.get());
-		} else {
-			onInvalidMove();
+				.collect(toList());
+		switch (moves.size()) {
+			case 0: onInvalidMove(); break;
+			case 1: onMove(moves.get(0)); break;
+			default: onPromote(moves); break;
 		}
 	}
 
@@ -161,37 +164,46 @@ public class GamePresentationModel {
 	}
 
 	private void onInvalidMove() {
-		state = State.WAITING_FOR_DRAG;
-		fireEvent(Event.STATE_CHANGED);
+		changeStateTo(State.WAITING_FOR_DRAG);
 	}
 
 	private void onMove(Move move) {
 		board.process(move);
-		moves.add(move);
 		if (move.getStatus().isGameOver()) {
-			state = State.GAME_OVER;
-			fireEvent(Event.STATE_CHANGED);
+			changeStateTo(State.GAME_OVER);
 		} else {
 			onStartThinking();
 		}
 	}
 
-	private void onStartThinking() {
-		if (board.currentPlayer() == WHITE && whitePlayerAi || board.currentPlayer() == BLACK && blackPlayerAi) {
-			state = State.COMPUTER_THINKING;
-			executorService.submit(this::computerThinking);
-		} else {
-			state = State.WAITING_FOR_DRAG;
-		}
-		fireEvent(Event.STATE_CHANGED);
+	private void onPromote(List<Move> promotionMoves) {
+		this.promotionMoves = promotionMoves;
+		changeStateTo(promotionMoves.get(0).getPlayer() == WHITE ? State.PROMOTING_WHITE_PAWN : State.PROMOTING_BLACK_PAWN);
 	}
 
-	public void onStartDragPiece(Square square) {
+	void onPromoteTo(PlayerPiece selectedPiece) {
+		Move selectedMove = promotionMoves.stream()
+				.filter(move -> move.getMutationAddingPieceAtDestination().getPlayerPiece().equals(selectedPiece))
+				.findFirst()
+				.orElseThrow(() -> new IllegalStateException("Could not find move that promotes to " + selectedPiece));
+		promotionMoves = null;
+		onMove(selectedMove);
+	}
+	
+	private void onStartThinking() {
+		if (board.currentPlayer() == WHITE && whitePlayerAi || board.currentPlayer() == BLACK && blackPlayerAi) {
+			executorService.submit(this::computerThinking);
+			changeStateTo(State.COMPUTER_THINKING);
+		} else {
+			changeStateTo(State.WAITING_FOR_DRAG);
+		}
+	}
+
+	void onStartDragPiece(Square square) {
 		PlayerPiece playerPiece = board.pieceAt(square);
 		if (playerPiece != null && playerPiece.getPlayer() == board.currentPlayer()) {
-			state = State.DRAGGING;
 			targets = determineTargetsForValidMoves(square);
-			fireEvent(Event.DRAGGING_PIECE);
+			changeStateTo(State.DRAGGING);
 		}
 	}
 
@@ -205,13 +217,18 @@ public class GamePresentationModel {
 						.filter(mut -> mut.getMutation() == ADD)
 						.map(BoardMutation::getSquare)
 						.findFirst()
-						.get())
+						.orElseThrow(() -> new IllegalStateException("Could not find destination of move " + m)))
 				.collect(toList());
 	}
 
-	public void onClose() {
+	void onClose() {
 		ai.cancel();
 		executorService.shutdownNow();
+	}
+
+	private void changeStateTo(State newState) {
+		state = newState;
+		fireEvent(Event.STATE_CHANGED);
 	}
 
 	private void fireEvent(Event event) {

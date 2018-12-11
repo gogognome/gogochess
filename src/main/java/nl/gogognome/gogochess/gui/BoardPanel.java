@@ -1,7 +1,10 @@
 package nl.gogognome.gogochess.gui;
 
+import static nl.gogognome.gogochess.gui.GamePresentationModel.State.*;
 import static nl.gogognome.gogochess.logic.Piece.*;
 import static nl.gogognome.gogochess.logic.Player.*;
+import static nl.gogognome.gogochess.logic.Square.*;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.*;
@@ -10,6 +13,7 @@ import java.util.*;
 import javax.imageio.*;
 import javax.inject.*;
 import javax.swing.*;
+
 import nl.gogognome.gogochess.logic.*;
 import nl.gogognome.gogochess.logic.piece.*;
 
@@ -24,6 +28,9 @@ public class BoardPanel extends JPanel {
 	private Square dragStartSquare;
 	private Point dragStartPoint;
 	private Point dragDelta;
+
+	private PlayerPiece[] promotionPieces;
+	private PlayerPiece promotionHighlightedPiece;
 
 	@Inject
 	public BoardPanel(GamePresentationModel presentationModel) {
@@ -42,7 +49,7 @@ public class BoardPanel extends JPanel {
 	}
 
 	private void onEvent(GamePresentationModel.Event event) {
-		if (event == GamePresentationModel.Event.STATE_CHANGED || event == GamePresentationModel.Event.DRAGGING_PIECE) {
+		if (event == GamePresentationModel.Event.STATE_CHANGED) {
 			updateBoard();
 		}
 	}
@@ -67,6 +74,12 @@ public class BoardPanel extends JPanel {
 		super.paint(g);
 		paintBoardAndPiecesExceptDraggedPiece(g);
 		paintDraggedPiece(g);
+		if (presentationModel.getState() == PROMOTING_WHITE_PAWN) {
+			paintPromotionPieces(g, WHITE);
+		}
+		if (presentationModel.getState() == PROMOTING_BLACK_PAWN) {
+			paintPromotionPieces(g, BLACK);
+		}
 	}
 
 	private void paintBoardAndPiecesExceptDraggedPiece(Graphics g) {
@@ -109,6 +122,29 @@ public class BoardPanel extends JPanel {
 		}
 	}
 
+	private void paintPromotionPieces(Graphics g, Player player) {
+		g.setColor(Color.GRAY);
+		int borderSize = squareSize / 10;
+		int rank = player == WHITE ? RANK_7 : RANK_2;
+		int file = FILE_C;
+		promotionPieces = new PlayerPiece[] {
+				new Knight(player), new Bishop(player), new Rook(player), new Queen(player)
+		};
+		g.fillRect(left(file) - borderSize, top(rank) - borderSize, squareSize * promotionPieces.length + 2 * borderSize, squareSize + 2 * borderSize);
+		for (PlayerPiece playerPiece : promotionPieces) {
+			if (playerPiece.equals(promotionHighlightedPiece)) {
+				g.setColor(player == WHITE ? Color.DARK_GRAY : Color.LIGHT_GRAY);
+				g.fillRect(left(file), top(rank), squareSize, squareSize);
+			}
+			g.drawImage(
+					piecesImage,
+					left(file), top(rank), left(file+1), top(rank-1),
+					pieceLeft(playerPiece), pieceTop(playerPiece), pieceRight(playerPiece), pieceBottom(playerPiece),
+					null);
+			file++;
+		}
+	}
+
 	private int pieceLeft(PlayerPiece playerPiece) {
 		return fileOfPlayerPiece(playerPiece) * piecesImage.getWidth() / PIECES_IN_IMAGE.length;
 	}
@@ -135,12 +171,12 @@ public class BoardPanel extends JPanel {
 		throw new IllegalArgumentException("Unknown piece encountered: " + piece);
 	}
 
-	private int left(int x) {
-		return x * squareSize;
+	private int left(int file) {
+		return file * squareSize;
 	}
 
-	private int top(int y) {
-		return (7 - y) * squareSize;
+	private int top(int rank) {
+		return (RANK_8 - rank) * squareSize;
 	}
 
 	private Square getSquare(int x, int y) {
@@ -150,7 +186,7 @@ public class BoardPanel extends JPanel {
 	private class MouseListener extends MouseAdapter {
 		@Override
 		public void mousePressed(MouseEvent e) {
-			if (presentationModel.getState() == GamePresentationModel.State.WAITING_FOR_DRAG) {
+			if (presentationModel.getState() == WAITING_FOR_DRAG) {
 				dragStartSquare = getSquare(e.getX(), e.getY());
 				dragStartPoint = e.getPoint();
 				dragDelta = new Point(0, 0);
@@ -160,7 +196,7 @@ public class BoardPanel extends JPanel {
 
 		@Override
 		public void mouseDragged(MouseEvent e) {
-			if (presentationModel.getState() == GamePresentationModel.State.DRAGGING) {
+			if (presentationModel.getState() == DRAGGING) {
 				dragDelta = new Point(e.getX() - dragStartPoint.x, e.getY() - dragStartPoint.y);
 				updateBoard();
 			}
@@ -168,13 +204,44 @@ public class BoardPanel extends JPanel {
 
 		@Override
 		public void mouseReleased(MouseEvent e) {
-			if (presentationModel.getState() == GamePresentationModel.State.DRAGGING) {
+			if (presentationModel.getState() == DRAGGING) {
 				Square targetSquare = getSquare(e.getX(), e.getY());
 				presentationModel.onPlayerMove(dragStartSquare, targetSquare);
 				dragStartSquare = null;
 				dragStartPoint = null;
 				dragDelta = null;
 			}
+		}
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			if (presentationModel.getState() == PROMOTING_WHITE_PAWN || presentationModel.getState() == PROMOTING_BLACK_PAWN) {
+				PlayerPiece selectedPiece = findSelectedPromotionPiece(e);
+				if (selectedPiece != null) {
+					presentationModel.onPromoteTo(selectedPiece);
+				}
+			}
+		}
+
+		@Override
+		public void mouseMoved(MouseEvent e) {
+			if (presentationModel.getState() == PROMOTING_WHITE_PAWN || presentationModel.getState() == PROMOTING_BLACK_PAWN) {
+				promotionHighlightedPiece = findSelectedPromotionPiece(e);
+				updateBoard();
+			}
+		}
+
+		private PlayerPiece findSelectedPromotionPiece(MouseEvent e) {
+			try {
+				Square targetSquare = getSquare(e.getX(), e.getY());
+				if (targetSquare.rank() == (presentationModel.getState() == PROMOTING_WHITE_PAWN ? RANK_7 : RANK_2) &&
+						FILE_C <= targetSquare.file() && targetSquare.file() <= FILE_F) {
+					return promotionPieces[targetSquare.file() - FILE_C];
+				}
+			} catch (IllegalArgumentException ex) {
+				// ignore, because mouse moved outside board
+			}
+			return null;
 		}
 	}
 
