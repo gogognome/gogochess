@@ -5,13 +5,14 @@ import static nl.gogognome.gogochess.gui.GamePresentationModel.State.INITIALIZIN
 import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.*;
 import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
-import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
 
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 import javax.inject.*;
 import javax.swing.*;
+
+import com.google.common.collect.ImmutableList;
 import org.slf4j.*;
 import nl.gogognome.gogochess.logic.*;
 import nl.gogognome.gogochess.logic.ai.*;
@@ -125,7 +126,7 @@ public class GamePresentationModel {
 					boardForArtificialIntelligence.currentPlayer(),
 					this::setPercentage,
 					bestMoves -> logger.debug(bestMoves.stream().map(Move::toString).collect(joining(", "))));
-			SwingUtilities.invokeLater(() -> onMove(move));
+			SwingUtilities.invokeLater(() -> onComputerMove(move));
 		} catch (ArtificalIntelligenceCanceledException e) {
 			logger.debug("Canceled thinking");
 		} catch (Exception e) {
@@ -165,6 +166,13 @@ public class GamePresentationModel {
 
 	private void onInvalidMove() {
 		changeStateTo(State.WAITING_FOR_DRAG);
+	}
+
+	private void onComputerMove(Move move) {
+		targets = ImmutableList.of(
+				move.getMutationRemovingPieceFromStart().getSquare(),
+				move.getMutationAddingPieceAtDestination().getSquare());
+		onMove(move);
 	}
 
 	private void onMove(Move move) {
