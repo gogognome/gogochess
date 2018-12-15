@@ -25,6 +25,15 @@ class CentralControlHeuristic {
 			.put(KING, 1)
 			.build();
 
+	private final static Map<Piece, Integer> ENDGAME_WITH_PAWNS_PIECE_VALUES = ImmutableMap.<Piece, Integer>builder()
+			.put(PAWN, 0)
+			.put(KNIGHT, 0)
+			.put(BISHOP, 0)
+			.put(ROOK, 0)
+			.put(QUEEN, 0)
+			.put(KING, 1)
+			.build();
+
 	private final static int[][] CENTER_CONTORL_ARRAY = new int[][]{
 			{0, 1, 2, 3, 3, 2, 1, 0},
 			{1, 3, 4, 5, 5, 4, 3, 1},
@@ -42,6 +51,10 @@ class CentralControlHeuristic {
 
 	int getCenterControlDeltaForMiddleGame(BoardMutation from, BoardMutation to) {
 		return getCenterControlDelta(from, to, MIDDLE_GAME_PIECE_VALUES);
+	}
+
+	int getCenterControlDeltaForEndgameWithPawns(BoardMutation from, BoardMutation to) {
+		return getCenterControlDelta(from, to, ENDGAME_WITH_PAWNS_PIECE_VALUES);
 	}
 
 	private int getCenterControlDelta(BoardMutation from, BoardMutation to, Map<Piece, Integer> pieceToValue) {

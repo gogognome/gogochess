@@ -17,14 +17,14 @@ class PositionalAnalysisForMiddleGame implements MovesEvaluator {
 	private final CastlingHeuristics castlingHeuristics;
 	private final CentralControlHeuristic centralControlHeuristic;
 	private final KingFieldHeuristic kingFieldHeuristic;
-	private final PawnHeuristics pawnHeuristics;
+	private final PawnHeuristicsOpeningAndMiddleGame pawnHeuristics;
 	private final PieceValueEvaluator pieceValueEvaluator;
 
 	PositionalAnalysisForMiddleGame(
 			CastlingHeuristics castlingHeuristics,
 			CentralControlHeuristic centralControlHeuristic,
 			KingFieldHeuristic kingFieldHeuristic,
-			PawnHeuristics pawnHeuristics,
+			PawnHeuristicsOpeningAndMiddleGame pawnHeuristics,
 			PieceValueEvaluator pieceValueEvaluator) {
 		this.castlingHeuristics = castlingHeuristics;
 		this.centralControlHeuristic = centralControlHeuristic;

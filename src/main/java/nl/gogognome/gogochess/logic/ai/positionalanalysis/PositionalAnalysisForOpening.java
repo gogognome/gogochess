@@ -14,7 +14,7 @@ class PositionalAnalysisForOpening implements MovesEvaluator {
 
 	private final CastlingHeuristics castlingHeuristics;
 	private final CentralControlHeuristic centralControlHeuristic;
-	private final PawnHeuristics pawnHeuristics;
+	private final PawnHeuristicsOpeningAndMiddleGame pawnHeuristics;
 
 	private final static Map<SimpleMove, Integer> SIMPLE_MOVE_TO_VALUE = ImmutableMap.<SimpleMove, Integer>builder()
 			.put(new SimpleMove(WHITE_KNIGHT.removeFrom(B1), WHITE_KNIGHT.addTo(A3)), -15)
@@ -26,7 +26,7 @@ class PositionalAnalysisForOpening implements MovesEvaluator {
 
 	PositionalAnalysisForOpening(
 			CastlingHeuristics castlingHeuristics, CentralControlHeuristic centralControlHeuristic,
-			PawnHeuristics pawnHeuristics) {
+			PawnHeuristicsOpeningAndMiddleGame pawnHeuristics) {
 		this.castlingHeuristics = castlingHeuristics;
 		this.centralControlHeuristic = centralControlHeuristic;
 		this.pawnHeuristics = pawnHeuristics;

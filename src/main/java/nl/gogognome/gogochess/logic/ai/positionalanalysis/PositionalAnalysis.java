@@ -20,7 +20,7 @@ public class PositionalAnalysis implements MovesEvaluator {
 				new CastlingHeuristics(),
 				centralControlHeuristic,
 				new KingFieldHeuristic(),
-				new PawnHeuristics(-5),
+				new PawnHeuristicsOpeningAndMiddleGame(-5),
 				pieceValueEvaluator);
 	}
 
@@ -34,9 +34,13 @@ public class PositionalAnalysis implements MovesEvaluator {
 	private final PositionalAnalysisForOpening positionalAnalysisForOpening = new PositionalAnalysisForOpening(
 			new CastlingHeuristics(),
 			centralControlHeuristic,
-			new PawnHeuristics(-10));
+			new PawnHeuristicsOpeningAndMiddleGame(-10));
 	private final PositionalAnalysisForMiddleGame positionalAnalysisForMiddleGame;
-	private final PositionalAnalysisForEndGame positionalAnalysisForEndGame = new PositionalAnalysisForEndGame(new PassedPawnFieldHeuristic());
+	private final PositionalAnalysisForEndGame positionalAnalysisForEndGame = new PositionalAnalysisForEndGame(
+			new PassedPawnFieldHeuristic(),
+			centralControlHeuristic,
+			new KingFieldHeuristic(),
+			new PawnHeuristicsEndgame());
 	private final PieceValueEvaluator pieceValueEvaluator;
 	
 	private Phase currentPhase;

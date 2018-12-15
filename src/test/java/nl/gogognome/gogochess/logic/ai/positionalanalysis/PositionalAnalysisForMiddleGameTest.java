@@ -17,7 +17,7 @@ class PositionalAnalysisForMiddleGameTest {
             new CastlingHeuristics(), 
             new CentralControlHeuristic(), 
             new KingFieldHeuristic(), 
-            new PawnHeuristics(-5), 
+            new PawnHeuristicsOpeningAndMiddleGame(-5),
             new PieceValueEvaluator());
     
     private SingleMoveEvaluator evaluator = new SingleMoveEvaluator((board, move) -> positionalAnalysisForMiddleGame.evaluate(board, asList(move)));

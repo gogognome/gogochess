@@ -286,6 +286,12 @@ public class Board {
 				.count();
 	}
 
+	public int countPiecesWhere(Predicate<PlayerPiece> mustCountPlayerPiece) {
+		return (int) Arrays.stream(playerPiecesPerSquare)
+				.filter(playerPiece -> playerPiece != null && mustCountPlayerPiece.test(playerPiece))
+				.count();
+	}
+
 	public int countNrOccurrencesInFile(PlayerPiece playerPiece, int file) {
 		int nrPawns = 0;
 		for (int rank=0; rank<8; rank++) {

@@ -15,7 +15,7 @@ class PositionalAnalysisForOpeningTest {
 	private PositionalAnalysisForOpening positionalAnalysisForOpening = new PositionalAnalysisForOpening(
 			new CastlingHeuristics(),
 			new CentralControlHeuristic(),
-			new PawnHeuristics(-10));
+			new PawnHeuristicsOpeningAndMiddleGame(-10));
 
 	private SingleMoveEvaluator evaluator = new SingleMoveEvaluator((board, move) -> positionalAnalysisForOpening.evaluate(board, asList(move)));
 	

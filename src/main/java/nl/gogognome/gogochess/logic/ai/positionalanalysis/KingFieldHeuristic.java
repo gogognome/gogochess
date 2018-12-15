@@ -28,11 +28,15 @@ class KingFieldHeuristic {
 			.build();
 
 	int getKingFieldDeltaForMiddleGame(BoardMutation from, BoardMutation to, Square opponentKingSquare) {
-		int centerControlDelta = 0;
 		int pieceValue = KingFieldHeuristic.MIDDLE_GAME_PIECE_VALUES.get(from.getPlayerPiece().getPiece());
-		centerControlDelta -= valueOf(pieceValue, from.getSquare(), opponentKingSquare);
-		centerControlDelta += valueOf(pieceValue, to.getSquare(), opponentKingSquare);
-		return centerControlDelta;
+		return valueOf(pieceValue, to.getSquare(), opponentKingSquare) - valueOf(pieceValue, from.getSquare(), opponentKingSquare);
+	}
+
+	int getKingFieldDeltaForEndgameWithPawns(BoardMutation from, BoardMutation to, Square opponentKingSquare) {
+		if (!from.getPlayerPiece().getPiece().equals(KING)) {
+			return 0;
+		}
+		return valueOf(1, to.getSquare(), opponentKingSquare) - valueOf(1, from.getSquare(), opponentKingSquare);
 	}
 
 	private int valueOf(int pieceFactor, Square square, Square opponentKingSquare) {
@@ -46,5 +50,4 @@ class KingFieldHeuristic {
 		}
 		return pieceFactor * centerControlValue;
 	}
-
 }
