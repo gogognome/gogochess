@@ -15,8 +15,8 @@ and computer player. The human player can enter moves by dragging pieces.
 
 ![Image of Gogo Chess](https://gogognome.nl/images/gogochess.png)
 
-You can download Gogo Chess 0.1 from my website by clicking
-[this link](https://gogognome.nl/downloads/gogochess-0.1.jar).
+You can download Gogo Chess 0.2 from my website by clicking
+[this link](https://gogognome.nl/downloads/gogochess-0.2.jar).
 
 ## Design principles
 
@@ -42,6 +42,4 @@ Start with
 
 The following features will be implemented soon, so keep an eye on this project:
 
-* When human player promotes a pawn, let the human player select the new type of piece
-* Fix issues when toggling from computer player to human player and vice versa
-* Finish positional analysis of middle game and endgame
+* Finish the positional analysis of the endgame
