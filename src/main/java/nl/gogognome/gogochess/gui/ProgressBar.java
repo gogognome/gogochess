@@ -10,6 +10,7 @@ public class ProgressBar extends JPanel {
 	public ProgressBar(GamePresentationModel presentationModel) {
 		this.presentationModel = presentationModel;
 		presentationModel.addListener(this::onEvent);
+		setPreferredSize(new Dimension(200, 20));
 	}
 
 	private void onEvent(GamePresentationModel.Event event) {

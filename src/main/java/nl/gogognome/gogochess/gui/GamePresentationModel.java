@@ -167,9 +167,15 @@ public class GamePresentationModel {
 		if (durationPercentage > 4 * percentage) {
 			maxDepthDelta--;
 		}
+		if (percentage > 2 * durationPercentage) {
+			maxDepthDelta++;
+		}
+		if (percentage > 4 * durationPercentage) {
+			maxDepthDelta++;
+		}
 		if (maxDepthDelta != progressListener.getMaxDepthDelta().get()) {
 			progressListener.getMaxDepthDelta().set(maxDepthDelta);
-			logger.info("Set max depth delta to " + maxDepthDelta + " because AI percentage is "
+			logger.debug("Set max depth delta to " + maxDepthDelta + " because AI percentage is "
 					+ percentage + "% and duration percentage is " + durationPercentage + "%.");
 		}
 	}

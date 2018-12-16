@@ -18,7 +18,8 @@ public class SettingsPanel extends JPanel {
 
 	public SettingsPanel(GamePresentationModel presentationModel) {
 		this.presentationModel = presentationModel;
-		this.buttonSize = 20;
+		this.buttonSize = 40;
+		setPreferredSize(new Dimension(80, 40));
 
 		try {
 			whiteHumanPlayer = ImageIO.read(getClass().getResourceAsStream("/white-human-player.png"));

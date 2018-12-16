@@ -10,7 +10,7 @@ import nl.gogognome.gogochess.juice.Module;
 
 public class Start {
 
-	public static void main(String args[]) {
+	public static void main(String[] args) {
 		Injector injector = Guice.createInjector(new Module());
 		JFrame frame = new JFrame("Gogo Chess");
 
@@ -21,7 +21,7 @@ public class Start {
 		frame.add(mainPanel, CENTER);
 		frame.pack();
 		frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		frame.setMinimumSize(new Dimension(500, 500));
+		frame.setMinimumSize(new Dimension(600, 500));
 		frame.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
@@ -30,6 +30,6 @@ public class Start {
 		});
 		frame.setVisible(true);
 
-		SwingUtilities.invokeLater(() -> controller.playGame());
+		SwingUtilities.invokeLater(controller::playGame);
 	}
 }
