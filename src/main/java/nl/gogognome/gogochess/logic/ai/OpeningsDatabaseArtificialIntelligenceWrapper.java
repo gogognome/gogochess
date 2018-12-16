@@ -1,11 +1,17 @@
 package nl.gogognome.gogochess.logic.ai;
 
+import nl.gogognome.gogochess.logic.Board;
+import nl.gogognome.gogochess.logic.Move;
+import nl.gogognome.gogochess.logic.Player;
+import nl.gogognome.gogochess.logic.movenotation.MoveNotation;
+import nl.gogognome.gogochess.logic.movenotation.ReverseAlgebraicNotation;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import static java.util.Collections.singletonList;
-import java.util.*;
-import java.util.function.*;
-import javax.inject.*;
-import nl.gogognome.gogochess.logic.*;
-import nl.gogognome.gogochess.logic.movenotation.*;
 
 public class OpeningsDatabaseArtificialIntelligenceWrapper implements ArtificialIntelligence {
 
@@ -37,7 +43,7 @@ public class OpeningsDatabaseArtificialIntelligenceWrapper implements Artificial
 	}
 
 	@Override
-	public Move nextMove(Board board, Player player, Consumer<Integer> progressUpdateConsumer, Consumer<List<Move>> bestMovesConsumer) {
+	public Move nextMove(Board board, Player player, ProgressListener progressListener) {
 		List<Integer> matchingOpenings = new ArrayList<>();
 		for (int opening=0; opening<OPENINGS.length; opening++) {
 			if (matchesOpeningWithFollowingMove(OPENINGS[opening], board.lastMove())) {
@@ -46,7 +52,7 @@ public class OpeningsDatabaseArtificialIntelligenceWrapper implements Artificial
 		}
 
 		if (matchingOpenings.isEmpty()) {
-			return wrappedArtificialIntelligence.nextMove(board, player, progressUpdateConsumer, bestMovesConsumer);
+			return wrappedArtificialIntelligence.nextMove(board, player, progressListener);
 		}
 
 		int opening = random.nextInt(matchingOpenings.size());
@@ -55,7 +61,7 @@ public class OpeningsDatabaseArtificialIntelligenceWrapper implements Artificial
 				.filter(move -> moveNotation.format(move).equals(followingMoveDescription))
 				.findFirst()
 				.orElseThrow(() -> new IllegalStateException("Could not find next move " + followingMoveDescription + " in valid moves " + board.currentPlayer().validMoves(board)));
-		bestMovesConsumer.accept(singletonList(nextMove));
+		progressListener.consumeBestMoves(singletonList(nextMove));
 		return nextMove;
 	}
 

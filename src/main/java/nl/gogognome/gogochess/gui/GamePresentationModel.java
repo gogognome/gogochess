@@ -52,6 +52,14 @@ public class GamePresentationModel {
 	private final List<Consumer<Event>> listeners = new ArrayList<>();
 	private List<Move> promotionMoves;
 
+	private final ProgressListener progressListener = new ProgressListener()
+			.withProgressUpdateConsumer(this::setPercentage)
+			.withBestMovesConsumer(bestMoves -> logger.debug(bestMoves.stream().map(Move::toString).collect(joining(", "))));
+
+	private long aiStartTime;
+	private long aiMaxEndTime;
+	private int maxDurationSeconds = 15;
+
 	@Inject
 	public GamePresentationModel(ArtificialIntelligence ai, Board board) {
 		this.ai = ai;
@@ -119,13 +127,15 @@ public class GamePresentationModel {
 	private void computerThinking() {
 		logger.debug("Start thinking...");
 		try {
+			aiStartTime = System.currentTimeMillis();
+			aiMaxEndTime = aiStartTime + maxDurationSeconds * 1000;
+
 			Board boardForArtificialIntelligence = new Board();
 			boardForArtificialIntelligence.process(board.lastMove());
 			Move move = ai.nextMove(
 					boardForArtificialIntelligence,
 					boardForArtificialIntelligence.currentPlayer(),
-					this::setPercentage,
-					bestMoves -> logger.debug(bestMoves.stream().map(Move::toString).collect(joining(", "))));
+					progressListener);
 			SwingUtilities.invokeLater(() -> onComputerMove(move));
 		} catch (ArtificalIntelligenceCanceledException e) {
 			logger.debug("Canceled thinking");
@@ -138,6 +148,29 @@ public class GamePresentationModel {
 		if (this.percentage != percentage) {
 			this.percentage = percentage;
 			SwingUtilities.invokeLater(() -> fireEvent(Event.PERCENTAGE_CHANGED));
+		}
+
+		if (percentage > 10) {
+			updateMaxDepthDelta(percentage);
+		}
+	}
+
+	private void updateMaxDepthDelta(Integer percentage) {
+		int maxDepthDelta = 0;
+		int durationPercentage = (int) (100 * ((System.currentTimeMillis() - aiStartTime)) / (aiMaxEndTime - aiStartTime));
+		if (durationPercentage > percentage) {
+			maxDepthDelta--;
+		}
+		if (durationPercentage > 2 * percentage) {
+			maxDepthDelta--;
+		}
+		if (durationPercentage > 4 * percentage) {
+			maxDepthDelta--;
+		}
+		if (maxDepthDelta != progressListener.getMaxDepthDelta().get()) {
+			progressListener.getMaxDepthDelta().set(maxDepthDelta);
+			logger.info("Set max depth delta to " + maxDepthDelta + " because AI percentage is "
+					+ percentage + "% and duration percentage is " + durationPercentage + "%.");
 		}
 	}
 
@@ -169,6 +202,8 @@ public class GamePresentationModel {
 	}
 
 	private void onComputerMove(Move move) {
+		long aiEndTime = System.currentTimeMillis();
+		logger.debug("Computer has thought for " + (aiEndTime - aiStartTime) / 1000  + " seconds");
 		targets = ImmutableList.of(
 				move.getMutationRemovingPieceFromStart().getSquare(),
 				move.getMutationAddingPieceAtDestination().getSquare());

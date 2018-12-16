@@ -35,7 +35,7 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 				BLACK_KING.addTo(H8)));
 
 		ArtificialIntelligence ai = buildAI(1);
-		Move move = ai.nextMove(board, WHITE, percentage -> {}, bestMoves -> {});
+		Move move = ai.nextMove(board, WHITE, new ProgressListener());
 
 		assertThat("Qg1-h1++, Qg1-h2++, Qg1-g7++, Qg1-g8++").contains(new ReverseAlgebraicNotation().format(move));
 		assertThat(move.getStatus()).isEqualTo(CHECK_MATE);
@@ -146,14 +146,12 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 
 		board.process(Board.INITIAL_BOARD);
 		for (int i=0; i<moves.length; i+=2) {
-			ai.nextMove(board, WHITE, percentage -> {
-			}, list -> {
-			});
+			ai.nextMove(board, WHITE, new ProgressListener());
 			board.process(moves[i]);
 			board.process(moves[i + 1]);
 		}
 
-		Move nextMove = ai.nextMove(board, WHITE, percentage -> {}, list -> {});
+		Move nextMove = ai.nextMove(board, WHITE, new ProgressListener());
 
 		assertThat(new ReverseAlgebraicNotation().format(nextMove)).isEqualTo("Qd1xc2");
 	}
@@ -162,7 +160,7 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 		ArtificialIntelligence ai = buildAI(maxDepth);
 
 		AtomicReference<List<Move>> actualMoves = new AtomicReference<>();
-		ai.nextMove(board, player, percentage -> {}, actualMoves::set);
+		ai.nextMove(board, player, new ProgressListener().withBestMovesConsumer(actualMoves::set));
 
 		String actualMovesString = format(actualMoves.get());
 		List<String> expectedMoveStrings = takePartNoLongerThanActualMoves(actualMoves.get(), asList(expectedMoves));
@@ -174,7 +172,7 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 		ArtificialIntelligence ai = buildAI(maxDepth);
 
 		AtomicReference<List<Move>> actualMoves = new AtomicReference<>();
-		ai.nextMove(board, player, percentage -> {}, actualMoves::set);
+		ai.nextMove(board, player, new ProgressListener().withBestMovesConsumer(actualMoves::set));
 		String actualMovesString = format(actualMoves.get());
 
 		for (List<String> expectedMoves : possibleExpectedMoves) {

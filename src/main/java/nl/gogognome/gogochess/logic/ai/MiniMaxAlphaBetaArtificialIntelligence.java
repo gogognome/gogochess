@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -25,6 +25,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 	private int initialAlpha;
 	private int initialBeta;
 	private int maxDepth;
+	private AtomicInteger maxDepthDelta;
 
 	private AtomicBoolean canceled = new AtomicBoolean();
 
@@ -63,9 +64,10 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 	}
 
 	@Override
-	public Move nextMove(Board board, Player player, Consumer<Integer> progressUpdateConsumer, Consumer<List<Move>> bestMovesConsumer) {
+	public Move nextMove(Board board, Player player, ProgressListener progressListener) {
 		canceled.set(false);
 		initMaxDepth(board);
+		maxDepthDelta = progressListener.getMaxDepthDelta();
 		statistics.reset();
 		transpositionTable.clear();
 
@@ -80,7 +82,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 //		}
 
 		statistics.onPositionsGenerated(nextMoves.size());
-		Progress progress = new Progress(progressUpdateConsumer);
+		Progress progress = new Progress(progressListener.getProgressUpdateConsumer());
 		Progress.Job job = progress.onStartJobWithNrSteps(nextMoves.size());
 		Map<Move, Move> moveToBestDeepestMove = new HashMap<>();
 		for (Move move : nextMoves) {
@@ -91,7 +93,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 
 		moveSort.sort(nextMoves);
 		Move nextMove = nextMoves.get(0);
-		bestMovesConsumer.accept(nextMove.pathTo(moveToBestDeepestMove.get(nextMove)));
+		progressListener.consumeBestMoves(nextMove.pathTo(moveToBestDeepestMove.get(nextMove)));
 		long endTime = System.nanoTime();
 		logStatistics(startTime, endTime);
 		return nextMove;
@@ -136,7 +138,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 			storeBestDeepestMoveInCache(move, hash, alpha, beta, move);
 			return move;
 		}
-		if (depth >= maxDepth) {
+		if (depth >= maxDepth + maxDepthDelta.get()) {
 			Move bestDeepestMove = quiescenceSearch.search(board, move, alpha, beta);
 			storeBestDeepestMoveInCache(move, hash, alpha, beta, bestDeepestMove);
 			return bestDeepestMove;
