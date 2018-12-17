@@ -41,8 +41,7 @@ public class GamePresentationModel {
 	private final Board board;
 
 	private State state = INITIALIZING;
-	private ExecutorService executorService = Executors.newFixedThreadPool(1);
-	private ArtificialIntelligence ai;
+	private final AiController aiController;
 
 	private boolean whitePlayerAi = false;
 	private boolean blackPlayerAi = true;
@@ -52,19 +51,14 @@ public class GamePresentationModel {
 	private final List<Consumer<Event>> listeners = new ArrayList<>();
 	private List<Move> promotionMoves;
 
-	private final ProgressListener progressListener = new ProgressListener()
-			.withProgressUpdateConsumer(this::setPercentage)
-			.withBestMovesConsumer(bestMoves -> logger.debug(bestMoves.stream().map(Move::toString).collect(joining(", "))));
-
-	private long aiStartTime;
-	private long aiMaxEndTime;
-	private int maxDurationSeconds = 15;
-
 	@Inject
-	public GamePresentationModel(ArtificialIntelligence ai, Board board) {
-		this.ai = ai;
+	public GamePresentationModel(AiController aiController, Board board) {
+		this.aiController = aiController;
 		this.board = board;
 		board.initBoard();
+
+		this.aiController.setPercentageConsumer(this::setPercentage);
+		this.aiController.setComputerMoveConsumer(this::onComputerMove);
 	}
 
 	void addListener(Consumer<Event> listener) {
@@ -112,7 +106,7 @@ public class GamePresentationModel {
 	private void cancelOrStartThinkingFor(Player player) {
 		if (board.currentPlayer() == player) {
 			if (state == State.COMPUTER_THINKING) {
-				ai.cancel();
+				aiController.cancelThinking();
 			}
 
 			onStartThinking();
@@ -124,59 +118,10 @@ public class GamePresentationModel {
 		fireEvent(Event.STATE_CHANGED);
 	}
 
-	private void computerThinking() {
-		logger.debug("Start thinking...");
-		try {
-			aiStartTime = System.currentTimeMillis();
-			aiMaxEndTime = aiStartTime + maxDurationSeconds * 1000;
-
-			Board boardForArtificialIntelligence = new Board();
-			boardForArtificialIntelligence.process(board.lastMove());
-			Move move = ai.nextMove(
-					boardForArtificialIntelligence,
-					boardForArtificialIntelligence.currentPlayer(),
-					progressListener);
-			SwingUtilities.invokeLater(() -> onComputerMove(move));
-		} catch (ArtificalIntelligenceCanceledException e) {
-			logger.debug("Canceled thinking");
-		} catch (Exception e) {
-			logger.error("Problem occurred: " + e.getMessage(), e);
-		}
-	}
-
 	private void setPercentage(Integer percentage) {
 		if (this.percentage != percentage) {
 			this.percentage = percentage;
 			SwingUtilities.invokeLater(() -> fireEvent(Event.PERCENTAGE_CHANGED));
-		}
-
-		if (percentage > 10) {
-			updateMaxDepthDelta(percentage);
-		}
-	}
-
-	private void updateMaxDepthDelta(Integer percentage) {
-		int maxDepthDelta = 0;
-		int durationPercentage = (int) (100 * ((System.currentTimeMillis() - aiStartTime)) / (aiMaxEndTime - aiStartTime));
-		if (durationPercentage > percentage) {
-			maxDepthDelta--;
-		}
-		if (durationPercentage > 2 * percentage) {
-			maxDepthDelta--;
-		}
-		if (durationPercentage > 4 * percentage) {
-			maxDepthDelta--;
-		}
-		if (percentage > 2 * durationPercentage) {
-			maxDepthDelta++;
-		}
-		if (percentage > 4 * durationPercentage) {
-			maxDepthDelta++;
-		}
-		if (maxDepthDelta != progressListener.getMaxDepthDelta().get()) {
-			progressListener.getMaxDepthDelta().set(maxDepthDelta);
-			logger.debug("Set max depth delta to " + maxDepthDelta + " because AI percentage is "
-					+ percentage + "% and duration percentage is " + durationPercentage + "%.");
 		}
 	}
 
@@ -208,12 +153,12 @@ public class GamePresentationModel {
 	}
 
 	private void onComputerMove(Move move) {
-		long aiEndTime = System.currentTimeMillis();
-		logger.debug("Computer has thought for " + (aiEndTime - aiStartTime) / 1000  + " seconds");
-		targets = ImmutableList.of(
-				move.getMutationRemovingPieceFromStart().getSquare(),
-				move.getMutationAddingPieceAtDestination().getSquare());
-		onMove(move);
+		SwingUtilities.invokeLater(() -> {
+			targets = ImmutableList.of(
+					move.getMutationRemovingPieceFromStart().getSquare(),
+					move.getMutationAddingPieceAtDestination().getSquare());
+			onMove(move);
+		});
 	}
 
 	private void onMove(Move move) {
@@ -241,10 +186,13 @@ public class GamePresentationModel {
 	
 	private void onStartThinking() {
 		if (board.currentPlayer() == WHITE && whitePlayerAi || board.currentPlayer() == BLACK && blackPlayerAi) {
-			executorService.submit(this::computerThinking);
+			aiController.startThinking(board.lastMove());
 			changeStateTo(State.COMPUTER_THINKING);
 		} else {
 			changeStateTo(State.WAITING_FOR_DRAG);
+			if (board.currentPlayer() == WHITE && blackPlayerAi || board.currentPlayer() == BLACK && whitePlayerAi) {
+				aiController.startThinkingDuringOpponentsTurn();
+			}
 		}
 	}
 
@@ -271,8 +219,7 @@ public class GamePresentationModel {
 	}
 
 	void onClose() {
-		ai.cancel();
-		executorService.shutdownNow();
+		aiController.onClose();
 	}
 
 	private void changeStateTo(State newState) {

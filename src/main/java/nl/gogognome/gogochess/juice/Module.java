@@ -28,6 +28,11 @@ public class Module extends AbstractModule {
 	}
 
 	@Provides
+	AiController provideArtiAiController(ArtificialIntelligence ai, MoveNotation moveNotation) {
+		return new AiController(ai, moveNotation);
+	}
+
+	@Provides
 	MiniMaxAlphaBetaArtificialIntelligence provideMiniMaxAlphaBetaArtificialIntelligence(
 			BoardEvaluator boardEvaluator,
 			PositionalAnalysis positionalAnalysis,
@@ -40,8 +45,8 @@ public class Module extends AbstractModule {
 
 	@Provides
 	@Singleton
-	GamePresentationModel provideGamePresentationModel(ArtificialIntelligence ai, Board board) {
-		return new GamePresentationModel(ai, board);
+	GamePresentationModel provideGamePresentationModel(AiController aiController, Board board) {
+		return new GamePresentationModel(aiController, board);
 	}
 
 	@Provides
