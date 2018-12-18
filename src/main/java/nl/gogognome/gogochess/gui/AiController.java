@@ -27,7 +27,7 @@ public class AiController {
 
     private final ProgressListener progressListener = new ProgressListener()
             .withProgressUpdateConsumer(this::setPercentage)
-            .withBestMovesConsumer(bestMoves -> setExpectedOpponentsMove(bestMoves.size() >= 2 ? bestMoves.get(1) : null));
+            .withBestMovesConsumer(bestMoves -> setNextExpectedOpponentsMove(bestMoves.size() >= 2 ? bestMoves.get(1) : null));
 
     private long aiStartTime;
     private long aiMaxEndTime;
@@ -35,8 +35,9 @@ public class AiController {
     private int maxDurationSeconds = 15;
 
     private boolean computerThinksDuringOpponentsTurn;
+    private Move nextExpectedOpponentsMove;
     private Move expectedOpponentsMove;
-    private Move responseToExpectedOppoonentsMove;
+    private Move responseToExpectedOpponentsMove;
 
     private final Object lock = new Object();
 
@@ -54,11 +55,9 @@ public class AiController {
         this.computerMoveConsumer = computerMoveConsumer;
     }
 
-    private void setExpectedOpponentsMove(Move expectedOpponentsMove) {
+    private void setNextExpectedOpponentsMove(Move nextExpectedOpponentsMove) {
         synchronized (lock) {
-            if (!computerThinksDuringOpponentsTurn) {
-                this.expectedOpponentsMove = expectedOpponentsMove;
-            }
+            this.nextExpectedOpponentsMove = nextExpectedOpponentsMove;
         }
     }
 
@@ -80,11 +79,11 @@ public class AiController {
                     computerThinksDuringOpponentsTurn = false;
                     return;
                 }
-                if (responseToExpectedOppoonentsMove != null) {
+                if (responseToExpectedOpponentsMove != null) {
                     logger.debug("Computer already finished thinking for the correct move of the opponent.");
-                    computerMoveConsumer.accept(responseToExpectedOppoonentsMove);
+                    computerMoveConsumer.accept(responseToExpectedOpponentsMove);
                     expectedOpponentsMove = null;
-                    responseToExpectedOppoonentsMove = null;
+                    responseToExpectedOpponentsMove = null;
                     return;
                 }
             }
@@ -94,26 +93,29 @@ public class AiController {
                 ai.cancel();
                 computerThinksDuringOpponentsTurn = false;
             }
+
             executorService.submit(() -> computerThinking(lastMove));
         }
     }
 
     void startThinkingDuringOpponentsTurn() {
         synchronized (lock) {
-            if (expectedOpponentsMove == null) {
+            if (nextExpectedOpponentsMove == null) {
                 return;
             }
 
+            expectedOpponentsMove = nextExpectedOpponentsMove;
             computerThinksDuringOpponentsTurn = true;
             executorService.submit(() -> computerThinking(expectedOpponentsMove));
         }
     }
 
     private void computerThinking(Move lastMove) {
-        String formattedMove = lastMove.getPrecedingMove() == null ? "board setup" : moveNotation.format(lastMove);
-        logger.debug("Start thinking for response to " + formattedMove +
-                (computerThinksDuringOpponentsTurn ? " during opponents turn" : ""));
         try {
+            String formattedMove = lastMove.getPrecedingMove() == null ? "board setup" : moveNotation.format(lastMove);
+            logger.debug("Start thinking for response to " + formattedMove +
+                    (computerThinksDuringOpponentsTurn ? " during opponents turn" : ""));
+
             aiStartTime = System.currentTimeMillis();
             aiMaxEndTime = aiStartTime + maxDurationSeconds * 1000;
 
@@ -129,8 +131,8 @@ public class AiController {
 
             synchronized (lock) {
                 if (computerThinksDuringOpponentsTurn) {
-                    logger.debug("Store response to expected move " + moveNotation.format(expectedOpponentsMove) + ": " + moveNotation.format(move));
-                    responseToExpectedOppoonentsMove = move;
+                    logger.debug("Store response to expected move " + moveNotation.format(lastMove) + ": " + moveNotation.format(move));
+                    responseToExpectedOpponentsMove = move;
                     computerThinksDuringOpponentsTurn = false;
                 } else {
                     logger.debug("Computer move: " + moveNotation.format(move));
