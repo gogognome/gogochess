@@ -4,6 +4,7 @@ import static java.awt.BorderLayout.*;
 import static javax.swing.WindowConstants.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.net.URL;
 import javax.swing.*;
 import com.google.inject.*;
 import nl.gogognome.gogochess.juice.Module;
@@ -30,6 +31,14 @@ public class Start {
 		});
 		frame.setVisible(true);
 
+		setIcon(frame);
+
 		SwingUtilities.invokeLater(controller::playGame);
+	}
+
+	private static void setIcon(JFrame frame) {
+		URL url = ClassLoader.getSystemResource("icon-32x32.png");
+		Image image = Toolkit.getDefaultToolkit().createImage(url);
+		frame.setIconImage(image);
 	}
 }
