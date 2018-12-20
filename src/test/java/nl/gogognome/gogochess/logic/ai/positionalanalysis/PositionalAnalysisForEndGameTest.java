@@ -203,6 +203,7 @@ class PositionalAnalysisForEndGameTest {
     private Map<Piece, Integer> getPieceToValue(String nameOfField) throws IllegalAccessException, NoSuchFieldException {
         Field field = PieceValueEvaluator.class.getDeclaredField(nameOfField);
         field.setAccessible(true);
+        //noinspection unchecked
         return (Map<Piece, Integer>) field.get(pieceValueEvaluator);
     }
 }
