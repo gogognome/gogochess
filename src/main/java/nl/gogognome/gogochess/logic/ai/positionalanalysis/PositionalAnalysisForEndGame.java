@@ -2,12 +2,14 @@ package nl.gogognome.gogochess.logic.ai.positionalanalysis;
 
 import com.google.common.collect.ImmutableSet;
 import nl.gogognome.gogochess.logic.*;
+import nl.gogognome.gogochess.logic.ai.PieceValueEvaluator;
 
 import java.util.List;
 import java.util.Set;
 
 import static nl.gogognome.gogochess.logic.MoveValues.negateForBlack;
 import static nl.gogognome.gogochess.logic.Piece.*;
+import static nl.gogognome.gogochess.logic.Player.*;
 
 public class PositionalAnalysisForEndGame implements MovesEvaluator {
 
@@ -15,15 +17,19 @@ public class PositionalAnalysisForEndGame implements MovesEvaluator {
     private final CentralControlHeuristic centralControlHeuristic;
     private final KingFieldHeuristic kingFieldHeuristic;
     private final PawnHeuristicsEndgame pawnHeuristics;
+    private final PieceValueEvaluator pieceValueEvaluator;
 
     PositionalAnalysisForEndGame(
             PassedPawnFieldHeuristic passedPawnFieldHeuristic,
             CentralControlHeuristic centralControlHeuristic,
-            KingFieldHeuristic kingFieldHeuristic, PawnHeuristicsEndgame pawnHeuristics) {
+            KingFieldHeuristic kingFieldHeuristic,
+            PawnHeuristicsEndgame pawnHeuristics,
+            PieceValueEvaluator pieceValueEvaluator) {
         this.passedPawnFieldHeuristic = passedPawnFieldHeuristic;
         this.centralControlHeuristic = centralControlHeuristic;
         this.kingFieldHeuristic = kingFieldHeuristic;
         this.pawnHeuristics = pawnHeuristics;
+        this.pieceValueEvaluator = pieceValueEvaluator;
     }
 
     @Override
@@ -33,6 +39,11 @@ public class PositionalAnalysisForEndGame implements MovesEvaluator {
         boolean endgameWithPawns = board.countPiecesWhere(playerPiece -> playerPiece.getPiece() == PAWN) > 0;
         Set<Piece> pieces = ImmutableSet.of(BISHOP, ROOK, KNIGHT, QUEEN);
         boolean endgameWithPieces = board.countPiecesWhere(playerPiece -> pieces.contains(playerPiece.getPiece())) > 0;
+
+        if (endgameWithPawns && endgameWithPieces) {
+            pieceValueEvaluator.setWhitePawnValue(countNrPawnsFor(board, WHITE) <= 2 ? 190 : 120);
+            pieceValueEvaluator.setBlackPawnValue(countNrPawnsFor(board, BLACK) <= 2 ? 190 : 120);
+        }
 
         for (Move move : moves) {
             BoardMutation from = move.getMutationRemovingPieceFromStart();
@@ -46,5 +57,9 @@ public class PositionalAnalysisForEndGame implements MovesEvaluator {
             }
             move.setValue(value);
         }
+    }
+
+    private int countNrPawnsFor(Board board, Player player) {
+        return board.countPiecesWhere(playerPiece -> playerPiece.getPlayer() == player && playerPiece.getPiece() == PAWN);
     }
 }

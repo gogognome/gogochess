@@ -22,6 +22,13 @@ public class PositionalAnalysis implements MovesEvaluator {
 				new KingFieldHeuristic(),
 				new PawnHeuristicsOpeningAndMiddleGame(-5),
 				pieceValueEvaluator);
+
+		positionalAnalysisForEndGame = new PositionalAnalysisForEndGame(
+				new PassedPawnFieldHeuristic(),
+				centralControlHeuristic,
+				new KingFieldHeuristic(),
+				new PawnHeuristicsEndgame(),
+				pieceValueEvaluator);
 	}
 
 	private enum Phase {
@@ -35,14 +42,10 @@ public class PositionalAnalysis implements MovesEvaluator {
 			new CastlingHeuristics(),
 			centralControlHeuristic,
 			new PawnHeuristicsOpeningAndMiddleGame(-10));
-	private final PositionalAnalysisForMiddleGame positionalAnalysisForMiddleGame;
-	private final PositionalAnalysisForEndGame positionalAnalysisForEndGame = new PositionalAnalysisForEndGame(
-			new PassedPawnFieldHeuristic(),
-			centralControlHeuristic,
-			new KingFieldHeuristic(),
-			new PawnHeuristicsEndgame());
 	private final PieceValueEvaluator pieceValueEvaluator;
-	
+	private final PositionalAnalysisForMiddleGame positionalAnalysisForMiddleGame;
+	private final PositionalAnalysisForEndGame positionalAnalysisForEndGame;
+
 	private Phase currentPhase;
 
 	public void evaluate(Board board, List<Move> moves) {

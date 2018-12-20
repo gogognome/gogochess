@@ -41,6 +41,16 @@ public class PieceValueEvaluator implements BoardEvaluator {
 		blackPieceToValue = readjustBlackPieceValues(blackPieceToValue, factor);
 	}
 
+	public void setWhitePawnValue(int newValue) {
+		whitePieceToValue = new HashMap<>(blackPieceToValue);
+		whitePieceToValue.put(PAWN, newValue);
+	}
+
+	public void setBlackPawnValue(int newValue) {
+		blackPieceToValue = new HashMap<>(blackPieceToValue);
+		blackPieceToValue.put(PAWN, newValue);
+	}
+
 	private Map<Piece, Integer> readjustBlackPieceValues(Map<Piece, Integer> pieceToValue, float factor) {
 		return pieceToValue.keySet().stream()
 				.collect(toMap(piece -> piece, piece -> applyFactor(piece, pieceToValue.get(piece), factor)));

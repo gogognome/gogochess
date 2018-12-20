@@ -1,9 +1,15 @@
 package nl.gogognome.gogochess.logic.ai.positionalanalysis;
 
 import nl.gogognome.gogochess.logic.Move;
+import nl.gogognome.gogochess.logic.Piece;
+import nl.gogognome.gogochess.logic.ai.PieceValueEvaluator;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Field;
+import java.util.Map;
+
 import static java.util.Arrays.asList;
+import static nl.gogognome.gogochess.logic.Piece.PAWN;
 import static nl.gogognome.gogochess.logic.Player.BLACK;
 import static nl.gogognome.gogochess.logic.Player.WHITE;
 import static nl.gogognome.gogochess.logic.Squares.*;
@@ -12,11 +18,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class PositionalAnalysisForEndGameTest {
 
+    private final PieceValueEvaluator pieceValueEvaluator = new PieceValueEvaluator();
+
     private PositionalAnalysisForEndGame positionalAnalysisForendgame = new PositionalAnalysisForEndGame(
             new PassedPawnFieldHeuristic(),
             new CentralControlHeuristic(),
             new KingFieldHeuristic(),
-            new PawnHeuristicsEndgame());
+            new PawnHeuristicsEndgame(),
+            pieceValueEvaluator);
 
     private SingleMoveEvaluator evaluator = new SingleMoveEvaluator((board, move) -> positionalAnalysisForendgame.evaluate(board, asList(move)));
 
@@ -76,7 +85,7 @@ class PositionalAnalysisForEndGameTest {
     }
 
     @Test
-    void unopposedBlackPawnOnLowerRankScoresBetterThanuUopposedBlackPawnOnHigherRank() {
+    void unopposedBlackPawnOnLowerRankScoresBetterThanUnopposedBlackPawnOnHigherRank() {
         int pawnOnLowerRank = evaluator.valueOfMove(new Move(WHITE, BLACK_PAWN.addTo(E2), BLACK_KING.addTo(A1), WHITE_KING.addTo(H8)),
                 BLACK_PAWN.removeFrom(E2), BLACK_KNIGHT.addTo(E1));
 
@@ -130,4 +139,70 @@ class PositionalAnalysisForEndGameTest {
         assertThat(singlePawn).isLessThan(secondPawn);
     }
 
+    @Test
+    void endgameWithThreeWhiteAndThreBlackPawnsAndPiecesRaisesValueOfAllPawnsTo120() throws Exception {
+        evaluator.valueOfMove(new Move(WHITE,
+                        WHITE_PAWN.addTo(A2), WHITE_PAWN.addTo(B2), WHITE_PAWN.addTo(B3),
+                        BLACK_PAWN.addTo(A7), BLACK_PAWN.addTo(B7), BLACK_PAWN.addTo(C7),
+                        BLACK_KING.addTo(H8), WHITE_KING.addTo(H1),
+                        WHITE_ROOK.addTo(A1)),
+                BLACK_PAWN.removeFrom(A7), BLACK_PAWN.addTo(A5));
+
+        assertThat(getWhitePieceToValue()).containsEntry(PAWN, 120);
+        assertThat(getBlackPieceToValue()).containsEntry(PAWN, 120);
+    }
+
+    @Test
+    void endgameWithThreeWhitePawnsAndTwoBlackPawnsAndPiecesRaisesValueOfWhitePawnsTo120AndBlackPawnsTo190() throws Exception {
+        evaluator.valueOfMove(new Move(WHITE,
+                        WHITE_PAWN.addTo(A2), WHITE_PAWN.addTo(B2), WHITE_PAWN.addTo(B3),
+                        BLACK_PAWN.addTo(A7), BLACK_PAWN.addTo(B7),
+                        BLACK_KING.addTo(H8), WHITE_KING.addTo(H1),
+                        WHITE_ROOK.addTo(A1)),
+                BLACK_PAWN.removeFrom(A7), BLACK_PAWN.addTo(A5));
+
+        assertThat(getWhitePieceToValue()).containsEntry(PAWN, 120);
+        assertThat(getBlackPieceToValue()).containsEntry(PAWN, 190);
+    }
+
+    @Test
+    void endgameWithOneWhitePawnsAndThreeBlackPawnsAndPiecesRaisesValueOfWhitePawnsTo190AndBlackPawnsTo120() throws Exception {
+        evaluator.valueOfMove(new Move(WHITE,
+                        WHITE_PAWN.addTo(A2),
+                        BLACK_PAWN.addTo(A7), BLACK_PAWN.addTo(B7), BLACK_PAWN.addTo(C7),
+                        BLACK_KING.addTo(H8), WHITE_KING.addTo(H1),
+                        WHITE_ROOK.addTo(A1)),
+                BLACK_PAWN.removeFrom(A7), BLACK_PAWN.addTo(A5));
+
+        assertThat(getWhitePieceToValue()).containsEntry(PAWN, 190);
+        assertThat(getBlackPieceToValue()).containsEntry(PAWN, 120);
+    }
+
+    @Test
+    void endgameWithOneWhitePawnsAndThreeBlackPawnsAndWithoutPiecesDoesNotRaiseValueOfPawns() throws Exception {
+        evaluator.valueOfMove(new Move(WHITE,
+                        WHITE_PAWN.addTo(A2),
+                        BLACK_PAWN.addTo(A7), BLACK_PAWN.addTo(B7), BLACK_PAWN.addTo(C7),
+                        BLACK_KING.addTo(H8), WHITE_KING.addTo(H1)),
+                BLACK_PAWN.removeFrom(A7), BLACK_PAWN.addTo(A5));
+
+        assertThat(getWhitePieceToValue()).containsEntry(PAWN, 100);
+        assertThat(getBlackPieceToValue()).containsEntry(PAWN, 100);
+    }
+
+    private Map<Piece, Integer> getWhitePieceToValue() throws IllegalAccessException, NoSuchFieldException {
+        String whitePieceToValue = "whitePieceToValue";
+        return getPieceToValue(whitePieceToValue);
+    }
+
+    private Map<Piece, Integer> getBlackPieceToValue() throws IllegalAccessException, NoSuchFieldException {
+        String whitePieceToValue = "blackPieceToValue";
+        return getPieceToValue(whitePieceToValue);
+    }
+
+    private Map<Piece, Integer> getPieceToValue(String nameOfField) throws IllegalAccessException, NoSuchFieldException {
+        Field field = PieceValueEvaluator.class.getDeclaredField(nameOfField);
+        field.setAccessible(true);
+        return (Map<Piece, Integer>) field.get(pieceValueEvaluator);
+    }
 }
