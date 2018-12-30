@@ -1,5 +1,12 @@
 package nl.gogognome.gogochess.logic;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
+
+import java.util.List;
+
+import static nl.gogognome.gogochess.logic.Square.*;
+
 public class Squares {
 
 	public static final Square A1 = new Square("a1");
@@ -67,4 +74,15 @@ public class Squares {
 	public static final Square H7 = new Square("h7");
 	public static final Square H8 = new Square("h8");
 
+	static final List<Square> ALL;
+
+	static {
+		Builder<Square> builder = new Builder<>();
+		for (int file = FILE_A; file<= FILE_H; file++) {
+			for (int rank=RANK_1; rank<=RANK_8; rank++) {
+				builder.add(new Square(file, rank));
+			}
+		}
+		ALL = builder.build();
+	}
 }

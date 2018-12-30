@@ -55,11 +55,25 @@ public class PositionalAnalysisForEndGame implements MovesEvaluator {
                 value += negateForBlack(kingFieldHeuristic.getKingFieldDeltaForEndgameWithPawns(from, to, opponentKingSquare), move);
                 value += negateForBlack(pawnHeuristics.getPawnHeuristicsForOpeningAndEndgame(board, from, to), move);
             }
+
+            if (endgameWithPawns && endgameWithPieces) {
+                value += negateForBlack(getDeltaForRookPlacedBehinedPassedPawn(board, from, to), move);
+            }
             move.setValue(value);
         }
     }
 
     private int countNrPawnsFor(Board board, Player player) {
         return board.countPiecesWhere(playerPiece -> playerPiece.getPlayer() == player && playerPiece.getPiece() == PAWN);
+    }
+
+    private int getDeltaForRookPlacedBehinedPassedPawn(Board board, BoardMutation from, BoardMutation to) {
+        if (from.getPlayerPiece().getPiece() != ROOK) {
+            return 0;
+        }
+        if (board.isBehindPassedPawn(to.getSquare()) && !board.isBehindPassedPawn(from.getSquare())) {
+            return 15;
+        }
+        return 0;
     }
 }

@@ -323,7 +323,7 @@ public class Board {
 
 	/**
 	 * Determines if the pawn at the specified square is a passed pawn. A passed pawn is a pawn with no opposing pawns
-	 * to prevent it from advancing to the eighth rank ; i.e. there are no opposing pawns in front of it on either
+	 * to prevent it from advancing to the eighth rank; i.e. there are no opposing pawns in front of it on either
 	 * the same file or adjacent files.
 	 * @param pawn the pawn
 	 * @param square the square of the pawn
@@ -335,7 +335,7 @@ public class Board {
 		}
 		int delta = pawn.getPlayer() == WHITE ? 1 : -1;
 		int finalRank = pawn.getPlayer() == WHITE ? RANK_8 : RANK_1;
-		for (int file = Math.max(FILE_A, square.file() - 1); file <= Math.min(FILE_H, square.file()); file++) {
+		for (int file = Math.max(FILE_A, square.file() - 1); file <= Math.min(FILE_H, square.file() + 1); file++) {
 			for (int rank = square.rank() + delta; rank != finalRank; rank += delta) {
 				PlayerPiece otherPiece = pieceAt(new Square(file, rank));
 				if (otherPiece != null && otherPiece.getPiece() == PAWN && otherPiece.getPlayer() != pawn.getPlayer()) {
@@ -344,6 +344,29 @@ public class Board {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * @param square a square
+	 * @return true if the square is behind a passed pawn and all fields between square and the passed pawn are empty.
+	 *         The specified square does not have to be empty.
+	 */
+	public boolean isBehindPassedPawn(Square square) {
+		return isBehindPassedPawn(square, WHITE_PAWN) || isBehindPassedPawn(square, BLACK_PAWN);
+	}
+
+	private boolean isBehindPassedPawn(Square square, PlayerPiece pawn) {
+		int deltaRanks = pawn.getPlayer() == WHITE ? 1 : -1;
+		for (Square currentSquare = square.addRanks(deltaRanks); currentSquare != null; currentSquare = currentSquare.addRanks(deltaRanks)) {
+			PlayerPiece playerPiece = pieceAt(currentSquare);
+			if (pawn.equals(playerPiece) && isPassedPawn(playerPiece, currentSquare)) {
+				return true;
+			}
+			if (playerPiece != null) {
+				return false;
+			}
+		}
+		return false;
 	}
 
 	@Override
@@ -442,5 +465,4 @@ public class Board {
 			BLACK_BISHOP.addTo(F8),
 			BLACK_KNIGHT.addTo(G8),
 			BLACK_ROOK.addTo(H8));
-
 }

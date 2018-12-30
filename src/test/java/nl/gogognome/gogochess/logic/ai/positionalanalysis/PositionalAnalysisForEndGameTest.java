@@ -3,6 +3,7 @@ package nl.gogognome.gogochess.logic.ai.positionalanalysis;
 import nl.gogognome.gogochess.logic.Move;
 import nl.gogognome.gogochess.logic.Piece;
 import nl.gogognome.gogochess.logic.ai.PieceValueEvaluator;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -14,6 +15,7 @@ import static nl.gogognome.gogochess.logic.Player.BLACK;
 import static nl.gogognome.gogochess.logic.Player.WHITE;
 import static nl.gogognome.gogochess.logic.Squares.*;
 import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PositionalAnalysisForEndGameTest {
@@ -188,6 +190,131 @@ class PositionalAnalysisForEndGameTest {
 
         assertThat(getWhitePieceToValue()).containsEntry(PAWN, 100);
         assertThat(getBlackPieceToValue()).containsEntry(PAWN, 100);
+    }
+
+    @Test
+    void whiteRookMovesBehindWhitePawnAdds15Points() {
+        int value = evaluator.valueOfMove(new Move(BLACK,
+                        WHITE_PAWN.addTo(C3),
+                        WHITE_ROOK.addTo(A1)),
+                WHITE_ROOK.removeFrom(A1), WHITE_ROOK.addTo(C1));
+        assertThat(value).isEqualTo(15);
+    }
+
+    @Test
+    void whiteRookMovesBehindBlackPawnAdds15Points() {
+        int value = evaluator.valueOfMove(new Move(BLACK,
+                        BLACK_PAWN.addTo(C3),
+                        WHITE_ROOK.addTo(A8)),
+                WHITE_ROOK.removeFrom(A8), WHITE_ROOK.addTo(C8));
+        assertThat(value).isEqualTo(15);
+    }
+
+    @Test
+    void whiteRookThatWasAlreadyBehindWhitePawnMovesBehindWhitePawnAdds0Points() {
+        int value = evaluator.valueOfMove(new Move(BLACK,
+                        WHITE_PAWN.addTo(C3),
+                        WHITE_ROOK.addTo(C1)),
+                WHITE_ROOK.removeFrom(C1), WHITE_ROOK.addTo(C2));
+        assertThat(value).isEqualTo(0);
+    }
+
+    @Test
+    void whiteRookThatWasAlreadyBehindWhitePawnMovesAwayFromBehindWhitePawnAdds0Points() {
+        int value = evaluator.valueOfMove(new Move(BLACK,
+                        WHITE_PAWN.addTo(C3),
+                        WHITE_ROOK.addTo(C1)),
+                WHITE_ROOK.removeFrom(C1), WHITE_ROOK.addTo(D1));
+        assertThat(value).isEqualTo(0);
+    }
+
+    @Test
+    void whiteRookMovesInFrontOfWhitePawnAdds0Points() {
+        int value = evaluator.valueOfMove(new Move(BLACK,
+                        WHITE_PAWN.addTo(C3),
+                        WHITE_ROOK.addTo(A8)),
+                WHITE_ROOK.removeFrom(A8), WHITE_ROOK.addTo(C8));
+        assertThat(value).isEqualTo(0);
+    }
+
+    @Test
+    void whiteRookMovesInFrontOfBlackPawnAdds0Points() {
+        int value = evaluator.valueOfMove(new Move(BLACK,
+                        BLACK_PAWN.addTo(C3),
+                        WHITE_ROOK.addTo(A1)),
+                WHITE_ROOK.removeFrom(A1), WHITE_ROOK.addTo(C1));
+        assertThat(value).isEqualTo(0);
+    }
+
+    @Test
+    void whiteQueenMovesBehindWhitePawnAdds0Points() {
+        int value = evaluator.valueOfMove(new Move(BLACK,
+                        WHITE_PAWN.addTo(C3),
+                        WHITE_QUEEN.addTo(A1)),
+                WHITE_QUEEN.removeFrom(A1), WHITE_QUEEN.addTo(C1));
+        assertThat(value).isEqualTo(0);
+    }
+    @Test
+    void blackRookMovesBehindBlackPawnSubtracts15Points() {
+        int value = evaluator.valueOfMove(new Move(WHITE,
+                        BLACK_PAWN.addTo(C3),
+                        BLACK_ROOK.addTo(A8)),
+                BLACK_ROOK.removeFrom(A8), WHITE_ROOK.addTo(C8));
+        assertThat(value).isEqualTo(-15);
+    }
+
+    @Test
+    void blackRookMovesBehindWhitePawnSubtracts15Points() {
+        int value = evaluator.valueOfMove(new Move(WHITE,
+                        WHITE_PAWN.addTo(C3),
+                        BLACK_ROOK.addTo(A1)),
+                BLACK_ROOK.removeFrom(A1), BLACK_ROOK.addTo(C1));
+        assertThat(value).isEqualTo(-15);
+    }
+
+    @Test
+    void blackRookThatWasAlreadyBehindBlackPawnMovesBehindBlackPawnSubtracts0Points() {
+        int value = evaluator.valueOfMove(new Move(WHITE,
+                        BLACK_PAWN.addTo(C3),
+                        BLACK_ROOK.addTo(C8)),
+                BLACK_ROOK.removeFrom(C8), BLACK_ROOK.addTo(C7));
+        assertThat(value).isEqualTo(0);
+    }
+
+    @Test
+    void blackRookThatWasAlreadyBehindBlackPawnMovesAwayFromBehindBlackPawnSubtracts0Points() {
+        int value = evaluator.valueOfMove(new Move(WHITE,
+                        BLACK_PAWN.addTo(C3),
+                        BLACK_ROOK.addTo(C8)),
+                BLACK_ROOK.removeFrom(C8), BLACK_ROOK.addTo(D8));
+        assertThat(value).isEqualTo(0);
+    }
+
+    @Test
+    void blackRookMovesInFrontOfBlackPawnSubtracts0Points() {
+        int value = evaluator.valueOfMove(new Move(WHITE,
+                        BLACK_PAWN.addTo(C3),
+                        BLACK_ROOK.addTo(A1)),
+                BLACK_ROOK.removeFrom(A1), BLACK_ROOK.addTo(C1));
+        assertThat(value).isEqualTo(0);
+    }
+
+    @Test
+    void blackRookMovesInFrontOfWhitePawnSubtracts0Points() {
+        int value = evaluator.valueOfMove(new Move(WHITE,
+                        WHITE_PAWN.addTo(C3),
+                        BLACK_ROOK.addTo(A8)),
+                BLACK_ROOK.removeFrom(A8), BLACK_ROOK.addTo(C8));
+        assertThat(value).isEqualTo(0);
+    }
+
+    @Test
+    void blackQueenMovesBehindBlackPawnSubtracts0Points() {
+        int value = evaluator.valueOfMove(new Move(WHITE,
+                        BLACK_PAWN.addTo(C3),
+                        BLACK_QUEEN.addTo(A8)),
+                BLACK_QUEEN.removeFrom(A8), BLACK_QUEEN.addTo(C8));
+        assertThat(value).isEqualTo(0);
     }
 
     private Map<Piece, Integer> getWhitePieceToValue() throws IllegalAccessException, NoSuchFieldException {
