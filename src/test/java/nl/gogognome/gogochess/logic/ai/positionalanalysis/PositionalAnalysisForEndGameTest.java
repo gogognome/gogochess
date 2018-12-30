@@ -259,7 +259,7 @@ class PositionalAnalysisForEndGameTest {
         int value = evaluator.valueOfMove(new Move(WHITE,
                         BLACK_PAWN.addTo(C3),
                         BLACK_ROOK.addTo(A8)),
-                BLACK_ROOK.removeFrom(A8), WHITE_ROOK.addTo(C8));
+                BLACK_ROOK.removeFrom(A8), BLACK_ROOK.addTo(C8));
         assertThat(value).isEqualTo(-15);
     }
 
