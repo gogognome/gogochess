@@ -59,6 +59,7 @@ public class PositionalAnalysisForEndGame implements MovesEvaluator {
             if (endgameWithPawns && endgameWithPieces) {
                 value += negateForBlack(getDeltaForRookPlacedBehindPassedPawn(board, from, to), move);
                 value += negateForBlack(centralControlHeuristic.getCenterControlDeltaForGeneralEndgame(from, to), move);
+                value += negateForBlack(kingFieldHeuristic.getKingFieldDeltaForGeneralEndgame(from, to, opponentKingSquare), move);
             }
             move.setValue(value);
         }
