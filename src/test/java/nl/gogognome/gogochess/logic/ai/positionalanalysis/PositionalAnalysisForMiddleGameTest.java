@@ -68,10 +68,10 @@ class PositionalAnalysisForMiddleGameTest {
 
     @Test
     void bigMobilityForWhiteRookScoresBetterThanSmallMobility() {
-        int bigMobility = evaluator.valueOfMove(new Move(BLACK, BLACK_KING.addTo(H8), WHITE_PAWN.addTo(A2), WHITE_ROOK.addTo(B1)),
-                WHITE_ROOK.removeFrom(B1), WHITE_ROOK.addTo(B5));
+        int bigMobility = evaluator.valueOfMove(new Move(BLACK, WHITE_ROOK.addTo(B1), BLACK_KING.addTo(H8), WHITE_PAWN.addTo(B2)),
+                WHITE_ROOK.removeFrom(B1), WHITE_ROOK.addTo(A1));
 
-        int smallMobility = evaluator.valueOfMove(new Move(BLACK, BLACK_KING.addTo(H8), WHITE_PAWN.addTo(A2), WHITE_ROOK.addTo(B1)),
+        int smallMobility = evaluator.valueOfMove(new Move(BLACK, WHITE_ROOK.addTo(B1), BLACK_KING.addTo(H8), WHITE_PAWN.addTo(A2)),
                 WHITE_ROOK.removeFrom(B1), WHITE_ROOK.addTo(A1));
 
         assertThat(bigMobility).isGreaterThan(smallMobility);
@@ -79,12 +79,11 @@ class PositionalAnalysisForMiddleGameTest {
 
     @Test
     void bigMobilityForBlackQueenScoresBetterThanSmallMobility() {
-        int bigMobility = evaluator.valueOfMove(new Move(WHITE, WHITE_KING.addTo(A1), BLACK_QUEEN.addTo(B7), WHITE_ROOK.addTo(A5), WHITE_ROOK.addTo(C5)),
-                BLACK_QUEEN.removeFrom(B7), BLACK_QUEEN.addTo(B3));
+        int bigMobility = evaluator.valueOfMove(new Move(WHITE, BLACK_QUEEN.addTo(B1), WHITE_KING.addTo(H8), WHITE_PAWN.addTo(A7)),
+                BLACK_QUEEN.removeFrom(B1), BLACK_QUEEN.addTo(A1));
 
-        int smallMobility = evaluator.valueOfMove(new Move(WHITE, WHITE_KING.addTo(A1), BLACK_QUEEN.addTo(B7), WHITE_ROOK.addTo(A5), WHITE_ROOK.addTo(C5)),
-                BLACK_QUEEN.removeFrom(B7), BLACK_QUEEN.addTo(B5));
-
+        int smallMobility = evaluator.valueOfMove(new Move(WHITE, BLACK_QUEEN.addTo(B1), WHITE_KING.addTo(H8), WHITE_PAWN.addTo(A2)),
+                BLACK_QUEEN.removeFrom(B1), BLACK_QUEEN.addTo(A1));
         assertThat(bigMobility).isLessThan(smallMobility);
     }
 
