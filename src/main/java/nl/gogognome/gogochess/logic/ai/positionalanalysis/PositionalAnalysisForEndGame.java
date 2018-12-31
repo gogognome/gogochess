@@ -57,7 +57,8 @@ public class PositionalAnalysisForEndGame implements MovesEvaluator {
             }
 
             if (endgameWithPawns && endgameWithPieces) {
-                value += negateForBlack(getDeltaForRookPlacedBehinedPassedPawn(board, from, to), move);
+                value += negateForBlack(getDeltaForRookPlacedBehindPassedPawn(board, from, to), move);
+                value += negateForBlack(centralControlHeuristic.getCenterControlDeltaForGeneralEndgame(from, to), move);
             }
             move.setValue(value);
         }
@@ -67,7 +68,7 @@ public class PositionalAnalysisForEndGame implements MovesEvaluator {
         return board.countPiecesWhere(playerPiece -> playerPiece.getPlayer() == player && playerPiece.getPiece() == PAWN);
     }
 
-    private int getDeltaForRookPlacedBehinedPassedPawn(Board board, BoardMutation from, BoardMutation to) {
+    int getDeltaForRookPlacedBehindPassedPawn(Board board, BoardMutation from, BoardMutation to) {
         if (from.getPlayerPiece().getPiece() != ROOK) {
             return 0;
         }

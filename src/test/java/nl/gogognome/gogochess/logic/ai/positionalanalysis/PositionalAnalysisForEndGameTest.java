@@ -3,7 +3,6 @@ package nl.gogognome.gogochess.logic.ai.positionalanalysis;
 import nl.gogognome.gogochess.logic.Move;
 import nl.gogognome.gogochess.logic.Piece;
 import nl.gogognome.gogochess.logic.ai.PieceValueEvaluator;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
@@ -15,7 +14,6 @@ import static nl.gogognome.gogochess.logic.Player.BLACK;
 import static nl.gogognome.gogochess.logic.Player.WHITE;
 import static nl.gogognome.gogochess.logic.Squares.*;
 import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class PositionalAnalysisForEndGameTest {
@@ -29,7 +27,12 @@ class PositionalAnalysisForEndGameTest {
             new PawnHeuristicsEndgame(),
             pieceValueEvaluator);
 
-    private SingleMoveEvaluator evaluator = new SingleMoveEvaluator((board, move) -> positionalAnalysisForendgame.evaluate(board, asList(move)));
+    private SingleMoveEvaluator evaluator = SingleMoveEvaluator.forConsumer((board, move) -> positionalAnalysisForendgame.evaluate(board, asList(move)));
+    private SingleMoveEvaluator rookBehindPawnEvaluator = SingleMoveEvaluator.forFunction((board, move) ->
+            positionalAnalysisForendgame.getDeltaForRookPlacedBehindPassedPawn(
+                    board,
+                    move.getMutationRemovingPieceFromStart(),
+                    move.getMutationAddingPieceAtDestination()));
 
     @Test
     void whiteKingMovingToCenterScoresBetterThanWhiteKingMovingAwayFromCenter() {
@@ -142,7 +145,7 @@ class PositionalAnalysisForEndGameTest {
     }
 
     @Test
-    void endgameWithThreeWhiteAndThreBlackPawnsAndPiecesRaisesValueOfAllPawnsTo120() throws Exception {
+    void endgameWithThreeWhiteAndThreeBlackPawnsAndPiecesRaisesValueOfAllPawnsTo120() throws Exception {
         evaluator.valueOfMove(new Move(WHITE,
                         WHITE_PAWN.addTo(A2), WHITE_PAWN.addTo(B2), WHITE_PAWN.addTo(B3),
                         BLACK_PAWN.addTo(A7), BLACK_PAWN.addTo(B7), BLACK_PAWN.addTo(C7),
@@ -194,7 +197,7 @@ class PositionalAnalysisForEndGameTest {
 
     @Test
     void whiteRookMovesBehindWhitePawnAdds15Points() {
-        int value = evaluator.valueOfMove(new Move(BLACK,
+        int value = rookBehindPawnEvaluator.valueOfMove(new Move(BLACK,
                         WHITE_PAWN.addTo(C3),
                         WHITE_ROOK.addTo(A1)),
                 WHITE_ROOK.removeFrom(A1), WHITE_ROOK.addTo(C1));
@@ -203,7 +206,7 @@ class PositionalAnalysisForEndGameTest {
 
     @Test
     void whiteRookMovesBehindBlackPawnAdds15Points() {
-        int value = evaluator.valueOfMove(new Move(BLACK,
+        int value = rookBehindPawnEvaluator.valueOfMove(new Move(BLACK,
                         BLACK_PAWN.addTo(C3),
                         WHITE_ROOK.addTo(A8)),
                 WHITE_ROOK.removeFrom(A8), WHITE_ROOK.addTo(C8));
@@ -212,7 +215,7 @@ class PositionalAnalysisForEndGameTest {
 
     @Test
     void whiteRookThatWasAlreadyBehindWhitePawnMovesBehindWhitePawnAdds0Points() {
-        int value = evaluator.valueOfMove(new Move(BLACK,
+        int value = rookBehindPawnEvaluator.valueOfMove(new Move(BLACK,
                         WHITE_PAWN.addTo(C3),
                         WHITE_ROOK.addTo(C1)),
                 WHITE_ROOK.removeFrom(C1), WHITE_ROOK.addTo(C2));
@@ -221,7 +224,7 @@ class PositionalAnalysisForEndGameTest {
 
     @Test
     void whiteRookThatWasAlreadyBehindWhitePawnMovesAwayFromBehindWhitePawnAdds0Points() {
-        int value = evaluator.valueOfMove(new Move(BLACK,
+        int value = rookBehindPawnEvaluator.valueOfMove(new Move(BLACK,
                         WHITE_PAWN.addTo(C3),
                         WHITE_ROOK.addTo(C1)),
                 WHITE_ROOK.removeFrom(C1), WHITE_ROOK.addTo(D1));
@@ -230,7 +233,7 @@ class PositionalAnalysisForEndGameTest {
 
     @Test
     void whiteRookMovesInFrontOfWhitePawnAdds0Points() {
-        int value = evaluator.valueOfMove(new Move(BLACK,
+        int value = rookBehindPawnEvaluator.valueOfMove(new Move(BLACK,
                         WHITE_PAWN.addTo(C3),
                         WHITE_ROOK.addTo(A8)),
                 WHITE_ROOK.removeFrom(A8), WHITE_ROOK.addTo(C8));
@@ -239,7 +242,7 @@ class PositionalAnalysisForEndGameTest {
 
     @Test
     void whiteRookMovesInFrontOfBlackPawnAdds0Points() {
-        int value = evaluator.valueOfMove(new Move(BLACK,
+        int value = rookBehindPawnEvaluator.valueOfMove(new Move(BLACK,
                         BLACK_PAWN.addTo(C3),
                         WHITE_ROOK.addTo(A1)),
                 WHITE_ROOK.removeFrom(A1), WHITE_ROOK.addTo(C1));
@@ -248,7 +251,7 @@ class PositionalAnalysisForEndGameTest {
 
     @Test
     void whiteQueenMovesBehindWhitePawnAdds0Points() {
-        int value = evaluator.valueOfMove(new Move(BLACK,
+        int value = rookBehindPawnEvaluator.valueOfMove(new Move(BLACK,
                         WHITE_PAWN.addTo(C3),
                         WHITE_QUEEN.addTo(A1)),
                 WHITE_QUEEN.removeFrom(A1), WHITE_QUEEN.addTo(C1));
@@ -256,25 +259,25 @@ class PositionalAnalysisForEndGameTest {
     }
     @Test
     void blackRookMovesBehindBlackPawnSubtracts15Points() {
-        int value = evaluator.valueOfMove(new Move(WHITE,
+        int value = rookBehindPawnEvaluator.valueOfMove(new Move(WHITE,
                         BLACK_PAWN.addTo(C3),
                         BLACK_ROOK.addTo(A8)),
                 BLACK_ROOK.removeFrom(A8), BLACK_ROOK.addTo(C8));
-        assertThat(value).isEqualTo(-15);
+        assertThat(value).isEqualTo(15);
     }
 
     @Test
     void blackRookMovesBehindWhitePawnSubtracts15Points() {
-        int value = evaluator.valueOfMove(new Move(WHITE,
+        int value = rookBehindPawnEvaluator.valueOfMove(new Move(WHITE,
                         WHITE_PAWN.addTo(C3),
                         BLACK_ROOK.addTo(A1)),
                 BLACK_ROOK.removeFrom(A1), BLACK_ROOK.addTo(C1));
-        assertThat(value).isEqualTo(-15);
+        assertThat(value).isEqualTo(15);
     }
 
     @Test
     void blackRookThatWasAlreadyBehindBlackPawnMovesBehindBlackPawnSubtracts0Points() {
-        int value = evaluator.valueOfMove(new Move(WHITE,
+        int value = rookBehindPawnEvaluator.valueOfMove(new Move(WHITE,
                         BLACK_PAWN.addTo(C3),
                         BLACK_ROOK.addTo(C8)),
                 BLACK_ROOK.removeFrom(C8), BLACK_ROOK.addTo(C7));
@@ -283,7 +286,7 @@ class PositionalAnalysisForEndGameTest {
 
     @Test
     void blackRookThatWasAlreadyBehindBlackPawnMovesAwayFromBehindBlackPawnSubtracts0Points() {
-        int value = evaluator.valueOfMove(new Move(WHITE,
+        int value = rookBehindPawnEvaluator.valueOfMove(new Move(WHITE,
                         BLACK_PAWN.addTo(C3),
                         BLACK_ROOK.addTo(C8)),
                 BLACK_ROOK.removeFrom(C8), BLACK_ROOK.addTo(D8));
@@ -292,7 +295,7 @@ class PositionalAnalysisForEndGameTest {
 
     @Test
     void blackRookMovesInFrontOfBlackPawnSubtracts0Points() {
-        int value = evaluator.valueOfMove(new Move(WHITE,
+        int value = rookBehindPawnEvaluator.valueOfMove(new Move(WHITE,
                         BLACK_PAWN.addTo(C3),
                         BLACK_ROOK.addTo(A1)),
                 BLACK_ROOK.removeFrom(A1), BLACK_ROOK.addTo(C1));
@@ -301,7 +304,7 @@ class PositionalAnalysisForEndGameTest {
 
     @Test
     void blackRookMovesInFrontOfWhitePawnSubtracts0Points() {
-        int value = evaluator.valueOfMove(new Move(WHITE,
+        int value = rookBehindPawnEvaluator.valueOfMove(new Move(WHITE,
                         WHITE_PAWN.addTo(C3),
                         BLACK_ROOK.addTo(A8)),
                 BLACK_ROOK.removeFrom(A8), BLACK_ROOK.addTo(C8));
@@ -310,11 +313,66 @@ class PositionalAnalysisForEndGameTest {
 
     @Test
     void blackQueenMovesBehindBlackPawnSubtracts0Points() {
-        int value = evaluator.valueOfMove(new Move(WHITE,
+        int value = rookBehindPawnEvaluator.valueOfMove(new Move(WHITE,
                         BLACK_PAWN.addTo(C3),
                         BLACK_QUEEN.addTo(A8)),
                 BLACK_QUEEN.removeFrom(A8), BLACK_QUEEN.addTo(C8));
         assertThat(value).isEqualTo(0);
+    }
+
+    @Test
+    void generalEndgame_whiteKnightMovingTowardsCenterScoresBetterThanMovingAwayFromCenter() {
+        int towardsCenterValue = evaluator.valueOfMove(new Move(BLACK, WHITE_KNIGHT.addTo(B2), WHITE_KING.addTo(A1), WHITE_PAWN.addTo(A2), BLACK_KING.addTo(H8)),
+                WHITE_KNIGHT.removeFrom(B2), WHITE_KNIGHT.addTo(C4));
+
+        int awayFromCenterValue = evaluator.valueOfMove(new Move(BLACK, WHITE_KNIGHT.addTo(C4), WHITE_KING.addTo(A1), WHITE_PAWN.addTo(A2), BLACK_KING.addTo(H8)),
+                WHITE_KING.removeFrom(C4), WHITE_KING.addTo(B2));
+
+        assertThat(towardsCenterValue).isGreaterThan(awayFromCenterValue);
+    }
+
+    @Test
+    void generalEndgame_whiteBishopMovingTowardsCenterScoresBetterThanMovingAwayFromCenter() {
+        int towardsCenterValue = evaluator.valueOfMove(new Move(BLACK, WHITE_BISHOP.addTo(B2), WHITE_KING.addTo(A1), WHITE_PAWN.addTo(A2), BLACK_KING.addTo(H8)),
+                WHITE_BISHOP.removeFrom(B2), WHITE_BISHOP.addTo(D4));
+
+        int awayFromCenterValue = evaluator.valueOfMove(new Move(BLACK, WHITE_BISHOP.addTo(D4), WHITE_KING.addTo(A1), WHITE_PAWN.addTo(A2), BLACK_KING.addTo(H8)),
+                WHITE_BISHOP.removeFrom(D4), WHITE_BISHOP.addTo(B2));
+
+        assertThat(towardsCenterValue).isGreaterThan(awayFromCenterValue);
+    }
+
+    @Test
+    void generalEndgame_blackRookMovingTowardsCenterScoresBetterThanMovingAwayFromCenter() {
+        int towardsCenterValue = evaluator.valueOfMove(new Move(BLACK, WHITE_BISHOP.addTo(B2), WHITE_KING.addTo(A1), WHITE_PAWN.addTo(A2), BLACK_KING.addTo(H8)),
+                WHITE_BISHOP.removeFrom(B2), WHITE_BISHOP.addTo(D4));
+
+        int awayFromCenterValue = evaluator.valueOfMove(new Move(BLACK, WHITE_BISHOP.addTo(D4), WHITE_KING.addTo(A1), WHITE_PAWN.addTo(A2), BLACK_KING.addTo(H8)),
+                WHITE_BISHOP.removeFrom(D4), WHITE_BISHOP.addTo(B2));
+
+        assertThat(towardsCenterValue).isGreaterThan(awayFromCenterValue);
+    }
+
+    @Test
+    void generalEndgame_blackQueenMovingTowardsCenterScoresBetterThanMovingAwayFromCenter() {
+        int towardsCenterValue = evaluator.valueOfMove(new Move(WHITE, BLACK_QUEEN.addTo(A8), WHITE_KING.addTo(A1), WHITE_PAWN.addTo(A2), BLACK_KING.addTo(H8)),
+                BLACK_QUEEN.removeFrom(A8), BLACK_QUEEN.addTo(E4));
+
+        int awayFromCenterValue = evaluator.valueOfMove(new Move(WHITE, BLACK_QUEEN.addTo(E4), WHITE_KING.addTo(A1), WHITE_PAWN.addTo(A2), BLACK_KING.addTo(H8)),
+                BLACK_QUEEN.removeFrom(E4), BLACK_QUEEN.addTo(A8));
+
+        assertThat(towardsCenterValue).isLessThan(awayFromCenterValue);
+    }
+
+    @Test
+    void generalEndgame_whiteKingMovingTowardsCenterScoresBetterThanMovingAwayFromCenter() {
+        int towardsCenterValue = evaluator.valueOfMove(new Move(BLACK, WHITE_KING.addTo(A1), WHITE_PAWN.addTo(A2), BLACK_KING.addTo(H8)),
+                WHITE_KING.removeFrom(A1), WHITE_KING.addTo(B2));
+
+        int awayFromCenterValue = evaluator.valueOfMove(new Move(BLACK, WHITE_KING.addTo(B2), WHITE_PAWN.addTo(A2), BLACK_KING.addTo(H8)),
+                WHITE_KING.removeFrom(B2), WHITE_KING.addTo(A1));
+
+        assertThat(towardsCenterValue).isGreaterThan(awayFromCenterValue);
     }
 
     private Map<Piece, Integer> getWhitePieceToValue() throws IllegalAccessException, NoSuchFieldException {

@@ -17,7 +17,7 @@ class PositionalAnalysisForOpeningTest {
 			new CentralControlHeuristic(),
 			new PawnHeuristicsOpeningAndMiddleGame(-10));
 
-	private SingleMoveEvaluator evaluator = new SingleMoveEvaluator((board, move) -> positionalAnalysisForOpening.evaluate(board, asList(move)));
+	private SingleMoveEvaluator evaluator = SingleMoveEvaluator.forConsumer((board, move) -> positionalAnalysisForOpening.evaluate(board, asList(move)));
 	
 	@Test
 	void whiteKnightMovingToCenterScoresBetterThanKnightMovingAwayFromCenter() {

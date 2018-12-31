@@ -20,7 +20,7 @@ class PositionalAnalysisForMiddleGameTest {
             new PawnHeuristicsOpeningAndMiddleGame(-5),
             new PieceValueEvaluator());
     
-    private SingleMoveEvaluator evaluator = new SingleMoveEvaluator((board, move) -> positionalAnalysisForMiddleGame.evaluate(board, asList(move)));
+    private SingleMoveEvaluator evaluator = SingleMoveEvaluator.forConsumer((board, move) -> positionalAnalysisForMiddleGame.evaluate(board, asList(move)));
 
     @Test
     void blackKnightMovingToCenterScoresBetterThanKnightMovingAwayFromCenter() {

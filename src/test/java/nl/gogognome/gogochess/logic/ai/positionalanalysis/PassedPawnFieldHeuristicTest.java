@@ -13,7 +13,7 @@ class PassedPawnFieldHeuristicTest {
 
     private PassedPawnFieldHeuristic passedPawnFieldHeuristic = new PassedPawnFieldHeuristic();
 
-    private SingleMoveEvaluator evaluator = new SingleMoveEvaluator((board, move) ->
+    private SingleMoveEvaluator evaluator = SingleMoveEvaluator.forConsumer((board, move) ->
             move.setValue(passedPawnFieldHeuristic.getDeltaForPassedPawns(board, move)));
 
     @Test
