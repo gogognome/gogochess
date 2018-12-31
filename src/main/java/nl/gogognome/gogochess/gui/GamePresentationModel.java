@@ -1,22 +1,23 @@
 package nl.gogognome.gogochess.gui;
 
-import static java.util.stream.Collectors.*;
-import static nl.gogognome.gogochess.gui.GamePresentationModel.State.INITIALIZING;
-import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.*;
-import static nl.gogognome.gogochess.logic.Player.*;
-import static nl.gogognome.gogochess.logic.Squares.*;
-
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.function.*;
-import javax.inject.*;
-import javax.swing.*;
-
 import com.google.common.collect.ImmutableList;
-import org.slf4j.*;
 import nl.gogognome.gogochess.logic.*;
-import nl.gogognome.gogochess.logic.ai.*;
-import nl.gogognome.gogochess.logic.piece.*;
+import nl.gogognome.gogochess.logic.piece.PlayerPiece;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import javax.swing.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
+import static java.util.stream.Collectors.toList;
+import static nl.gogognome.gogochess.gui.GamePresentationModel.State.INITIALIZING;
+import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.ADD;
+import static nl.gogognome.gogochess.logic.Player.BLACK;
+import static nl.gogognome.gogochess.logic.Player.WHITE;
+import static nl.gogognome.gogochess.logic.Squares.*;
 
 public class GamePresentationModel {
 

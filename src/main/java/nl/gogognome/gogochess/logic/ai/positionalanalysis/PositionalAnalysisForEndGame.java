@@ -2,6 +2,7 @@ package nl.gogognome.gogochess.logic.ai.positionalanalysis;
 
 import com.google.common.collect.ImmutableSet;
 import nl.gogognome.gogochess.logic.*;
+import nl.gogognome.gogochess.logic.ai.EndOfGameBoardEvaluator;
 import nl.gogognome.gogochess.logic.ai.PieceValueEvaluator;
 
 import java.util.List;
@@ -18,18 +19,21 @@ public class PositionalAnalysisForEndGame implements MovesEvaluator {
     private final KingFieldHeuristic kingFieldHeuristic;
     private final PawnHeuristicsEndgame pawnHeuristics;
     private final PieceValueEvaluator pieceValueEvaluator;
+    private final EndOfGameBoardEvaluator endOfGameBoardEvaluator;
 
     PositionalAnalysisForEndGame(
             PassedPawnFieldHeuristic passedPawnFieldHeuristic,
             CentralControlHeuristic centralControlHeuristic,
             KingFieldHeuristic kingFieldHeuristic,
             PawnHeuristicsEndgame pawnHeuristics,
-            PieceValueEvaluator pieceValueEvaluator) {
+            PieceValueEvaluator pieceValueEvaluator,
+            EndOfGameBoardEvaluator endOfGameBoardEvaluator) {
         this.passedPawnFieldHeuristic = passedPawnFieldHeuristic;
         this.centralControlHeuristic = centralControlHeuristic;
         this.kingFieldHeuristic = kingFieldHeuristic;
         this.pawnHeuristics = pawnHeuristics;
         this.pieceValueEvaluator = pieceValueEvaluator;
+        this.endOfGameBoardEvaluator = endOfGameBoardEvaluator;
     }
 
     @Override
@@ -62,8 +66,37 @@ public class PositionalAnalysisForEndGame implements MovesEvaluator {
                 value += negateForBlack(kingFieldHeuristic.getKingFieldDeltaForGeneralEndgame(from, to, opponentKingSquare), move);
                 value += negateForBlack(mobilityAfterMove(board, move), move);
             }
+
+            if (!endgameWithPawns) {
+                value += board.temporarilyMove(move, () -> {
+                    Player opponent = move.getPlayer().opponent();
+                    List<Move> opponentMoves = opponent.validMoves(board);
+                    if (opponentMoves.isEmpty()) {
+                        return endOfGameBoardEvaluator.value(board);
+                    }
+                    int bestOpponentValue = negateForBlack(-10000, opponent);
+                    for (Move opponentMove : opponentMoves) {
+                        int opponentValue = board.temporarilyMove(opponentMove, () -> evaluateForEndgameWithPieces(board, move.getPlayer()));
+                        bestOpponentValue = opponent == WHITE ?
+                                Math.max(bestOpponentValue, opponentValue) :
+                                Math.min(bestOpponentValue, opponentValue);
+                    }
+                    return bestOpponentValue;
+                });
+            }
             move.setValue(value);
         }
+    }
+
+    private int evaluateForEndgameWithPieces(Board board, Player player) {
+        int value;
+        Square ownKingSquare = board.kingSquareOf(player);
+        Player opponent = player.opponent();
+        Square opponentKingSquare = board.kingSquareOf(opponent);
+
+        value = negateForBlack(centralControlHeuristic.getCenterControlValueForOpponentKingInEndgameWithPieces(opponentKingSquare), player);
+        value += negateForBlack(kingFieldHeuristic.getOpponentKingFieldValueForEndgameWithPieces(ownKingSquare, opponentKingSquare), player);
+        return value;
     }
 
     private int countNrPawnsFor(Board board, Player player) {

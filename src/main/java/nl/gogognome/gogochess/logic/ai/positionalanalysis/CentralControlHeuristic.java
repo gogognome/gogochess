@@ -77,10 +77,13 @@ class CentralControlHeuristic {
 		return centerControlDelta;
 	}
 
-	private int valueOf(Piece piece, Square square, Map<Piece, Integer> pieceToValue) {
-		int pieceFactor = pieceToValue.get(piece);
-		int centerControlValue = CentralControlHeuristic.CENTER_CONTORL_ARRAY[square.rank()][square.file()];
-		return pieceFactor * centerControlValue;
+	int getCenterControlValueForOpponentKingInEndgameWithPieces(Square opponentKingsSquare) {
+		return -32 * CENTER_CONTORL_ARRAY[opponentKingsSquare.rank()][opponentKingsSquare.file()];
 	}
 
+	private int valueOf(Piece piece, Square square, Map<Piece, Integer> pieceToValue) {
+		int pieceFactor = pieceToValue.get(piece);
+		int centerControlValue = CENTER_CONTORL_ARRAY[square.rank()][square.file()];
+		return pieceFactor * centerControlValue;
+	}
 }

@@ -47,6 +47,16 @@ class KingFieldHeuristic {
 			{4, 4, 5, 6, 5, 4, 4}
 	};
 
+	private final static int[][] ENDGAME_WITH_PIECES_KING_FIELD = new int[][]{
+			{4, 4, 5, 6, 5, 4, 4},
+			{4, 8, 10, 9, 10, 8, 4},
+			{5, 10, 10, 10, 10, 10, 5},
+			{6, 9, 10, 10, 10, 9, 6},
+			{5, 10, 10, 10, 10, 10, 5},
+			{4, 8, 10, 9, 10, 8, 4},
+			{4, 4, 5, 6, 5, 4, 4}
+	};
+
 	int getKingFieldDeltaForMiddleGame(BoardMutation from, BoardMutation to, Square opponentKingSquare) {
 		int pieceValue = KingFieldHeuristic.MIDDLE_GAME_PIECE_VALUES.get(from.getPlayerPiece().getPiece());
 		return valueOf(pieceValue, to.getSquare(), opponentKingSquare, MIDDLE_GAME_KING_FIELD) - valueOf(pieceValue, from.getSquare(), opponentKingSquare, MIDDLE_GAME_KING_FIELD);
@@ -65,6 +75,10 @@ class KingFieldHeuristic {
 			return 0;
 		}
 		return valueOf(1, to.getSquare(), opponentKingSquare, kingField) - valueOf(1, from.getSquare(), opponentKingSquare, kingField);
+	}
+
+	int getOpponentKingFieldValueForEndgameWithPieces(Square ownKingSquare, Square opponentKingSquare) {
+		return valueOf(2, ownKingSquare, opponentKingSquare, ENDGAME_WITH_PIECES_KING_FIELD);
 	}
 
 	private int valueOf(int pieceFactor, Square square, Square opponentKingSquare, int[][] kingField) {

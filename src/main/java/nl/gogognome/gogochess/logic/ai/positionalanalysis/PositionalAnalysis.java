@@ -28,7 +28,8 @@ public class PositionalAnalysis implements MovesEvaluator {
 				centralControlHeuristic,
 				new KingFieldHeuristic(),
 				new PawnHeuristicsEndgame(),
-				pieceValueEvaluator);
+				pieceValueEvaluator,
+				new EndOfGameBoardEvaluator());
 	}
 
 	private enum Phase {

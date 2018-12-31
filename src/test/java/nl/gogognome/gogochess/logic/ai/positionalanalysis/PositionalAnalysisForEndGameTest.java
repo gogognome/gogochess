@@ -2,6 +2,7 @@ package nl.gogognome.gogochess.logic.ai.positionalanalysis;
 
 import nl.gogognome.gogochess.logic.Move;
 import nl.gogognome.gogochess.logic.Piece;
+import nl.gogognome.gogochess.logic.ai.EndOfGameBoardEvaluator;
 import nl.gogognome.gogochess.logic.ai.PieceValueEvaluator;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +26,8 @@ abstract class PositionalAnalysisForEndGameTest {
             new CentralControlHeuristic(),
             new KingFieldHeuristic(),
             new PawnHeuristicsEndgame(),
-            pieceValueEvaluator);
+            pieceValueEvaluator,
+            new EndOfGameBoardEvaluator());
 
     SingleMoveEvaluator evaluator = SingleMoveEvaluator.forConsumer((board, move) -> positionalAnalysisForendgame.evaluate(board, asList(move)));
     SingleMoveEvaluator rookBehindPawnEvaluator = SingleMoveEvaluator.forFunction((board, move) ->
@@ -441,5 +443,53 @@ abstract class PositionalAnalysisForEndGameTest {
             //noinspection unchecked
             return (Map<Piece, Integer>) field.get(pieceValueEvaluator);
         }
+    }
+
+    static class EndgameWithPiecesTest extends PositionalAnalysisForEndGameTest {
+
+        @Test
+        void whiteMoveThatForcesOpponentsKingToEdgeScoresBetterThanMoveThatDoesNotForceOpponentsKingToEdge() {
+            int forcesOpponentKingToEdge = evaluator.valueOfMove(new Move(BLACK, WHITE_ROOK.addTo(B1), WHITE_ROOK.addTo(A5), BLACK_KING.addTo(E6), WHITE_KING.addTo(A1)),
+                    WHITE_ROOK.removeFrom(B1), WHITE_ROOK.addTo(B6));
+
+            int doesNotForcesOpponentKingToEdge = evaluator.valueOfMove(new Move(BLACK, WHITE_ROOK.addTo(B1), WHITE_ROOK.addTo(A5), BLACK_KING.addTo(E6), WHITE_KING.addTo(A1)),
+                    WHITE_ROOK.removeFrom(B1), WHITE_ROOK.addTo(B5));
+
+            assertThat(forcesOpponentKingToEdge).isGreaterThan(doesNotForcesOpponentKingToEdge);
+        }
+
+        @Test
+        void blackMoveThatForcesOpponentsKingToEdgeScoresBetterThanMoveThatDoesNotForceOpponentsKingToEdge() {
+            int forcesOpponentKingToEdge = evaluator.valueOfMove(new Move(WHITE, BLACK_ROOK.addTo(B1), BLACK_ROOK.addTo(A5), WHITE_KING.addTo(E6), BLACK_KING.addTo(A1)),
+                    BLACK_ROOK.removeFrom(B1), BLACK_ROOK.addTo(B6));
+
+            int doesNotForcesOpponentKingToEdge = evaluator.valueOfMove(new Move(WHITE, BLACK_ROOK.addTo(B1), BLACK_ROOK.addTo(A5), WHITE_KING.addTo(E6), BLACK_KING.addTo(A1)),
+                    BLACK_ROOK.removeFrom(B1), BLACK_ROOK.addTo(B5));
+
+            assertThat(forcesOpponentKingToEdge).isLessThan(doesNotForcesOpponentKingToEdge);
+        }
+
+        @Test
+        void whiteMoveThatForcesOpponentsKingNearOwnKingScoresBetterThanMoveThatDoesNotForceOpponentsKingNearOwnKing() {
+            int forcesOpponentKingNearOwnKing = evaluator.valueOfMove(new Move(BLACK, WHITE_ROOK.addTo(B1), BLACK_KING.addTo(H8), WHITE_KING.addTo(E5)),
+                    WHITE_KING.removeFrom(E5), WHITE_KING.addTo(F5));
+
+            int doesNotForcesOpponentKingNearOwnKing = evaluator.valueOfMove(new Move(BLACK, WHITE_ROOK.addTo(B1), BLACK_KING.addTo(H8), WHITE_KING.addTo(E5)),
+                    WHITE_KING.removeFrom(E5), WHITE_KING.addTo(D4));
+
+            assertThat(forcesOpponentKingNearOwnKing).isGreaterThan(doesNotForcesOpponentKingNearOwnKing);
+        }
+
+        @Test
+        void blackMoveThatForcesOpponentsKingNearOwnKingScoresBetterThanMoveThatDoesNotForceOpponentsKingNearOwnKing() {
+            int forcesOpponentKingNearOwnKing = evaluator.valueOfMove(new Move(WHITE, BLACK_ROOK.addTo(B1), WHITE_KING.addTo(H8), BLACK_KING.addTo(E5)),
+                    BLACK_KING.removeFrom(E5), BLACK_KING.addTo(F5));
+
+            int doesNotForcesOpponentKingNearOwnKing = evaluator.valueOfMove(new Move(WHITE, BLACK_ROOK.addTo(B1), WHITE_KING.addTo(H8), BLACK_KING.addTo(E5)),
+                    BLACK_KING.removeFrom(E5), BLACK_KING.addTo(D4));
+
+            assertThat(forcesOpponentKingNearOwnKing).isLessThan(doesNotForcesOpponentKingNearOwnKing);
+        }
+
     }
 }
