@@ -333,7 +333,7 @@ abstract class PositionalAnalysisForEndGameTest {
                     WHITE_KNIGHT.removeFrom(B2), WHITE_KNIGHT.addTo(C4));
 
             int awayFromCenterValue = evaluator.valueOfMove(new Move(BLACK, WHITE_KNIGHT.addTo(C4), WHITE_KING.addTo(A1), WHITE_PAWN.addTo(A2), BLACK_KING.addTo(H8)),
-                    WHITE_KING.removeFrom(C4), WHITE_KING.addTo(B2));
+                    WHITE_KNIGHT.removeFrom(C4), WHITE_KNIGHT.addTo(B2));
 
             assertThat(towardsCenterValue).isGreaterThan(awayFromCenterValue);
         }
@@ -398,10 +398,31 @@ abstract class PositionalAnalysisForEndGameTest {
             int towardsOpponentsKingValue = evaluator.valueOfMove(new Move(WHITE, BLACK_KING.addTo(D4), BLACK_PAWN.addTo(H2), BLACK_KNIGHT.addTo(A8), WHITE_KING.addTo(G2)),
                     BLACK_KING.removeFrom(D4), BLACK_KING.addTo(E4));
 
-            int awayFromOpponentsKingValue = evaluator.valueOfMove(new Move(WHITE, BLACK_KING.addTo(E2), BLACK_PAWN.addTo(H2), BLACK_KNIGHT.addTo(A8), WHITE_KING.addTo(F4)),
+            int awayFromOpponentsKingValue = evaluator.valueOfMove(new Move(WHITE, BLACK_KING.addTo(E4), BLACK_PAWN.addTo(H2), BLACK_KNIGHT.addTo(A8), WHITE_KING.addTo(F4)),
                     BLACK_KING.removeFrom(E4), BLACK_KING.addTo(D4));
 
             assertThat(towardsOpponentsKingValue).isLessThan(awayFromOpponentsKingValue);
+        }
+
+        @Test
+        void bigMobilityForWhiteRookScoresBetterThanSmallMobility() {
+            int bigMobility = evaluator.valueOfMove(new Move(BLACK, WHITE_ROOK.addTo(B1), BLACK_KING.addTo(H8), WHITE_KING.addTo(B2), WHITE_PAWN.addTo(C7)),
+                    WHITE_ROOK.removeFrom(B1), WHITE_ROOK.addTo(A1));
+
+            int smallMobility = evaluator.valueOfMove(new Move(BLACK, WHITE_ROOK.addTo(B1), BLACK_KING.addTo(H8), WHITE_KING.addTo(A2), WHITE_PAWN.addTo(C7)),
+                    WHITE_ROOK.removeFrom(B1), WHITE_ROOK.addTo(A1));
+
+            assertThat(bigMobility).isGreaterThan(smallMobility);
+        }
+
+        @Test
+        void bigMobilityForBlackQueenScoresBetterThanSmallMobility() {
+            int bigMobility = evaluator.valueOfMove(new Move(WHITE, BLACK_QUEEN.addTo(B1), WHITE_KING.addTo(H8), WHITE_KING.addTo(A7), WHITE_PAWN.addTo(C7)),
+                    BLACK_QUEEN.removeFrom(B1), BLACK_QUEEN.addTo(A1));
+
+            int smallMobility = evaluator.valueOfMove(new Move(WHITE, BLACK_QUEEN.addTo(B1), WHITE_KING.addTo(H8), WHITE_KING.addTo(A2), WHITE_PAWN.addTo(C7)),
+                    BLACK_QUEEN.removeFrom(B1), BLACK_QUEEN.addTo(A1));
+            assertThat(bigMobility).isLessThan(smallMobility);
         }
 
         private Map<Piece, Integer> getWhitePieceToValue() throws IllegalAccessException, NoSuchFieldException {

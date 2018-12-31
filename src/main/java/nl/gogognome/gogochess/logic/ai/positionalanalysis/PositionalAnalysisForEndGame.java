@@ -60,6 +60,7 @@ public class PositionalAnalysisForEndGame implements MovesEvaluator {
                 value += negateForBlack(getDeltaForRookPlacedBehindPassedPawn(board, from, to), move);
                 value += negateForBlack(centralControlHeuristic.getCenterControlDeltaForGeneralEndgame(from, to), move);
                 value += negateForBlack(kingFieldHeuristic.getKingFieldDeltaForGeneralEndgame(from, to, opponentKingSquare), move);
+                value += negateForBlack(mobilityAfterMove(board, move), move);
             }
             move.setValue(value);
         }
@@ -77,5 +78,9 @@ public class PositionalAnalysisForEndGame implements MovesEvaluator {
             return 15;
         }
         return 0;
+    }
+
+    private int mobilityAfterMove(Board board, Move move) {
+        return board.temporarilyMove(move, () -> move.getPlayer().validMoves(board).size());
     }
 }
