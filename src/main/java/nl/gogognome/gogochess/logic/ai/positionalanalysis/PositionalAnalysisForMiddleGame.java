@@ -54,7 +54,7 @@ class PositionalAnalysisForMiddleGame implements MovesEvaluator {
 	}
 
 	private int mobilityAfterMove(Board board, Move move) {
-		return board.temporarilyMove(move, () -> board.currentPlayerOpponent().validMoves(board).size());
+		return board.temporarilyMove(move, () -> move.getPlayer().validMoves(board).size());
 	}
 
 	private int getCaptureBonus(Board board) {
