@@ -81,9 +81,18 @@ class KingFieldHeuristic {
 		return valueOf(2, ownKingSquare, opponentKingSquare, ENDGAME_WITH_PIECES_KING_FIELD);
 	}
 
-	private int valueOf(int pieceFactor, Square square, Square opponentKingSquare, int[][] kingField) {
-		int fieldColumn = square.rank() - opponentKingSquare.rank() + 3;
-		int fieldRow = square.file() - opponentKingSquare.file() + 3;
+	int getCenterControlValueForPiecesAt(Square ownKingsSquare, List<Square> ownPiecesSquares) {
+		if (ownPiecesSquares.isEmpty()) {
+			return 0;
+		}
+		return ownPiecesSquares.stream()
+				.mapToInt(square -> valueOf(1, square, ownKingsSquare, ENDGAME_WITH_PIECES_KING_FIELD))
+				.sum() / ownPiecesSquares.size();
+	}
+
+	private int valueOf(int pieceFactor, Square square, Square kingsSquare, int[][] kingField) {
+		int fieldColumn = square.rank() - kingsSquare.rank() + 3;
+		int fieldRow = square.file() - kingsSquare.file() + 3;
 		int kingFieldValue;
 		if (0 <= fieldColumn && fieldColumn < 7 && 0 <= fieldRow && fieldRow < 7) {
 			kingFieldValue = kingField[fieldRow][fieldColumn];

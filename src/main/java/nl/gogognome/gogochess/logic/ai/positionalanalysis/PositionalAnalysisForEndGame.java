@@ -5,6 +5,7 @@ import nl.gogognome.gogochess.logic.*;
 import nl.gogognome.gogochess.logic.ai.EndOfGameBoardEvaluator;
 import nl.gogognome.gogochess.logic.ai.PieceValueEvaluator;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -96,7 +97,18 @@ public class PositionalAnalysisForEndGame implements MovesEvaluator {
 
         value = negateForBlack(centralControlHeuristic.getCenterControlValueForOpponentKingInEndgameWithPieces(opponentKingSquare), player);
         value += negateForBlack(kingFieldHeuristic.getOpponentKingFieldValueForEndgameWithPieces(ownKingSquare, opponentKingSquare), player);
+        value += negateForBlack(centralControlHeuristic.getCenterControlValueForOwnKingInEndgameWithPieces(ownKingSquare), player);
+        List<Square> ownPiecesSquares = getOwnPiecesSquaresExceptForKing(board, player);
+        value += negateForBlack(kingFieldHeuristic.getCenterControlValueForPiecesAt(ownKingSquare, ownPiecesSquares), player);
         return value;
+    }
+
+    private List<Square> getOwnPiecesSquaresExceptForKing(Board board, Player player) {
+        List<Square> ownPiecesSquares = new ArrayList<>();
+        board.forEachPlayerPieceWhere(player,
+                (playerPiece, square) -> playerPiece.getPiece() != KING,
+                (playerPiece, square) ->  ownPiecesSquares.add(square));
+        return ownPiecesSquares;
     }
 
     private int countNrPawnsFor(Board board, Player player) {

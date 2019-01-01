@@ -491,5 +491,48 @@ abstract class PositionalAnalysisForEndGameTest {
             assertThat(forcesOpponentKingNearOwnKing).isLessThan(doesNotForcesOpponentKingNearOwnKing);
         }
 
+        @Test
+        void whiteKingMovingTowardsCenterScoresBetterThanKingMovingAwayFromCenter() {
+            int kingMovingToCenter = evaluator.valueOfMove(new Move(BLACK, WHITE_KING.addTo(B2), WHITE_ROOK.addTo(B1), BLACK_KING.addTo(H8)),
+                    WHITE_KING.removeFrom(B2), WHITE_KING.addTo(C3));
+
+            int kingMovingAwayFromCenter = evaluator.valueOfMove(new Move(BLACK, WHITE_KING.addTo(C3), WHITE_ROOK.addTo(B1), BLACK_KING.addTo(H8)),
+                    WHITE_KING.removeFrom(C3), WHITE_KING.addTo(B2));
+
+            assertThat(kingMovingToCenter).isGreaterThan(kingMovingAwayFromCenter);
+        }
+
+        @Test
+        void blackKingMovingTowardsCenterScoresBetterThanKingMovingAwayFromCenter() {
+            int kingMovingToCenter = evaluator.valueOfMove(new Move(WHITE, BLACK_KING.addTo(B2), BLACK_ROOK.addTo(B1), WHITE_KING.addTo(H8)),
+                    BLACK_KING.removeFrom(B2), BLACK_KING.addTo(C3));
+
+            int kingMovingAwayFromCenter = evaluator.valueOfMove(new Move(WHITE, BLACK_KING.addTo(C3), BLACK_ROOK.addTo(B1), WHITE_KING.addTo(H8)),
+                    BLACK_KING.removeFrom(C3), BLACK_KING.addTo(B2));
+
+            assertThat(kingMovingToCenter).isLessThan(kingMovingAwayFromCenter);
+        }
+
+        @Test
+        void whiteRookMovingTowardsOwnKingScoresBetterThanMovingAwayFromOwnKing() {
+            int kingMovingToCenter = evaluator.valueOfMove(new Move(BLACK, WHITE_KING.addTo(A1), WHITE_ROOK.addTo(H1), BLACK_KING.addTo(H8)),
+                    WHITE_ROOK.removeFrom(H1), WHITE_ROOK.addTo(B1));
+
+            int kingMovingAwayFromCenter = evaluator.valueOfMove(new Move(BLACK, WHITE_KING.addTo(A1), WHITE_ROOK.addTo(B1), BLACK_KING.addTo(H8)),
+                    WHITE_ROOK.removeFrom(B1), WHITE_ROOK.addTo(H1));
+
+            assertThat(kingMovingToCenter).isGreaterThan(kingMovingAwayFromCenter);
+        }
+
+        @Test
+        void blackRookMovingTowardsOwnKingScoresBetterThanMovingAwayFromOwnKing() {
+            int kingMovingToCenter = evaluator.valueOfMove(new Move(WHITE, BLACK_KING.addTo(A1), BLACK_ROOK.addTo(H1), WHITE_KING.addTo(H8)),
+                    BLACK_ROOK.removeFrom(H1), BLACK_ROOK.addTo(B1));
+
+            int kingMovingAwayFromCenter = evaluator.valueOfMove(new Move(WHITE, BLACK_KING.addTo(A1), BLACK_ROOK.addTo(B1), WHITE_KING.addTo(H8)),
+                    BLACK_ROOK.removeFrom(B1), BLACK_ROOK.addTo(H1));
+
+            assertThat(kingMovingToCenter).isLessThan(kingMovingAwayFromCenter);
+        }
     }
 }

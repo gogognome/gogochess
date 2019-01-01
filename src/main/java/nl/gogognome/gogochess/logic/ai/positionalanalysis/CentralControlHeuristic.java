@@ -78,12 +78,20 @@ class CentralControlHeuristic {
 	}
 
 	int getCenterControlValueForOpponentKingInEndgameWithPieces(Square opponentKingsSquare) {
-		return -32 * CENTER_CONTORL_ARRAY[opponentKingsSquare.rank()][opponentKingsSquare.file()];
+		return -32 * centerControlValueFor(opponentKingsSquare);
+	}
+
+	int getCenterControlValueForOwnKingInEndgameWithPieces(Square ownKingSquare) {
+		return centerControlValueFor(ownKingSquare);
 	}
 
 	private int valueOf(Piece piece, Square square, Map<Piece, Integer> pieceToValue) {
 		int pieceFactor = pieceToValue.get(piece);
-		int centerControlValue = CENTER_CONTORL_ARRAY[square.rank()][square.file()];
+		int centerControlValue = centerControlValueFor(square);
 		return pieceFactor * centerControlValue;
+	}
+
+	private int centerControlValueFor(Square square) {
+		return CENTER_CONTORL_ARRAY[square.rank()][square.file()];
 	}
 }
