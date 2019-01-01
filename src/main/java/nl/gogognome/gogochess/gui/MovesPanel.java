@@ -66,10 +66,10 @@ public class MovesPanel extends JPanel implements Scrollable, MouseMotionListene
 		super.paint(g);
 		int margin = width * 10 / 100;
 		int left = 0;
-		g.setColor(Color.BLACK);
+		g.setColor(getBackground());
 		g.fillRect(left, 0, width - margin, getHeight());
 
-		g.setColor(Color.LIGHT_GRAY);
+		g.setColor(Color.DARK_GRAY);
 		Player player = WHITE;
 		fontHeight = g.getFontMetrics().getHeight();
 		int y = margin + fontHeight;
