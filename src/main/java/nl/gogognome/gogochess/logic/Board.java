@@ -413,6 +413,21 @@ public class Board {
 		return hashToNumberOfRepetitions.get(getBoardHash());
 	}
 
+	public void initBoard() {
+		process(INITIAL_BOARD);
+	}
+
+	public boolean gameStartedFromInitialSetup() {
+		if (lastMove == null) {
+			return false;
+		}
+		Move move = lastMove;
+		while (move.getPrecedingMove() != null) {
+			move = move.getPrecedingMove();
+		}
+		return move.boardMutationsEqual(INITIAL_BOARD);
+	}
+
 	@Override
 	public int hashCode() {
 		return (int) boardHash.getHash(lastMove.getPlayer());
@@ -426,10 +441,6 @@ public class Board {
 
 		Board that = (Board) obj;
 		return this.hashCode() == that.hashCode();
-	}
-
-	public void initBoard() {
-		process(INITIAL_BOARD);
 	}
 
 	public final static Move INITIAL_BOARD = new Move(BLACK,

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
+import static nl.gogognome.gogochess.logic.Board.*;
 import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.ADD;
 import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.REMOVE;
 import static nl.gogognome.gogochess.logic.Moves.assertMovesContain;
@@ -300,6 +301,36 @@ class BoardTest {
 				.filter(square -> board.isBehindPassedPawn(square))
 				.collect(toList());
 		assertThat(fieldsBehindPassedPawn).isEmpty();
+	}
+
+	@Test
+	void boardWithoutSetupIsNotStartedFromInitialSetup() {
+		assertThat(board.gameStartedFromInitialSetup()).isFalse();
+	}
+
+	@Test
+	void boardWithInitialSetupIsStartedFromInitialSetup() {
+		board.initBoard();
+		assertThat(board.gameStartedFromInitialSetup()).isTrue();
+	}
+
+	@Test
+	void boardWithMovesFollowingInitialSetupIsStartedFromInitialSetup() {
+		Move move1 = new Move(INITIAL_BOARD, WHITE_PAWN.removeFrom(E2), WHITE_PAWN.addTo(E4));
+		Move move2 = new Move(move1, BLACK_PAWN.removeFrom(E7), BLACK_PAWN.addTo(E5));
+		board.process(move2);
+
+		assertThat(board.gameStartedFromInitialSetup()).isTrue();
+	}
+
+	@Test
+	void boardWithMovesFollowingDeviatingSetupIsNotStartedFromInitialSetup() {
+		Move deviatingSetup = new Move(BLACK, WHITE_PAWN.addTo(E2), BLACK_PAWN.addTo(E7));
+		Move move1 = new Move(deviatingSetup, WHITE_PAWN.removeFrom(E2), WHITE_PAWN.addTo(E4));
+		Move move2 = new Move(move1, BLACK_PAWN.removeFrom(E7), BLACK_PAWN.addTo(E5));
+		board.process(move2);
+
+		assertThat(board.gameStartedFromInitialSetup()).isFalse();
 	}
 
 	private Move find(List<Move> moves, String moveDescription) {

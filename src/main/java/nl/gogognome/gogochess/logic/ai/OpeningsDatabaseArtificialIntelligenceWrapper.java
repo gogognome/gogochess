@@ -51,7 +51,7 @@ public class OpeningsDatabaseArtificialIntelligenceWrapper implements Artificial
 			}
 		}
 
-		if (matchingOpenings.isEmpty()) {
+		if (matchingOpenings.isEmpty() || !board.gameStartedFromInitialSetup()) {
 			return wrappedArtificialIntelligence.nextMove(board, player, progressListener);
 		}
 

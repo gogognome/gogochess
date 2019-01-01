@@ -80,7 +80,7 @@ public class PositionalAnalysis implements MovesEvaluator {
 	}
 
 	private boolean isOpening(Board board) {
-		return board.lastMove().depthInTree() + 1 <= 15;
+		return board.gameStartedFromInitialSetup() && board.lastMove().depthInTree() + 1 <= 15;
 	}
 
 	private boolean isMiddleGame(Board board) {
