@@ -15,7 +15,7 @@ public class Start {
 		Injector injector = Guice.createInjector(new Module());
 		JFrame frame = new JFrame("Gogo Chess");
 
-		GamePresentationModel controller = injector.getInstance(GamePresentationModel.class);
+		GamePresentationModel gamePresentationModel = injector.getInstance(GamePresentationModel.class);
 		BoardMovesAndSettingsPanel mainPanel = injector.getInstance(BoardMovesAndSettingsPanel.class);
 
 		frame.setLayout(new BorderLayout());
@@ -26,14 +26,14 @@ public class Start {
 		frame.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				controller.onClose();
+				gamePresentationModel.onClose();
 			}
 		});
 		frame.setVisible(true);
 
 		setIcon(frame);
 
-		SwingUtilities.invokeLater(controller::playGame);
+		SwingUtilities.invokeLater(gamePresentationModel::playGame);
 	}
 
 	private static void setIcon(JFrame frame) {
