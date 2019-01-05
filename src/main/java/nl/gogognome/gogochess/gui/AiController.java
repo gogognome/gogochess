@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 import java.util.function.Consumer;
 
 public class AiController {
@@ -40,6 +41,7 @@ public class AiController {
     private Move responseToExpectedOpponentsMove;
 
     private final Object lock = new Object();
+    private Semaphore thinkingSemaphore = new Semaphore(1);
 
     @Inject
     public AiController(ArtificialIntelligence ai, MoveNotation moveNotation) {
@@ -94,7 +96,7 @@ public class AiController {
                 computerThinksDuringOpponentsTurn = false;
             }
 
-            executorService.submit(() -> computerThinking(lastMove));
+            letComputerThinkOfBestResponseTo(lastMove);
         }
     }
 
@@ -106,8 +108,17 @@ public class AiController {
 
             expectedOpponentsMove = nextExpectedOpponentsMove;
             computerThinksDuringOpponentsTurn = true;
-            executorService.submit(() -> computerThinking(expectedOpponentsMove));
+            letComputerThinkOfBestResponseTo(expectedOpponentsMove);
         }
+    }
+
+    private void letComputerThinkOfBestResponseTo(Move move) {
+        try {
+            thinkingSemaphore.acquire();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        executorService.submit(() -> computerThinking(move));
     }
 
     private void computerThinking(Move lastMove) {
@@ -143,6 +154,8 @@ public class AiController {
             logger.debug("Canceled thinking");
         } catch (Exception e) {
             logger.error("Problem occurred: " + e.getMessage(), e);
+        } finally {
+            thinkingSemaphore.release();
         }
     }
 
@@ -177,6 +190,12 @@ public class AiController {
 
     void cancelThinking() {
         ai.cancel();
+        try {
+            thinkingSemaphore.acquire();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        thinkingSemaphore.release();
     }
 
     void onClose() {

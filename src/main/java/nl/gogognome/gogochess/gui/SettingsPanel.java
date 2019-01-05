@@ -15,17 +15,19 @@ public class SettingsPanel extends JPanel {
 	private final BufferedImage whiteComputerPlayer;
 	private final BufferedImage blackHumanPlayer;
 	private final BufferedImage blackComputerPlayer;
+	private final BufferedImage undoMove;
 
 	public SettingsPanel(GamePresentationModel presentationModel) {
 		this.presentationModel = presentationModel;
 		this.buttonSize = 40;
-		setPreferredSize(new Dimension(80, 40));
+		setPreferredSize(new Dimension(3*buttonSize, buttonSize));
 
 		try {
 			whiteHumanPlayer = ImageIO.read(getClass().getResourceAsStream("/white-human-player.png"));
 			whiteComputerPlayer = ImageIO.read(getClass().getResourceAsStream("/white-computer-player.png"));
 			blackHumanPlayer = ImageIO.read(getClass().getResourceAsStream("/black-human-player.png"));
 			blackComputerPlayer = ImageIO.read(getClass().getResourceAsStream("/black-computer-player.png"));
+			undoMove = ImageIO.read(getClass().getResourceAsStream("/undo-move.png"));
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to load pieces from the resources: " + e.getMessage(), e);
 		}
@@ -35,8 +37,10 @@ public class SettingsPanel extends JPanel {
 			public void mouseClicked(MouseEvent e) {
 				if (e.getX() < buttonSize) {
 					presentationModel.onWhitePlayerAI(!presentationModel.isWhitePlayerAi());
-				} else {
+				} else if (e.getX() < 2 * buttonSize) {
 					presentationModel.onBlackPlayerAI(!presentationModel.isBlackPlayerAi());
+				} else {
+					presentationModel.onUndoMove();
 				}
 			}
 		});
@@ -61,6 +65,8 @@ public class SettingsPanel extends JPanel {
 
 		image = presentationModel.isBlackPlayerAi() ? blackComputerPlayer : blackHumanPlayer;
 		g.drawImage(image, buttonSize, 0, 2*buttonSize, buttonSize, 0, 0, 80, 86, null);
+
+		g.drawImage(undoMove, 2*buttonSize, 0, 3*buttonSize, buttonSize, 0, 0, 80, 86, null);
 	}
 
 }

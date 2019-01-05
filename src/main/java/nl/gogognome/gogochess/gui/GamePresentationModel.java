@@ -171,6 +171,15 @@ public class GamePresentationModel {
 		}
 	}
 
+	void onUndoMove() {
+		if (state == State.COMPUTER_THINKING) {
+			aiController.cancelThinking();
+		}
+		if (board.lastMove() != null && board.lastMove().getPrecedingMove() != null) {
+			onMove(board.lastMove().getPrecedingMove());
+		}
+	}
+
 	private void onPromote(List<Move> promotionMoves) {
 		this.promotionMoves = promotionMoves;
 		changeStateTo(promotionMoves.get(0).getPlayer() == WHITE ? State.PROMOTING_WHITE_PAWN : State.PROMOTING_BLACK_PAWN);
