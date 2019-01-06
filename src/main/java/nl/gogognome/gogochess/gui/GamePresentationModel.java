@@ -155,14 +155,12 @@ public class GamePresentationModel {
 
 	private void onComputerMove(Move move) {
 		SwingUtilities.invokeLater(() -> {
-			targets = ImmutableList.of(
-					move.getMutationRemovingPieceFromStart().getSquare(),
-					move.getMutationAddingPieceAtDestination().getSquare());
-			onMove(move);
+            highlightMove(move);
+            onMove(move);
 		});
 	}
 
-	private void onMove(Move move) {
+    private void onMove(Move move) {
 		board.process(move);
 		if (move.getStatus().isGameOver()) {
 			changeStateTo(State.GAME_OVER);
@@ -176,11 +174,19 @@ public class GamePresentationModel {
 			aiController.cancelThinking();
 		}
 		if (board.lastMove() != null && board.lastMove().getPrecedingMove() != null) {
-			onMove(board.lastMove().getPrecedingMove());
+            highlightMove(board.lastMove());
+            onMove(board.lastMove().getPrecedingMove());
 		}
 	}
 
-	private void onPromote(List<Move> promotionMoves) {
+	private void highlightMove(Move move) {
+        targets = ImmutableList.of(
+                move.getMutationRemovingPieceFromStart().getSquare(),
+                move.getMutationAddingPieceAtDestination().getSquare());
+    }
+
+
+    private void onPromote(List<Move> promotionMoves) {
 		this.promotionMoves = promotionMoves;
 		changeStateTo(promotionMoves.get(0).getPlayer() == WHITE ? State.PROMOTING_WHITE_PAWN : State.PROMOTING_BLACK_PAWN);
 	}
