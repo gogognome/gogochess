@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
-public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelligence {
+public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelligence, RecursiveSearchAI {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -51,16 +51,8 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		this.initialBeta = Integer.MAX_VALUE;
 	}
 
-	public void setInitialMaxDepth(int initialMaxDepth) {
+	public void setMaxDepth(int initialMaxDepth) {
 		this.initialMaxDepth = initialMaxDepth;
-	}
-
-	public void setInitialAlpha(int initialAlpha) {
-		this.initialAlpha = initialAlpha;
-	}
-
-	public void setInitialBeta(int initialBeta) {
-		this.initialBeta = initialBeta;
 	}
 
 	@Override

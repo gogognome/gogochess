@@ -194,7 +194,7 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 
 	private ArtificialIntelligence buildAI(int maxDepth) {
 		MiniMaxAlphaBetaArtificialIntelligence ai = Guice.createInjector(new Module()).getInstance(MiniMaxAlphaBetaArtificialIntelligence.class);
-		ai.setInitialMaxDepth(maxDepth);
+		ai.setMaxDepth(maxDepth);
 		return ai;
 	}
 }

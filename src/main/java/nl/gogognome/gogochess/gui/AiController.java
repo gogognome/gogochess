@@ -5,6 +5,7 @@ import nl.gogognome.gogochess.logic.Move;
 import nl.gogognome.gogochess.logic.ai.ArtificalIntelligenceCanceledException;
 import nl.gogognome.gogochess.logic.ai.ArtificialIntelligence;
 import nl.gogognome.gogochess.logic.ai.ProgressListener;
+import nl.gogognome.gogochess.logic.ai.RecursiveSearchAI;
 import nl.gogognome.gogochess.logic.movenotation.MoveNotation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,7 @@ public class AiController {
     private long aiStartTime;
     private long aiMaxEndTime;
     private long lastTimeMaxDepthDeltaWasChanged;
-    private int maxDurationSeconds = 15;
+    private AIThinkingLimit thinkingLimit = AIThinkingLimit.seconds(15);
 
     private boolean computerThinksDuringOpponentsTurn;
     private Move nextExpectedOpponentsMove;
@@ -51,6 +52,14 @@ public class AiController {
 
     void setPercentageConsumer(Consumer<Integer> percentageConsumer) {
         this.percentageConsumer = percentageConsumer;
+    }
+
+    AIThinkingLimit getThinkingLimit() {
+        return thinkingLimit;
+    }
+
+    void setThinkingLimit(AIThinkingLimit thinkingLimit) {
+        this.thinkingLimit = thinkingLimit;
     }
 
     void setComputerMoveConsumer(Consumer<Move> computerMoveConsumer) {
@@ -127,8 +136,7 @@ public class AiController {
             logger.debug("Start thinking for response to " + formattedMove +
                     (computerThinksDuringOpponentsTurn ? " during opponents turn" : ""));
 
-            aiStartTime = System.currentTimeMillis();
-            aiMaxEndTime = aiStartTime + maxDurationSeconds * 1000;
+            setupSearchParameters();
 
             Board boardForArtificialIntelligence = new Board();
             boardForArtificialIntelligence.process(lastMove);
@@ -137,8 +145,7 @@ public class AiController {
                     boardForArtificialIntelligence.currentPlayer(),
                     progressListener);
 
-            long aiEndTime = System.currentTimeMillis();
-            logger.debug("Computer has thought for " + (aiEndTime - aiStartTime) / 1000  + " seconds");
+            logEndOfSearch();
 
             synchronized (lock) {
                 if (computerThinksDuringOpponentsTurn) {
@@ -159,8 +166,36 @@ public class AiController {
         }
     }
 
+    private void setupSearchParameters() {
+        aiStartTime = System.currentTimeMillis();
+        // Initialize max seconds in case the user toggles from level to time while the computer is thinking.
+        switch (thinkingLimit.getUnit()) {
+            case SECONDS:
+                int maxSecondsToThink = thinkingLimit.getUnit() == AIThinkingLimit.Unit.SECONDS ? thinkingLimit.getValue() : 15;
+                aiMaxEndTime = aiStartTime + maxSecondsToThink * 1000;
+                break;
+
+            case LEVEL:
+                if (ai instanceof RecursiveSearchAI) {
+                    ((RecursiveSearchAI) ai).setMaxDepth(thinkingLimit.getValue());
+                }
+                break;
+            default:
+               throw new IllegalStateException("Unknown unit encountered: " + thinkingLimit.getValue());
+        }
+    }
+
+    private void logEndOfSearch() {
+        long aiEndTime = System.currentTimeMillis();
+        logger.debug("Computer has thought for " + (aiEndTime - aiStartTime) / 1000  + " seconds");
+    }
+
 
     private void updateMaxDepthDelta(Integer percentage) {
+        if (thinkingLimit.getUnit() != AIThinkingLimit.Unit.SECONDS) {
+            return;
+        }
+
         long now = System.currentTimeMillis();
 
         int maxDepthDelta = 0;

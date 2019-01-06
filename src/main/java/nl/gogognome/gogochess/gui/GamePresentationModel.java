@@ -90,6 +90,15 @@ public class GamePresentationModel {
 		return blackPlayerAi;
 	}
 
+	AIThinkingLimit getThinkingLimit() {
+		return aiController.getThinkingLimit();
+	}
+
+	void setThinkingLimit(AIThinkingLimit thinkingLimit) {
+		aiController.setThinkingLimit(thinkingLimit);
+		fireEvent(Event.SETTING_CHANGED);
+	}
+
 	void onWhitePlayerAI(boolean whitePlayerAi) {
 		this.whitePlayerAi = whitePlayerAi;
 		fireEvent(Event.SETTING_CHANGED);

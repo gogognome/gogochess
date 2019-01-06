@@ -13,7 +13,7 @@ import java.util.Random;
 
 import static java.util.Collections.singletonList;
 
-public class OpeningsDatabaseArtificialIntelligenceWrapper implements ArtificialIntelligence {
+public class OpeningsDatabaseArtificialIntelligenceWrapper implements ArtificialIntelligence, RecursiveSearchAI {
 
 	private final ArtificialIntelligence wrappedArtificialIntelligence;
 	private final MoveNotation moveNotation = new ReverseAlgebraicNotation();
@@ -40,6 +40,13 @@ public class OpeningsDatabaseArtificialIntelligenceWrapper implements Artificial
 	@Inject
 	public OpeningsDatabaseArtificialIntelligenceWrapper(ArtificialIntelligence wrappedArtificialIntelligence) {
 		this.wrappedArtificialIntelligence = wrappedArtificialIntelligence;
+	}
+
+	@Override
+	public void setMaxDepth(int maxDepth) {
+		if (wrappedArtificialIntelligence instanceof RecursiveSearchAI) {
+			((RecursiveSearchAI) wrappedArtificialIntelligence).setMaxDepth(maxDepth);
+		}
 	}
 
 	@Override
