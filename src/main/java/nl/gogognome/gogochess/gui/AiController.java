@@ -11,10 +11,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.function.Consumer;
+
+import static com.google.common.primitives.Ints.asList;
 
 public class AiController {
 
@@ -43,6 +47,9 @@ public class AiController {
 
     private final Object lock = new Object();
     private Semaphore thinkingSemaphore = new Semaphore(1);
+
+    private int initialMaxDepthForTimeLimit = 2;
+    private List<Integer> lastInitialMaxDepths = new ArrayList<>(asList(2, 2, 2, 2));
 
     @Inject
     public AiController(ArtificialIntelligence ai, MoveNotation moveNotation) {
@@ -145,7 +152,7 @@ public class AiController {
                     boardForArtificialIntelligence.currentPlayer(),
                     progressListener);
 
-            logEndOfSearch();
+            onEndOfSearch();
 
             synchronized (lock) {
                 if (computerThinksDuringOpponentsTurn) {
@@ -173,6 +180,7 @@ public class AiController {
             case SECONDS:
                 int maxSecondsToThink = thinkingLimit.getUnit() == AIThinkingLimit.Unit.SECONDS ? thinkingLimit.getValue() : 15;
                 aiMaxEndTime = aiStartTime + maxSecondsToThink * 1000;
+                ((RecursiveSearchAI) ai).setMaxDepth(initialMaxDepthForTimeLimit);
                 break;
 
             case LEVEL:
@@ -185,11 +193,51 @@ public class AiController {
         }
     }
 
-    private void logEndOfSearch() {
+    private void onEndOfSearch() {
         long aiEndTime = System.currentTimeMillis();
-        logger.debug("Computer has thought for " + (aiEndTime - aiStartTime) / 1000  + " seconds");
+        int actualSeconds = (int) ((aiEndTime - aiStartTime) / 1000);
+        logger.debug("Computer has thought for " + actualSeconds + " seconds");
+
+        updateInitialMaxDepth(actualSeconds);
     }
 
+    private void updateInitialMaxDepth(int actualSeconds) {
+        if (thinkingLimit.getUnit() != AIThinkingLimit.Unit.SECONDS) {
+            return;
+        }
+
+        lastInitialMaxDepths.add(changeWithOneIfOutOfRange(actualSeconds));
+        lastInitialMaxDepths.remove(0);
+        int nextInitialMaxDepth = (int) (lastInitialMaxDepths.stream()
+                .mapToInt(v -> v)
+                .average()
+                .orElse(initialMaxDepthForTimeLimit) + 0.5);
+        logger.debug("Last initial max depths " + lastInitialMaxDepths);
+        if (nextInitialMaxDepth != initialMaxDepthForTimeLimit) {
+            logger.debug("Changed initial max depth from " + initialMaxDepthForTimeLimit + " to " + nextInitialMaxDepth);
+            initialMaxDepthForTimeLimit = nextInitialMaxDepth;
+        }
+    }
+
+    private int changeWithOneIfOutOfRange(int actualSeconds) {
+        int nextInitialMaxDepth = initialMaxDepthForTimeLimit;
+        if (actualSeconds <= 0.8f * thinkingLimit.getValue()) {
+            nextInitialMaxDepth++;
+        }
+        if (actualSeconds <= 0.5f * thinkingLimit.getValue()) {
+            nextInitialMaxDepth++;
+        }
+        if (actualSeconds >= 1.2f * thinkingLimit.getValue()) {
+            nextInitialMaxDepth--;
+        }
+        if (actualSeconds >= 1.5f * thinkingLimit.getValue()) {
+            nextInitialMaxDepth--;
+        }
+        if (actualSeconds >= 2.0f * thinkingLimit.getValue()) {
+            nextInitialMaxDepth--;
+        }
+        return nextInitialMaxDepth;
+    }
 
     private void updateMaxDepthDelta(Integer percentage) {
         if (thinkingLimit.getUnit() != AIThinkingLimit.Unit.SECONDS) {
@@ -209,17 +257,18 @@ public class AiController {
         if (durationPercentage > 4 * percentage) {
             maxDepthDelta--;
         }
+        if (durationPercentage > 8 * percentage) {
+            maxDepthDelta--;
+        }
         if (percentage > 2 * durationPercentage) {
             maxDepthDelta++;
         }
         if (percentage > 4 * durationPercentage) {
             maxDepthDelta++;
         }
-        if (maxDepthDelta != progressListener.getMaxDepthDelta().get() && (lastTimeMaxDepthDeltaWasChanged + 1000 < now)) {
+        if (maxDepthDelta != progressListener.getMaxDepthDelta().get() && (lastTimeMaxDepthDeltaWasChanged + 100 < now)) {
             progressListener.getMaxDepthDelta().set(maxDepthDelta);
             lastTimeMaxDepthDeltaWasChanged = now;
-            logger.debug("Set max depth delta to " + maxDepthDelta + " because AI percentage is "
-                    + percentage + "% and duration percentage is " + durationPercentage + "%.");
         }
     }
 

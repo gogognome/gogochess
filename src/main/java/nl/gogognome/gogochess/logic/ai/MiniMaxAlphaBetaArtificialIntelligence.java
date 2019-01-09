@@ -58,7 +58,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 	@Override
 	public Move nextMove(Board board, Player player, ProgressListener progressListener) {
 		canceled.set(false);
-		initMaxDepth(board);
+		maxDepth = initialMaxDepth;
 		maxDepthDelta = progressListener.getMaxDepthDelta();
 		statistics.reset();
 		transpositionTable.clear();
@@ -97,20 +97,6 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		logger.debug("generating " + statistics.getNrPositionsGenerated() + " positions took " + durationMillis + " s (" + (statistics.getNrPositionsGenerated() / (durationMillis)) + " positions/s");
 		logger.debug("nr cut offs caused by killer heuristic: " + statistics.getNrCutOffsByKillerMove());
 		logger.debug("nr cache hits: " + statistics.getNrCacheHits());
-	}
-
-	private void initMaxDepth(Board board) {
-		maxDepth = initialMaxDepth;
-		double numberNonPawnPieces = board.numberNonPawnPieces();
-		if (numberNonPawnPieces <= 8) {
-			maxDepth++;
-		}
-		if (numberNonPawnPieces <= 6) {
-			maxDepth++;
-		}
-		if (numberNonPawnPieces <= 4) {
-			maxDepth += 2;
-		}
 	}
 
 	private Move alphaBeta(Board board, Move move, int depth, int alpha, int beta, Progress progress) {
