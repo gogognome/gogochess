@@ -123,37 +123,41 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 				asList("Qd4-f2", "Kh5-h6", "Rc3-c7", "Kh6-h5", "Rc7-h7+", "Kh5-g6", "Qf2-f7++"),
 				asList("d3-d2", "Kh5-g6", "Qd4-e5", "Kg6-h7", "Qe5xg5", "Kh7-h8", "Rc3-h3++"),
 				asList("Qd4-f2", "g5-g6", "Rc3-c7", "g6-g7", "Qf2-f5+", "Kh5-h6", "Rc7-c6++"));
-
 	}
 
 	@Test
 	void aiShouldNotThrowNullPointerException() {
-		Move[] moves = new Move[12];
-		moves[0] = new Move(Board.INITIAL_BOARD, WHITE_PAWN.removeFrom(E2), WHITE_PAWN.addTo(E4));
-		moves[1] = new Move(moves[0], BLACK_PAWN.removeFrom(D7), BLACK_PAWN.addTo(D5));
-		moves[2] = new Move(moves[1], WHITE_KNIGHT.removeFrom(B1), WHITE_KNIGHT.addTo(C3));
-		moves[3] = new Move(moves[2], BLACK_PAWN.removeFrom(D5), BLACK_PAWN.addTo(D4));
-		moves[4] = new Move(moves[3], WHITE_KNIGHT.removeFrom(C3), WHITE_KNIGHT.addTo(D5));
-		moves[5] = new Move(moves[4], BLACK_PAWN.removeFrom(C7), BLACK_PAWN.addTo(C6));
-		moves[6] = new Move(moves[5], WHITE_KNIGHT.removeFrom(D5), WHITE_KNIGHT.addTo(F4));
-		moves[7] = new Move(moves[6], BLACK_PAWN.removeFrom(E7), BLACK_PAWN.addTo(E5));
-		moves[8] = new Move(moves[7], WHITE_KNIGHT.removeFrom(F4), WHITE_KNIGHT.addTo(E2));
-		moves[9] = new Move(moves[8], BLACK_PAWN.removeFrom(D4), BLACK_PAWN.addTo(D3));
-		moves[10] = new Move(moves[9], WHITE_KNIGHT.removeFrom(E2), WHITE_KNIGHT.addTo(C3));
-		moves[11] = new Move(moves[10], BLACK_PAWN.removeFrom(D3), WHITE_PAWN.removeFrom(C2), BLACK_PAWN.addTo(C2));
+		new BoardSetup(new ReverseAlgebraicNotation())
+				.setupBoard(board,
+						"e2-e4", "d7-d5",
+						"Nb1-c3", "d5-d4",
+						"Nc3-d5", "c7-c6",
+						"Nd5-f4", "e7-e5",
+						"Nf4-e2", "d4-d3",
+						"Ne2-c3", "d3xc2");
 
 		ArtificialIntelligence ai = buildAI(3);
-
-		board.process(Board.INITIAL_BOARD);
-		for (int i=0; i<moves.length; i+=2) {
-			ai.nextMove(board, WHITE, new ProgressListener());
-			board.process(moves[i]);
-			board.process(moves[i + 1]);
-		}
-
 		Move nextMove = ai.nextMove(board, WHITE, new ProgressListener());
 
 		assertThat(new ReverseAlgebraicNotation().format(nextMove)).isEqualTo("Qd1xc2");
+	}
+
+	@Test
+	void depth5CausesVeryDeepQuiesenceSearch_aiShouldFindSolutionQuickly() {
+		new BoardSetup(new ReverseAlgebraicNotation())
+				.setupBoard(board,
+						"e2-e4", "d7-d6",
+						"Ng1-f3", "Ng8-f6",
+						"Bf1-c4", "Nf6xe4",
+						"d2-d3", "Ne4-c5",
+						"O-O", "Nb8-c6",
+						"Bc4-b5", "Bc8-f5",
+						"Bc1-f4");
+
+		ArtificialIntelligence ai = buildAI(3);
+		Move nextMove = ai.nextMove(board, board.currentPlayerOpponent(), new ProgressListener());
+
+		assertThat(new ReverseAlgebraicNotation().format(nextMove)).isEqualTo("e7-e5");
 	}
 
 	private void assertNextMoves(int maxDepth, Player player, String... expectedMoves) {
