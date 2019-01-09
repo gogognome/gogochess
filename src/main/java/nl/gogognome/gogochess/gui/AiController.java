@@ -13,9 +13,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 
 import static com.google.common.primitives.Ints.asList;
@@ -24,16 +22,22 @@ public class AiController {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    private final ExecutorService executorService = Executors.newFixedThreadPool(1);
+    private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(3);
     private final ArtificialIntelligence ai;
     private final MoveNotation moveNotation;
+    private final ScheduledFuture<?> tickFuture;
+
+    /**
+     * Indicates if this controller has been closed. Once closed, no methods on this instance must be called anymore.
+     */
+    private boolean closed;
 
     private Consumer<Integer> percentageConsumer = percentage -> {};
     private Consumer<Move> computerMoveConsumer = move -> {};
 
     private final ProgressListener progressListener = new ProgressListener()
-            .withProgressUpdateConsumer(this::setPercentage)
-            .withBestMovesConsumer(bestMoves -> setNextExpectedOpponentsMove(bestMoves.size() >= 2 ? bestMoves.get(1) : null));
+            .withProgressUpdateConsumer(this::onSetPercentage)
+            .withBestMovesConsumer(bestMoves -> scheduleAction(() -> this.nextExpectedOpponentsMove = bestMoves.size() >= 2 ? bestMoves.get(1) : null));
 
     private long aiStartTime;
     private long aiMaxEndTime;
@@ -45,20 +49,68 @@ public class AiController {
     private Move expectedOpponentsMove;
     private Move responseToExpectedOpponentsMove;
 
-    private final Object lock = new Object();
+    /**
+     * The computer is currently thinking.
+     */
     private Semaphore thinkingSemaphore = new Semaphore(1);
-
+    private int lastKnownPercentage;
     private int initialMaxDepthForTimeLimit = 2;
     private List<Integer> lastInitialMaxDepths = new ArrayList<>(asList(2, 2, 2, 2));
+
+    private BlockingDeque<Runnable> actionQueue = new LinkedBlockingDeque<>();
+    private final Future<?> actionQueueFuture;
 
     @Inject
     public AiController(ArtificialIntelligence ai, MoveNotation moveNotation) {
         this.ai = ai;
         this.moveNotation = moveNotation;
+        tickFuture = executorService.scheduleWithFixedDelay(this::onTick, 0, 1, TimeUnit.SECONDS);
+        actionQueueFuture = executorService.submit(this::actionQueueHandler);
+    }
+
+    private void actionQueueHandler() {
+        logger.debug("Action queue handler started");
+        while (!closed) {
+            try {
+                Runnable runnable = actionQueue.takeFirst();
+                runnable.run();
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+        logger.debug("Action queue handler finished");
+    }
+
+    private void scheduleAction(Runnable runnable) {
+        actionQueue.add(runnable);
+    }
+
+    private void onTick() {
+        try {
+            if (!isComputerThinking()) {
+                return;
+            }
+
+            updateMaxDepthDelta(lastKnownPercentage);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+    }
+
+    private boolean isComputerThinking() {
+        if (thinkingSemaphore.tryAcquire()) {
+            thinkingSemaphore.release();
+            return false;
+        }
+        return true;
     }
 
     void setPercentageConsumer(Consumer<Integer> percentageConsumer) {
-        this.percentageConsumer = percentageConsumer;
+        scheduleAction(() -> this.percentageConsumer = percentageConsumer);
+    }
+
+    void setComputerMoveConsumer(Consumer<Move> computerMoveConsumer) {
+        scheduleAction(() -> this.computerMoveConsumer = computerMoveConsumer);
     }
 
     AIThinkingLimit getThinkingLimit() {
@@ -69,70 +121,65 @@ public class AiController {
         this.thinkingLimit = thinkingLimit;
     }
 
-    void setComputerMoveConsumer(Consumer<Move> computerMoveConsumer) {
-        this.computerMoveConsumer = computerMoveConsumer;
-    }
-
-    private void setNextExpectedOpponentsMove(Move nextExpectedOpponentsMove) {
-        synchronized (lock) {
-            this.nextExpectedOpponentsMove = nextExpectedOpponentsMove;
-        }
+    private void onSetPercentage(int percentage) {
+        scheduleAction(() -> setPercentage(percentage));
     }
 
     private void setPercentage(int percentage) {
+        lastKnownPercentage = percentage;
         if (!computerThinksDuringOpponentsTurn) {
             percentageConsumer.accept(percentage);
         }
-
-        if (percentage > 10) {
-            updateMaxDepthDelta(percentage);
-        }
     }
 
-    void startThinking(Move lastMove) {
-        synchronized (lock) {
-            if (expectedOpponentsMove != null && lastMove.getBoardMutations().equals(expectedOpponentsMove.getBoardMutations())) {
-                if (computerThinksDuringOpponentsTurn) {
-                    logger.debug("Computer started thinking for the correct move of the opponent.");
-                    computerThinksDuringOpponentsTurn = false;
-                    return;
-                }
-                if (responseToExpectedOpponentsMove != null) {
-                    logger.debug("Computer already finished thinking for the correct move of the opponent.");
-                    computerMoveConsumer.accept(responseToExpectedOpponentsMove);
-                    expectedOpponentsMove = null;
-                    responseToExpectedOpponentsMove = null;
-                    return;
-                }
-            }
+    void onStartThinking(Move lastMove) {
+        scheduleAction(() -> startThinking(lastMove));
+    }
 
+    private void startThinking(Move lastMove) {
+        if (expectedOpponentsMove != null && lastMove.getBoardMutations().equals(expectedOpponentsMove.getBoardMutations())) {
             if (computerThinksDuringOpponentsTurn) {
-                logger.debug("Cancel computer thinking in opponents turn because the opponent made a different move than expected.");
-                ai.cancel();
+                logger.debug("Computer started thinking for the correct move of the opponent.");
                 computerThinksDuringOpponentsTurn = false;
-            }
-
-            letComputerThinkOfBestResponseTo(lastMove);
-        }
-    }
-
-    void startThinkingDuringOpponentsTurn() {
-        synchronized (lock) {
-            if (nextExpectedOpponentsMove == null) {
                 return;
             }
-
-            expectedOpponentsMove = nextExpectedOpponentsMove;
-            computerThinksDuringOpponentsTurn = true;
-            letComputerThinkOfBestResponseTo(expectedOpponentsMove);
+            if (responseToExpectedOpponentsMove != null) {
+                logger.debug("Computer already finished thinking for the correct move of the opponent.");
+                computerMoveConsumer.accept(responseToExpectedOpponentsMove);
+                expectedOpponentsMove = null;
+                responseToExpectedOpponentsMove = null;
+                return;
+            }
         }
+
+        if (computerThinksDuringOpponentsTurn) {
+            logger.debug("Cancel computer thinking in opponents turn because the opponent made a different move than expected.");
+            ai.cancel();
+            computerThinksDuringOpponentsTurn = false;
+        }
+
+        letComputerThinkOfBestResponseTo(lastMove);
+    }
+
+    void onStartThinkingDuringOpponentsTurn() {
+        scheduleAction(this::startThinkingDuringOpponentsTurn);
+    }
+
+    private void startThinkingDuringOpponentsTurn() {
+        if (nextExpectedOpponentsMove == null) {
+            return;
+        }
+
+        expectedOpponentsMove = nextExpectedOpponentsMove;
+        computerThinksDuringOpponentsTurn = true;
+        letComputerThinkOfBestResponseTo(expectedOpponentsMove);
     }
 
     private void letComputerThinkOfBestResponseTo(Move move) {
         try {
             thinkingSemaphore.acquire();
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            logger.error(e.getMessage(), e);
         }
         executorService.submit(() -> computerThinking(move));
     }
@@ -152,18 +199,7 @@ public class AiController {
                     boardForArtificialIntelligence.currentPlayer(),
                     progressListener);
 
-            onEndOfSearch();
-
-            synchronized (lock) {
-                if (computerThinksDuringOpponentsTurn) {
-                    logger.debug("Store response to expected move " + moveNotation.format(lastMove) + ": " + moveNotation.format(move));
-                    responseToExpectedOpponentsMove = move;
-                    computerThinksDuringOpponentsTurn = false;
-                } else {
-                    logger.debug("Computer move: " + moveNotation.format(move));
-                    computerMoveConsumer.accept(move);
-                }
-            }
+            scheduleAction(() -> onEndOfSearch(lastMove, move));
         } catch (ArtificalIntelligenceCanceledException e) {
             logger.debug("Canceled thinking");
         } catch (Exception e) {
@@ -193,12 +229,21 @@ public class AiController {
         }
     }
 
-    private void onEndOfSearch() {
+    private void onEndOfSearch(Move lastMove, Move move) {
         long aiEndTime = System.currentTimeMillis();
         int actualSeconds = (int) ((aiEndTime - aiStartTime) / 1000);
         logger.debug("Computer has thought for " + actualSeconds + " seconds");
 
         updateInitialMaxDepth(actualSeconds);
+
+        if (computerThinksDuringOpponentsTurn) {
+            logger.debug("Store response to expected move " + moveNotation.format(lastMove) + ": " + moveNotation.format(move));
+            responseToExpectedOpponentsMove = move;
+            computerThinksDuringOpponentsTurn = false;
+        } else {
+            logger.debug("Computer move: " + moveNotation.format(move));
+            computerMoveConsumer.accept(move);
+        }
     }
 
     private void updateInitialMaxDepth(int actualSeconds) {
@@ -239,15 +284,20 @@ public class AiController {
         return nextInitialMaxDepth;
     }
 
-    private void updateMaxDepthDelta(Integer percentage) {
+    private void updateMaxDepthDelta(int percentage) {
         if (thinkingLimit.getUnit() != AIThinkingLimit.Unit.SECONDS) {
             return;
         }
 
         long now = System.currentTimeMillis();
+        long duration = now - aiStartTime;
+        if (duration < 500 || aiMaxEndTime == aiStartTime) {
+            return;
+        }
 
         int maxDepthDelta = 0;
-        int durationPercentage = (int) (100 * ((now - aiStartTime)) / (aiMaxEndTime - aiStartTime));
+        long targetDuration = aiMaxEndTime - aiStartTime;
+        int durationPercentage = (int) (100 * duration / targetDuration);
         if (durationPercentage > percentage) {
             maxDepthDelta--;
         }
@@ -269,6 +319,7 @@ public class AiController {
         if (maxDepthDelta != progressListener.getMaxDepthDelta().get() && (lastTimeMaxDepthDeltaWasChanged + 100 < now)) {
             progressListener.getMaxDepthDelta().set(maxDepthDelta);
             lastTimeMaxDepthDeltaWasChanged = now;
+            logger.debug("Duration " + duration + ", Target duration: " + targetDuration + ", Duration %: " + durationPercentage + ", %: " + percentage + ", New delta: " + maxDepthDelta);
         }
     }
 
@@ -283,6 +334,14 @@ public class AiController {
     }
 
     void onClose() {
+        if (closed) {
+            throw new IllegalStateException("close() has been called before!");
+        }
+
+        closed = true;
+        tickFuture.cancel(false);
+        scheduleAction(() -> { /* closed must be true before the action is executed */});
+        actionQueueFuture.cancel(false);
         cancelThinking();
         executorService.shutdownNow();
     }

@@ -211,12 +211,12 @@ public class GamePresentationModel {
 	
 	private void onStartThinking() {
 		if (board.currentPlayer() == WHITE && whitePlayerAi || board.currentPlayer() == BLACK && blackPlayerAi) {
-			aiController.startThinking(board.lastMove());
+			aiController.onStartThinking(board.lastMove());
 			changeStateTo(State.COMPUTER_THINKING);
 		} else {
 			changeStateTo(State.WAITING_FOR_DRAG);
 			if (board.currentPlayer() == WHITE && blackPlayerAi || board.currentPlayer() == BLACK && whitePlayerAi) {
-				aiController.startThinkingDuringOpponentsTurn();
+				aiController.onStartThinkingDuringOpponentsTurn();
 			}
 		}
 	}
