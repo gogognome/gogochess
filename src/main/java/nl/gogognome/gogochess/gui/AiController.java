@@ -211,7 +211,7 @@ public class AiController {
 
     private void setupSearchParameters() {
         aiStartTime = System.currentTimeMillis();
-        // Initialize max seconds in case the user toggles from level to time while the computer is thinking.
+        progressListener.getMaxDepthDelta().set(0);
         switch (thinkingLimit.getUnit()) {
             case SECONDS:
                 int maxSecondsToThink = thinkingLimit.getUnit() == AIThinkingLimit.Unit.SECONDS ? thinkingLimit.getValue() : 15;
@@ -223,6 +223,8 @@ public class AiController {
                 if (ai instanceof RecursiveSearchAI) {
                     ((RecursiveSearchAI) ai).setMaxDepth(thinkingLimit.getValue());
                 }
+                // Initialize maxEndTime in case the user toggles from level to time while the computer is thinking.
+                aiMaxEndTime = aiStartTime + 15 * 1000;
                 break;
             default:
                throw new IllegalStateException("Unknown unit encountered: " + thinkingLimit.getValue());
@@ -251,7 +253,7 @@ public class AiController {
             return;
         }
 
-        lastInitialMaxDepths.add(changeWithOneIfOutOfRange(actualSeconds));
+        lastInitialMaxDepths.add(calculateNextInitialMaxDepth(actualSeconds));
         lastInitialMaxDepths.remove(0);
         int nextInitialMaxDepth = (int) (lastInitialMaxDepths.stream()
                 .mapToInt(v -> v)
@@ -264,7 +266,7 @@ public class AiController {
         }
     }
 
-    private int changeWithOneIfOutOfRange(int actualSeconds) {
+    private int calculateNextInitialMaxDepth(int actualSeconds) {
         int nextInitialMaxDepth = initialMaxDepthForTimeLimit;
         if (actualSeconds <= 0.8f * thinkingLimit.getValue()) {
             nextInitialMaxDepth++;
@@ -291,32 +293,24 @@ public class AiController {
 
         long now = System.currentTimeMillis();
         long duration = now - aiStartTime;
-        if (duration < 500 || aiMaxEndTime == aiStartTime) {
+        if (duration < 500 || aiMaxEndTime == aiStartTime || lastTimeMaxDepthDeltaWasChanged + 100 > now) {
             return;
         }
 
-        int maxDepthDelta = 0;
         long targetDuration = aiMaxEndTime - aiStartTime;
         int durationPercentage = (int) (100 * duration / targetDuration);
-        if (durationPercentage > percentage) {
-            maxDepthDelta--;
+        float timeLeftPercentage = 100 - durationPercentage;
+        float workLeftPercentage = 100 - percentage;
+        if (workLeftPercentage <= 0) {
+            return;
         }
-        if (durationPercentage > 2 * percentage) {
-            maxDepthDelta--;
-        }
-        if (durationPercentage > 4 * percentage) {
-            maxDepthDelta--;
-        }
-        if (durationPercentage > 8 * percentage) {
-            maxDepthDelta--;
-        }
-        if (percentage > 2 * durationPercentage) {
-            maxDepthDelta++;
-        }
-        if (percentage > 4 * durationPercentage) {
-            maxDepthDelta++;
-        }
-        if (maxDepthDelta != progressListener.getMaxDepthDelta().get() && (lastTimeMaxDepthDeltaWasChanged + 100 < now)) {
+
+        int currentMaxDepthDelta = progressListener.getMaxDepthDelta().get();
+        int maxDepthDelta = timeLeftPercentage > 0
+                ? (int) Math.round(Math.log(timeLeftPercentage / workLeftPercentage) / Math.log(2))
+                : currentMaxDepthDelta-1;
+
+        if (maxDepthDelta <= 0 && maxDepthDelta != currentMaxDepthDelta) {
             progressListener.getMaxDepthDelta().set(maxDepthDelta);
             lastTimeMaxDepthDeltaWasChanged = now;
             logger.debug("Duration " + duration + ", Target duration: " + targetDuration + ", Duration %: " + durationPercentage + ", %: " + percentage + ", New delta: " + maxDepthDelta);
