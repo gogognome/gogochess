@@ -115,7 +115,7 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 				BLACK_ROOK.addTo(C3));
 		board.process(initialMove);
 
-		assertNextMovesOneOf(2,
+		assertNextMovesOneOf(6,
 				BLACK,
 				asList("Qd4-f2", "Kh5-h6", "Rc3-c7", "Kh6-g6", "Qf2-f7+", "Kg6-h6", "Qf7-h7++"),
 				asList("Qd4-f2", "g5-g6", "Qf2-f5+", "Kh5-h6", "Rc3-c7", "g6-g7", "Rc7-c6++"),
