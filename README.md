@@ -15,8 +15,8 @@ and computer player. The human player can enter moves by dragging pieces.
 
 ![Image of Gogo Chess](https://gogognome.nl/images/gogochess.png)
 
-You can download Gogo Chess 0.4 from my website by clicking
-[this link](https://gogognome.nl/downloads/gogochess-0.4.jar).
+You can download Gogo Chess 1.0 from my website by clicking
+[this link](https://gogognome.nl/downloads/gogochess-1.0.jar).
 
 ## Design principles
 
