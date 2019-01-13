@@ -15,8 +15,8 @@ and computer player. The human player can enter moves by dragging pieces.
 
 ![Image of Gogo Chess](https://gogognome.nl/images/gogochess.png)
 
-You can download Gogo Chess 0.3 from my website by clicking
-[this link](https://gogognome.nl/downloads/gogochess-0.3.jar).
+You can download Gogo Chess 0.4 from my website by clicking
+[this link](https://gogognome.nl/downloads/gogochess-0.4.jar).
 
 ## Design principles
 
@@ -37,9 +37,3 @@ Build with
 Start with 
 
     java -jar target/gogochess-0.1.jar
-
-## To be implemented
-
-The following features will be implemented soon, so keep an eye on this project:
-
-* Finish the positional analysis of the endgame
