@@ -58,6 +58,7 @@ public class AiController {
     private List<Integer> lastInitialMaxDepths = new ArrayList<>(asList(2, 2, 2, 2));
 
     private BlockingDeque<Runnable> actionQueue = new LinkedBlockingDeque<>();
+    private boolean actionQueueTerminated;
     private final Future<?> actionQueueFuture;
 
     @Inject
@@ -70,7 +71,7 @@ public class AiController {
 
     private void actionQueueHandler() {
         logger.debug("Action queue handler started");
-        while (!closed) {
+        while (!actionQueueTerminated) {
             try {
                 Runnable runnable = actionQueue.takeFirst();
                 runnable.run();
@@ -82,6 +83,9 @@ public class AiController {
     }
 
     private void scheduleAction(Runnable runnable) {
+        if (actionQueueTerminated) {
+            throw new IllegalStateException("The action queue has been terminated already");
+        }
         actionQueue.add(runnable);
     }
 
@@ -236,7 +240,7 @@ public class AiController {
         int actualSeconds = (int) ((aiEndTime - aiStartTime) / 1000);
         logger.debug("Computer has thought for " + actualSeconds + " seconds");
 
-        updateInitialMaxDepth(actualSeconds);
+        updateInitialMaxDepth(actualSeconds, progressListener.getMaxDepthDelta().get());
 
         if (computerThinksDuringOpponentsTurn) {
             logger.debug("Store response to expected move " + moveNotation.format(lastMove) + ": " + moveNotation.format(move));
@@ -248,12 +252,12 @@ public class AiController {
         }
     }
 
-    private void updateInitialMaxDepth(int actualSeconds) {
+    private void updateInitialMaxDepth(int actualSeconds, int lastMaxDepthDelta) {
         if (thinkingLimit.getUnit() != AIThinkingLimit.Unit.SECONDS) {
             return;
         }
 
-        lastInitialMaxDepths.add(calculateNextInitialMaxDepth(actualSeconds));
+        lastInitialMaxDepths.add(calculateNextInitialMaxDepth(actualSeconds, lastMaxDepthDelta));
         lastInitialMaxDepths.remove(0);
         int nextInitialMaxDepth = (int) (lastInitialMaxDepths.stream()
                 .mapToInt(v -> v)
@@ -266,7 +270,7 @@ public class AiController {
         }
     }
 
-    private int calculateNextInitialMaxDepth(int actualSeconds) {
+    private int calculateNextInitialMaxDepth(int actualSeconds, int lastMaxDepthDelta) {
         int nextInitialMaxDepth = initialMaxDepthForTimeLimit;
         if (actualSeconds <= 0.8f * thinkingLimit.getValue()) {
             nextInitialMaxDepth++;
@@ -283,6 +287,11 @@ public class AiController {
         if (actualSeconds >= 2.0f * thinkingLimit.getValue()) {
             nextInitialMaxDepth--;
         }
+
+        if (lastMaxDepthDelta <= -2) {
+            nextInitialMaxDepth--;
+        }
+
         return nextInitialMaxDepth;
     }
 
@@ -332,11 +341,11 @@ public class AiController {
             throw new IllegalStateException("close() has been called before!");
         }
 
-        closed = true;
         tickFuture.cancel(false);
-        scheduleAction(() -> { /* closed must be true before the action is executed */});
+        scheduleAction(() -> actionQueueTerminated = true);
         actionQueueFuture.cancel(false);
         cancelThinking();
         executorService.shutdownNow();
+        closed = true;
     }
 }
