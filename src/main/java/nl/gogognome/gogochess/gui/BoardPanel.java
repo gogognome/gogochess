@@ -22,6 +22,7 @@ public class BoardPanel extends JPanel {
 	private final GamePresentationModel presentationModel;
 	private final static Color[] SQUARE_COLORS = new Color[] { new Color(209,139, 71), new Color(255, 206, 158) };
 	private final BufferedImage piecesImage;
+	private final BufferedImage retryImage;
 	private final static Piece[] PIECES_IN_IMAGE = new Piece[] { KING, QUEEN, BISHOP, KNIGHT, ROOK, PAWN };
 	private Map<Square, PlayerPiece> squareToPlayerPiece = new HashMap<>();
 	private int squareSize = 1;
@@ -31,6 +32,11 @@ public class BoardPanel extends JPanel {
 
 	private PlayerPiece[] promotionPieces;
 	private PlayerPiece promotionHighlightedPiece;
+
+	private int retryButtonLeft;
+	private int retryButtonTop;
+	private int retryButtonRight;
+	private int retryButtonBottom;
 
 	@Inject
 	public BoardPanel(GamePresentationModel presentationModel) {
@@ -43,6 +49,7 @@ public class BoardPanel extends JPanel {
 
 		try {
 			piecesImage = ImageIO.read(getClass().getResourceAsStream("/pieces.png"));
+			retryImage = ImageIO.read(getClass().getResourceAsStream("/retry.png"));
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to load pieces from the resources: " + e.getMessage(), e);
 		}
@@ -79,6 +86,9 @@ public class BoardPanel extends JPanel {
 		}
 		if (presentationModel.getState() == PROMOTING_BLACK_PAWN) {
 			paintPromotionPieces(g, BLACK);
+		}
+		if (presentationModel.getState() == GAME_OVER) {
+			paintGameOverOverlay(g);
 		}
 	}
 
@@ -183,6 +193,31 @@ public class BoardPanel extends JPanel {
 		return new Square(x / squareSize, 7 - y/squareSize);
 	}
 
+	private void paintGameOverOverlay(Graphics g) {
+		String message;
+		if (presentationModel.whiteHasWon()) {
+			message = "White wins!";
+		} else if (presentationModel.blackHasWon()) {
+			message = "Black wins!";
+		} else {
+			message = "Draw!";
+		}
+		g.setFont(new Font("SansSerif", Font.BOLD, 3 * squareSize / 4));
+		FontMetrics fontMetrics = g.getFontMetrics();
+		int width = fontMetrics.stringWidth(message);
+
+		g.setColor(new Color(0, 0, 0,  128));
+		g.fillRoundRect(left(FILE_D) - width / 2, top(RANK_4), width + 2 * squareSize, squareSize, squareSize / 2, squareSize / 2);
+		g.setColor(Color.WHITE);
+		g.drawString(message, left(FILE_E) - (squareSize + width) / 2, top(RANK_4) + 3 * squareSize / 4);
+
+		retryButtonLeft = left(FILE_E) + width / 2;
+		retryButtonTop = top(RANK_4) + 2 * squareSize / 10;
+		retryButtonRight = (int) (retryButtonLeft + 80f * (6 * squareSize / 10) / 86);
+		retryButtonBottom = top(RANK_3) - 2 * squareSize / 10;
+		g.drawImage(retryImage, retryButtonLeft, retryButtonTop, retryButtonRight, retryButtonBottom, 0, 0, 80, 86, null);
+	}
+
 	private class MouseListener extends MouseAdapter {
 		@Override
 		public void mousePressed(MouseEvent e) {
@@ -219,6 +254,12 @@ public class BoardPanel extends JPanel {
 				PlayerPiece selectedPiece = findSelectedPromotionPiece(e);
 				if (selectedPiece != null) {
 					presentationModel.onPromoteTo(selectedPiece);
+				}
+			}
+			if (presentationModel.getState() == GAME_OVER) {
+				if (retryButtonLeft <= e.getX() && e.getX() <= retryButtonRight &&
+						retryButtonTop <= e.getY() && e.getY() <= retryButtonBottom) {
+					presentationModel.onRestart();
 				}
 			}
 		}

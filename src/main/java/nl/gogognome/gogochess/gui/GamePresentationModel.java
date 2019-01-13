@@ -90,6 +90,20 @@ public class GamePresentationModel {
 		return blackPlayerAi;
 	}
 
+	boolean whiteHasWon() {
+		return checkIfPlayerHasWon(WHITE);
+	}
+
+	boolean blackHasWon() {
+		return checkIfPlayerHasWon(BLACK);
+	}
+
+	private boolean checkIfPlayerHasWon(Player winningPlayer) {
+		return board.lastMove() != null
+				&& board.lastMove().getStatus() == Status.CHECK_MATE
+				&& board.lastMove().getPlayer() == winningPlayer;
+	}
+
 	AIThinkingLimit getThinkingLimit() {
 		return aiController.getThinkingLimit();
 	}
@@ -241,6 +255,11 @@ public class GamePresentationModel {
 						.findFirst()
 						.orElseThrow(() -> new IllegalStateException("Could not find destination of move " + m)))
 				.collect(toList());
+	}
+
+	void onRestart() {
+		board.initBoard();
+		playGame();
 	}
 
 	void onClose() {
