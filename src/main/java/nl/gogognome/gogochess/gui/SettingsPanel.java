@@ -12,6 +12,7 @@ import javax.swing.*;
 
 import static nl.gogognome.gogochess.gui.AIThinkingLimit.*;
 import static nl.gogognome.gogochess.gui.AIThinkingLimit.Unit.SECONDS;
+import org.slf4j.*;
 
 public class SettingsPanel extends JPanel {
 
@@ -19,6 +20,7 @@ public class SettingsPanel extends JPanel {
 	private final static Color MIDDLE = new Color(95, 98, 112);
 	private static final Color LIGHT = Color.WHITE;
 
+	private final Logger logger = LoggerFactory.getLogger(SettingsPanel.class);
 	private final GamePresentationModel presentationModel;
 	private int buttonSize;
 	private final BufferedImage whiteHumanPlayer;
@@ -127,7 +129,7 @@ public class SettingsPanel extends JPanel {
 
 	@Override
 	public void paint(Graphics g) {
-		super.paint(g);
+		logger.debug("Painting settings panel");
 		g.setColor(DARK);
 		g.fillRect(0, 0, getWidth(), getHeight());
 		buttonSize = Math.min(getHeight(), getWidth() / 2);
