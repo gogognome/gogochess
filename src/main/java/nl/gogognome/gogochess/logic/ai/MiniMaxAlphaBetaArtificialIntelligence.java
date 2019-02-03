@@ -2,6 +2,7 @@ package nl.gogognome.gogochess.logic.ai;
 
 import static java.lang.Math.*;
 import static java.util.stream.Collectors.*;
+import static nl.gogognome.gogochess.logic.Player.WHITE;
 import java.util.*;
 import java.util.concurrent.atomic.*;
 import javax.inject.*;
@@ -104,6 +105,37 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		}
 
 		boolean quiescence = depth >= maxDepth + maxDepthDelta.get();
+		if (quiescence) {
+			statistics.onPositionEvaluated();
+			int value = boardEvaluator.value(board);
+			move.setValue(value);
+
+			Player playerForNextMove = move.getPlayer().opponent();
+			if (playerForNextMove == WHITE) {
+				if (value >= beta) {
+					move.setValue(beta);
+					if (killerHeuristic.markAsKiller(move)) {
+						statistics.onCutOffByKillerMove();
+					}
+					return move;
+				}
+				if (alpha < value) {
+					alpha = value;
+				}
+			} else {
+				if (value <= alpha) {
+					move.setValue(alpha);
+					if (killerHeuristic.markAsKiller(move)) {
+						statistics.onCutOffByKillerMove();
+					}
+					return move;
+				}
+				if (beta > value) {
+					beta = value;
+				}
+			}
+		}
+
 		List<Move> childMoves = getChildMoves(board, move, quiescence);
 		statistics.onPositionsGenerated(childMoves.size());
 		if (childMoves.isEmpty()) {
