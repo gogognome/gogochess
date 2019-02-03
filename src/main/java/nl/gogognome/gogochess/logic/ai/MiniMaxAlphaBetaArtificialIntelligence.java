@@ -1,8 +1,7 @@
 package nl.gogognome.gogochess.logic.ai;
 
 import static java.lang.Math.*;
-import static java.util.stream.Collectors.*;
-import static nl.gogognome.gogochess.logic.Player.WHITE;
+import static nl.gogognome.gogochess.logic.Player.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
 import javax.inject.*;
@@ -106,33 +105,14 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 
 		boolean quiescence = depth >= maxDepth + maxDepthDelta.get();
 		if (quiescence) {
-			statistics.onPositionEvaluated();
-			int value = boardEvaluator.value(board);
-			move.setValue(value);
-
+			if (skipQuiescence(board, move, alpha, beta)) {
+				return move;
+			}
 			Player playerForNextMove = move.getPlayer().opponent();
 			if (playerForNextMove == WHITE) {
-				if (value >= beta) {
-					move.setValue(beta);
-					if (killerHeuristic.markAsKiller(move)) {
-						statistics.onCutOffByKillerMove();
-					}
-					return move;
-				}
-				if (alpha < value) {
-					alpha = value;
-				}
+				alpha = max(alpha, move.getValue());
 			} else {
-				if (value <= alpha) {
-					move.setValue(alpha);
-					if (killerHeuristic.markAsKiller(move)) {
-						statistics.onCutOffByKillerMove();
-					}
-					return move;
-				}
-				if (beta > value) {
-					beta = value;
-				}
+				beta = min(beta, move.getValue());
 			}
 		}
 
@@ -209,6 +189,32 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		}
 
 		return bestDeepestMove;
+	}
+
+	private boolean skipQuiescence(Board board, Move move, int alpha, int beta) {
+		statistics.onPositionEvaluated();
+		int value = boardEvaluator.value(board);
+		move.setValue(value);
+
+		Player playerForNextMove = move.getPlayer().opponent();
+		if (playerForNextMove == WHITE) {
+			if (value >= beta) {
+				move.setValue(beta);
+				if (killerHeuristic.markAsKiller(move)) {
+					statistics.onCutOffByKillerMove();
+				}
+				return true;
+			}
+		} else {
+			if (value <= alpha) {
+				move.setValue(alpha);
+				if (killerHeuristic.markAsKiller(move)) {
+					statistics.onCutOffByKillerMove();
+				}
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void storeBestDeepestMoveInCache(Move move, long hash, int alpha, int beta, Move bestDeepestMove) {
