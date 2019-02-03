@@ -3,6 +3,7 @@ package nl.gogognome.gogochess.logic;
 import static nl.gogognome.gogochess.logic.Status.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
+import java.util.function.*;
 
 public enum Player {
 	WHITE,
@@ -24,10 +25,18 @@ public enum Player {
 		return moves;
 	}
 
+	public List<Move> validCaptures(Board board) {
+		List<Move> moves = new ArrayList<>(40);
+		addMovesIgnoringCheck(board, moves);
+		removeMovesWhere(moves, move -> !move.isCapture());
+		removeMovesCausingCheckForOwnPlayer(board, moves);
+		updateStatusForMoves(board, moves);
+		return moves;
+	}
+
 	private void addMovesIgnoringCheck(Board board, List<Move> moves) {
 		board.forEachPlayerPiece(this, (playerPiece, square) -> playerPiece.addPossibleMoves(moves, square, board));
 	}
-
 
 	private void updateStatusForMoves(Board board, List<Move> moves) {
 		for (Move move : moves) {
@@ -51,18 +60,26 @@ public enum Player {
 	}
 
 	public void removeMovesCausingCheckForOwnPlayer(Board board, List<Move> moves) {
-		int index = 0;
-		while (index < moves.size()) {
-			Move move = moves.get(index);
+		removeMovesWhere(moves, move -> {
 			AtomicBoolean attacksKing = new AtomicBoolean();
 			board.tryWithMove(move, () -> {
 				Square kingSquare = board.kingSquareOf(this);
 				if (kingSquare != null) {
-					board.forEachPlayerPiece(opponent(), (playerPiece, square) -> attacksKing.set(attacksKing.get() || playerPiece.attacks(square, kingSquare, board)), attacksKing::get);
+					board.forEachPlayerPiece(
+							opponent(),
+							(playerPiece, square) -> attacksKing.set(attacksKing.get() || playerPiece.attacks(square, kingSquare, board)),
+							attacksKing::get);
 				}
 			});
+			return attacksKing.get();
+		});
+	}
 
-			if (attacksKing.get()) {
+	public void removeMovesWhere(List<Move> moves, Predicate<Move> mustRemove) {
+		int index = 0;
+		while (index < moves.size()) {
+			Move move = moves.get(index);
+			if (mustRemove.test(move)) {
 				moves.remove(index);
 			} else {
 				index++;

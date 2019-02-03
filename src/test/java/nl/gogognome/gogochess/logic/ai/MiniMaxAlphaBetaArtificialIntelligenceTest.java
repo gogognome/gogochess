@@ -160,6 +160,32 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 		assertThat(new ReverseAlgebraicNotation().format(nextMove)).isEqualTo("e7-e5");
 	}
 
+	@Test
+	void quiescenceNeededToFigureOutCaptures() {
+		Move initialMove = new Move(BLACK,
+				WHITE_KING.addTo(A1),
+				WHITE_ROOK.addTo(B1),
+				WHITE_PAWN.addTo(A2),
+				WHITE_PAWN.addTo(B2),
+				WHITE_QUEEN.addTo(C4),
+				WHITE_KNIGHT.addTo(E3),
+				WHITE_BISHOP.addTo(E4),
+				BLACK_KING.addTo(H8),
+				BLACK_ROOK.addTo(G8),
+				BLACK_PAWN.addTo(H7),
+				BLACK_PAWN.addTo(G7),
+				BLACK_QUEEN.addTo(F7),
+				BLACK_BISHOP.addTo(F4),
+				BLACK_ROOK.addTo(D5));
+		board.process(initialMove);
+
+		assertNextMovesOneOf(1,
+				WHITE,
+				asList("Be4xRd5", "Qf7-c7", "Bd5xRg8", "Qc7xQc4", "Bg8xQc4", "Bf4xNe3"),
+				asList("Be4xRd5", "Qf7-c7", "Bd5xRg8", "Bf4xNe3", "Qc4xQc7", "Kh8xBg8", "Qc7xg7+", "Kg8xQg7"),
+				asList("Qc4xRd5", "Qf7xQd5", "Ne3xQd5"));
+	}
+
 	private void assertNextMoves(int maxDepth, Player player, String... expectedMoves) {
 		ArtificialIntelligence ai = buildAI(maxDepth);
 
@@ -169,6 +195,24 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 		String actualMovesString = format(actualMoves.get());
 		List<String> expectedMoveStrings = takePartNoLongerThanActualMoves(actualMoves.get(), asList(expectedMoves));
 		assertThat(actualMovesString).isEqualTo(expectedMoveStrings.toString());
+	}
+
+	@Test
+	void quiescenceNeededToFigureOutCaptures2() {
+		Move initialMove = new Move(BLACK,
+				WHITE_KING.addTo(H1),
+				WHITE_QUEEN.addTo(H5),
+				BLACK_KING.addTo(H8),
+				BLACK_ROOK.addTo(G6),
+				BLACK_PAWN.addTo(H7),
+				BLACK_PAWN.addTo(G7),
+				BLACK_QUEEN.addTo(F7));
+		board.process(initialMove);
+
+		ArtificialIntelligence ai = buildAI(0);
+		Move nextMove = ai.nextMove(board, board.currentPlayerOpponent(), new ProgressListener());
+
+		assertThat(new ReverseAlgebraicNotation().format(nextMove)).isNotEqualTo("Qh5xRg6");
 	}
 
 	@SafeVarargs

@@ -1,21 +1,13 @@
 package nl.gogognome.gogochess.logic.ai;
 
-import nl.gogognome.gogochess.logic.Board;
-import nl.gogognome.gogochess.logic.Move;
-import nl.gogognome.gogochess.logic.Player;
-import nl.gogognome.gogochess.logic.ai.positionalanalysis.PositionalAnalysis;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static java.lang.Math.max;
-import static java.lang.Math.min;
+import static java.lang.Math.*;
+import static java.util.stream.Collectors.*;
+import java.util.*;
+import java.util.concurrent.atomic.*;
+import javax.inject.*;
+import org.slf4j.*;
+import nl.gogognome.gogochess.logic.*;
+import nl.gogognome.gogochess.logic.ai.positionalanalysis.*;
 
 public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelligence, RecursiveSearchAI {
 
@@ -32,18 +24,20 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 	private final BoardEvaluator boardEvaluator;
 	private final PositionalAnalysis positonalAnalysis;
 	private final MoveSort moveSort;
-	private final QuiescenceSearch quiescenceSearch;
 	private final Statistics statistics;
 	private final KillerHeuristic killerHeuristic;
 	private final TranspositionTable transpositionTable = new TranspositionTable();
 
 	@Inject
-	public MiniMaxAlphaBetaArtificialIntelligence(BoardEvaluator boardEvaluator, PositionalAnalysis positionalAnalysis, MoveSort moveSort,
-			QuiescenceSearch quiescenceSearch, Statistics statistics, KillerHeuristic killerHeuristic) {
+	public MiniMaxAlphaBetaArtificialIntelligence(
+			BoardEvaluator boardEvaluator,
+			PositionalAnalysis positionalAnalysis,
+			MoveSort moveSort,
+			Statistics statistics,
+			KillerHeuristic killerHeuristic) {
 		this.boardEvaluator = boardEvaluator;
 		this.positonalAnalysis = positionalAnalysis;
 		this.moveSort = moveSort;
-		this.quiescenceSearch = quiescenceSearch;
 		this.statistics = statistics;
 		this.killerHeuristic = killerHeuristic;
 		this.initialMaxDepth = 3;
@@ -102,27 +96,15 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 	private Move alphaBeta(Board board, Move move, int depth, int alpha, int beta, Progress progress) {
 		board.process(move);
 		long hash = board.getBoardHash();
-		{
-			TranspositionTable.BoardPosition cachedBoardPosition = transpositionTable.getCachedBoardPosition(hash, alpha, beta, move.depthInTree());
-			if (cachedBoardPosition != null) {
-				statistics.onCacheHit();
-				move.setValue(cachedBoardPosition.getValue());
-				return cachedBoardPosition.getBestDeepestMove();
-			}
+		TranspositionTable.BoardPosition cachedBoardPosition = transpositionTable.getCachedBoardPosition(hash, alpha, beta, move.depthInTree());
+		if (cachedBoardPosition != null) {
+			statistics.onCacheHit();
+			move.setValue(cachedBoardPosition.getValue());
+			return cachedBoardPosition.getBestDeepestMove();
 		}
 
-		if (move.getStatus().isGameOver()) {
-			evaluateMove(board, move);
-			storeBestDeepestMoveInCache(move, hash, alpha, beta, move);
-			return move;
-		}
-		if (depth >= maxDepth + maxDepthDelta.get()) {
-			Move bestDeepestMove = quiescenceSearch.search(board, move, alpha, beta);
-			storeBestDeepestMoveInCache(move, hash, alpha, beta, bestDeepestMove);
-			return bestDeepestMove;
-		}
-
-		List<Move> childMoves = getChildMoves(board, move);
+		boolean quiescence = depth >= maxDepth + maxDepthDelta.get();
+		List<Move> childMoves = getChildMoves(board, move, quiescence);
 		statistics.onPositionsGenerated(childMoves.size());
 		if (childMoves.isEmpty()) {
 			evaluateMove(board, move);
@@ -201,12 +183,15 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		transpositionTable.store(hash, alpha, beta, move.getValue(), move.depthInTree(), bestDeepestMove);
 	}
 
-	private List<Move> getChildMoves(Board board, Move move) {
+	private List<Move> getChildMoves(Board board, Move move, boolean capturesOnly) {
 		board.process(move);
-		List<Move> childMoves = board.currentPlayer().validMoves(board);
+		Player player = board.currentPlayer();
+		List<Move> childMoves = capturesOnly ? player.validCaptures(board) : player.validMoves(board);
 
-		evaluateMoves(board, childMoves);
-		moveSort.sort(childMoves);
+		if (!capturesOnly) {
+			evaluateMoves(board, childMoves);
+			moveSort.sort(childMoves);
+		}
 
 		return childMoves;
 	}
