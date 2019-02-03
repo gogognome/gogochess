@@ -18,8 +18,8 @@ and computer player. The human player can enter moves by dragging pieces.
 
 ## Download
 
-You can download Gogo Chess 1.0 from my website by clicking
-[this link](https://gogognome.nl/downloads/gogochess-1.0.jar).
+You can download Gogo Chess 1.1 from my website by clicking
+[this link](https://gogognome.nl/downloads/gogochess-1.1.jar).
 Double click the downloaded file to start Gogo Chess.
 
 To run Gogo Chess you need a Java Runtime (version 8 or newer). Most modern computers have a Java Runtime
@@ -92,4 +92,4 @@ Build with
     
 Start with 
 
-    java -jar target/gogochess-1.0.jar
+    java -jar target/gogochess-1.1.jar
