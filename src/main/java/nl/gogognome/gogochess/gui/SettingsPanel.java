@@ -1,7 +1,8 @@
 package nl.gogognome.gogochess.gui;
 
-import com.google.common.collect.ImmutableList;
-
+import static nl.gogognome.gogochess.gui.AIThinkingLimit.Unit.*;
+import static nl.gogognome.gogochess.gui.AIThinkingLimit.*;
+import static nl.gogognome.gogochess.gui.GamePresentationModel.State.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.*;
@@ -9,10 +10,8 @@ import java.io.*;
 import java.util.List;
 import javax.imageio.*;
 import javax.swing.*;
-
-import static nl.gogognome.gogochess.gui.AIThinkingLimit.*;
-import static nl.gogognome.gogochess.gui.AIThinkingLimit.Unit.SECONDS;
 import org.slf4j.*;
+import com.google.common.collect.*;
 
 public class SettingsPanel extends JPanel {
 
@@ -38,7 +37,7 @@ public class SettingsPanel extends JPanel {
 	public SettingsPanel(GamePresentationModel presentationModel) {
 		this.presentationModel = presentationModel;
 		this.buttonSize = 40;
-		setPreferredSize(new Dimension(6*buttonSize, buttonSize));
+		setPreferredSize(new Dimension(7*buttonSize, buttonSize));
 		otherUnit = presentationModel.getThinkingLimit().getUnit() == SECONDS ?
 				level(3) :
 				seconds(15);
@@ -63,14 +62,16 @@ public class SettingsPanel extends JPanel {
 				} else if (e.getX() < 2 * buttonSize) {
 					presentationModel.onBlackPlayerAI(!presentationModel.isBlackPlayerAi());
 				} else if (e.getX() < 3 * buttonSize){
+					presentationModel.onTogglePause();
+				} else if (e.getX() < 4 * buttonSize){
 					presentationModel.onUndoMove();
-				} else if (e.getX() < 4 * buttonSize) {
+				} else if (e.getX() < 5 * buttonSize) {
 					AIThinkingLimit currentThinkingLimitUnit = presentationModel.getThinkingLimit();
 					presentationModel.setThinkingLimit(otherUnit);
 					otherUnit = currentThinkingLimitUnit;
-				} else if (e.getX() < 9 * buttonSize / 2) {
+				} else if (e.getX() < 11 * buttonSize / 2) {
 					onLowerThinkingLimit();
-				} else if (11 * buttonSize / 2 <=  e.getX() && e.getX() < 6 * buttonSize) {
+				} else if (13 * buttonSize / 2 <=  e.getX() && e.getX() < 7 * buttonSize) {
 					onRaiseThinkingLimit();
 				}
 			}
@@ -133,15 +134,41 @@ public class SettingsPanel extends JPanel {
 		g.setColor(DARK);
 		g.fillRect(0, 0, getWidth(), getHeight());
 		buttonSize = Math.min(getHeight(), getWidth() / 2);
+		int x = 0;
+		drawWhitePlayerStatus(g, x);
+
+		x += buttonSize;
+		drawBlackPlayerStatus(g, x);
+
+		x += buttonSize;
+		g.setColor(LIGHT);
+		g.fillRect(x, 0, buttonSize, buttonSize);
+		g.setColor(DARK);
+		if (presentationModel.getState() == PAUSED) {
+			g.fillRect(x + 3 * buttonSize / 10, 2 * buttonSize / 10, 2 * buttonSize / 10, 6 * buttonSize / 10);
+			g.fillRect(x + 6 * buttonSize / 10, 2 * buttonSize / 10, 2 * buttonSize / 10, 6 * buttonSize / 10);
+		} else {
+			g.fillPolygon(
+					new int[] { x + 2 * buttonSize / 10, x + 2 * buttonSize / 10, x + 8 * buttonSize / 10, x + 2 * buttonSize / 10 },
+					new int[] { 2 * buttonSize / 10, 8 * buttonSize / 10,  buttonSize / 2, 2 * buttonSize / 10 },
+					4);
+		}
+
+		x += buttonSize;
+		g.drawImage(undoMove, x, 0, x+buttonSize, buttonSize, 0, 0, 80, 86, null);
+
+		x += buttonSize;
+		drawThinkingLimitValueAndControls(g, x);
+	}
+
+	private void drawWhitePlayerStatus(Graphics g, int x) {
 		BufferedImage image = presentationModel.isWhitePlayerAi() ? whiteComputerPlayer : whiteHumanPlayer;
-		g.drawImage(image, 0, 0, buttonSize, buttonSize, 0, 0, 80, 86, null);
+		g.drawImage(image, x, 0, x + buttonSize, buttonSize, 0, 0, 80, 86, null);
+	}
 
-		image = presentationModel.isBlackPlayerAi() ? blackComputerPlayer : blackHumanPlayer;
-		g.drawImage(image, buttonSize, 0, 2*buttonSize, buttonSize, 0, 0, 80, 86, null);
-
-		g.drawImage(undoMove, 2*buttonSize, 0, 3*buttonSize, buttonSize, 0, 0, 80, 86, null);
-
-		drawThinkingLimitValueAndControls(g);
+	private void drawBlackPlayerStatus(Graphics g, int x) {
+		BufferedImage image = presentationModel.isBlackPlayerAi() ? blackComputerPlayer : blackHumanPlayer;
+		g.drawImage(image, x, 0, x+buttonSize, buttonSize, 0, 0, 80, 86, null);
 	}
 
 	private BufferedImage getImageForThinkingLimit() {
@@ -159,23 +186,24 @@ public class SettingsPanel extends JPanel {
 		return thinkingImage;
 	}
 
-	private void drawThinkingLimitValueAndControls(Graphics g) {
-		g.drawImage(getImageForThinkingLimit(), 3*buttonSize, 0, 4*buttonSize, buttonSize, 0, 0, 80, 86, null);
+	private void drawThinkingLimitValueAndControls(Graphics g, int x) {
+		g.drawImage(getImageForThinkingLimit(), x, 0, x + buttonSize, buttonSize, 0, 0, 80, 86, null);
 
 		g.setColor(MIDDLE);
-		g.fillRect(4*buttonSize, 0, 2*buttonSize, buttonSize);
+		x += buttonSize;
+		g.fillRect(x, 0, x + buttonSize, buttonSize);
 
 		g.setColor(LIGHT);
 		Font font = new Font("SansSerif", Font.PLAIN, buttonSize * 3 / 4);
-		drawStringCentered(g, font, "\u2b07", 4 * buttonSize, 0, buttonSize / 2, buttonSize);
+		drawStringCentered(g, font, "\u2b07", x, 0, buttonSize / 2, buttonSize);
 
 		g.setColor(DARK);
-		g.fillRoundRect(9 * buttonSize / 2, 0, buttonSize, buttonSize, buttonSize, buttonSize);
+		g.fillRoundRect(x + buttonSize / 2, 0, buttonSize, buttonSize, buttonSize, buttonSize);
 		g.setColor(MIDDLE);
-		drawStringCentered(g, font, Integer.toString(presentationModel.getThinkingLimit().getValue()), 9 * buttonSize / 2, 0, buttonSize, buttonSize);
+		drawStringCentered(g, font, Integer.toString(presentationModel.getThinkingLimit().getValue()), x + buttonSize / 2, 0, buttonSize, buttonSize);
 
 		g.setColor(LIGHT);
-		drawStringCentered(g, font, "\u2b06", 11 * buttonSize / 2, 0, buttonSize / 2, buttonSize);
+		drawStringCentered(g, font, "\u2b06", x + 3 * buttonSize / 2, 0, buttonSize / 2, buttonSize);
 	}
 
 	private void drawStringCentered(Graphics g, Font font, String text, int left, int top, int width, int height) {

@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static java.util.stream.Collectors.toList;
-import static nl.gogognome.gogochess.gui.GamePresentationModel.State.INITIALIZING;
+import static nl.gogognome.gogochess.gui.GamePresentationModel.State.*;
 import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.ADD;
 import static nl.gogognome.gogochess.logic.Player.BLACK;
 import static nl.gogognome.gogochess.logic.Player.WHITE;
@@ -31,6 +31,7 @@ public class GamePresentationModel {
 
 	public enum State {
 		INITIALIZING,
+		PAUSED,
 		COMPUTER_THINKING,
 		WAITING_FOR_DRAG,
 		DRAGGING,
@@ -56,7 +57,6 @@ public class GamePresentationModel {
 	public GamePresentationModel(AiController aiController, Board board) {
 		this.aiController = aiController;
 		this.board = board;
-		board.initBoard();
 
 		this.aiController.setPercentageConsumer(this::setPercentage);
 		this.aiController.setComputerMoveConsumer(this::onComputerMove);
@@ -128,16 +128,18 @@ public class GamePresentationModel {
 	}
 
 	private void cancelOrStartThinkingFor(Player player) {
+		if (state == PAUSED || state == GAME_OVER) {
+			return;
+		}
+
 		if (board.currentPlayer() == player) {
-			if (state == State.COMPUTER_THINKING) {
-				aiController.cancelThinking();
-			}
+			cancelComputerThinking();
 
 			onStartThinking();
 		}
 	}
 
-	void playGame() {
+	private void playGame() {
 		onStartThinking();
 		fireEvent(Event.STATE_CHANGED);
 	}
@@ -164,9 +166,9 @@ public class GamePresentationModel {
 	private boolean startAndTargetSquareMatchMove(Move move, Square startSquare, Square targetSquare) {
 		String description = move.toString();
 		if (description.equals("O-O")) {
-			description = move.getPlayer() == WHITE ?  E1 + "-" + G1 : E8 + "-" + G8;
+			description = move.getPlayer() == WHITE ? E1 + "-" + G1 : E8 + "-" + G8;
 		} else if (description.equals("O-O-O")) {
-			description = move.getPlayer() == WHITE ?  E1 + "-" + C1 : E8 + "-" + C8;
+			description = move.getPlayer() == WHITE ? E1 + "-" + C1 : E8 + "-" + C8;
 		}
 		return description.contains(startSquare.toString()) && description.contains(targetSquare.toString())
 				&& description.indexOf(startSquare.toString()) < description.indexOf(targetSquare.toString());
@@ -193,13 +195,35 @@ public class GamePresentationModel {
 	}
 
 	void onUndoMove() {
-		if (state == State.COMPUTER_THINKING) {
-			aiController.cancelThinking();
-		}
+		cancelComputerThinking();
 		if (board.lastMove() != null && board.lastMove().getPrecedingMove() != null) {
             highlightMove(board.lastMove());
             onMove(board.lastMove().getPrecedingMove());
 		}
+	}
+
+	/**
+	 * Call this method to initialise the board and put the game in paused state.
+	 */
+	void init() {
+		board.initBoard();
+		targets = null; // prevents showing the last move of previous game in new game
+		changeStateTo(PAUSED);
+		fireEvent(Event.SETTING_CHANGED);
+	}
+
+	void onTogglePause() {
+		if (state == GAME_OVER) {
+			return;
+		}
+
+		if (state == State.PAUSED) {
+			playGame();
+		} else {
+			cancelComputerThinking();
+			changeStateTo(PAUSED);
+		}
+		fireEvent(Event.SETTING_CHANGED);
 	}
 
 	private void highlightMove(Move move) {
@@ -207,7 +231,6 @@ public class GamePresentationModel {
                 move.getMutationRemovingPieceFromStart().getSquare(),
                 move.getMutationAddingPieceAtDestination().getSquare());
     }
-
 
     private void onPromote(List<Move> promotionMoves) {
 		this.promotionMoves = promotionMoves;
@@ -258,12 +281,17 @@ public class GamePresentationModel {
 	}
 
 	void onRestart() {
-		board.initBoard();
-		playGame();
+		init();
 	}
 
 	void onClose() {
 		aiController.onClose();
+	}
+
+	private void cancelComputerThinking() {
+		if (state == State.COMPUTER_THINKING) {
+			aiController.cancelThinking();
+		}
 	}
 
 	private void changeStateTo(State newState) {

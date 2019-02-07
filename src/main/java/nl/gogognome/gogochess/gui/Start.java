@@ -33,7 +33,7 @@ public class Start {
 
 		setIcon(frame);
 
-		SwingUtilities.invokeLater(gamePresentationModel::playGame);
+		SwingUtilities.invokeLater(gamePresentationModel::init);
 	}
 
 	private static void setIcon(JFrame frame) {
