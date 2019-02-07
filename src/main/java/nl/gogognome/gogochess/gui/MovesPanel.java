@@ -17,7 +17,7 @@ public class MovesPanel extends JPanel implements Scrollable, MouseMotionListene
 	private Runnable onMoveAddedListener;
 	private List<String> moves = new LinkedList<>();
 
-	private int width = 150;
+	private int width = 180;
 	private int fontHeight = 10;
 
 	public MovesPanel(MoveNotation moveNotation, GamePresentationModel presentationModel) {
@@ -63,23 +63,22 @@ public class MovesPanel extends JPanel implements Scrollable, MouseMotionListene
 
 	@Override
 	public void paint(Graphics g) {
-		super.paint(g);
 		int margin = width * 10 / 100;
 		int left = 0;
 		g.setColor(getBackground());
-		g.fillRect(left, 0, width - margin, getHeight());
+		g.fillRect(left, 0, width, getHeight());
 
 		g.setColor(Color.DARK_GRAY);
-		Player player = WHITE;
 		fontHeight = g.getFontMetrics().getHeight();
 		int y = margin + fontHeight;
-		for (String move : moves) {
-			int textX =  player == WHITE ? left + margin : left + (width-left) / 2;
-			g.drawString(move, textX, y);
-			player = player.opponent();
-			if (player == WHITE) {
-				y += getRowHeight();
+		int nrRows = (moves.size() + 1) / 2;
+		for (int row=0; row < nrRows; row++) {
+			g.drawString(Integer.toString(row+1) + '.', margin / 2, y);
+			g.drawString(moves.get(2*row), left + 2 * margin, y);
+			if (2*row + 1 < moves.size()) {
+				g.drawString(moves.get(2*row + 1), left + (width-left) / 2 + margin, y);
 			}
+			y += getRowHeight();
 		}
 	}
 
