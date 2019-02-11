@@ -31,7 +31,6 @@ public class GamePresentationModel {
 
 	public enum State {
 		INITIALIZING,
-		PAUSED,
 		COMPUTER_THINKING,
 		WAITING_FOR_DRAG,
 		DRAGGING,
@@ -42,11 +41,15 @@ public class GamePresentationModel {
 
 	private final Board board;
 
+	/** All moves made so far, including the board setup move. */
+	private List<Move> moves = new ArrayList<>();
+	private int lastMoveIndex;
+
 	private State state = INITIALIZING;
 	private final AiController aiController;
 
 	private boolean whitePlayerAi = false;
-	private boolean blackPlayerAi = true;
+	private boolean blackPlayerAi = false;
 
 	private List<Square> targets;
 	private int percentage;
@@ -68,6 +71,21 @@ public class GamePresentationModel {
 
 	public Board getBoard() {
 		return board;
+	}
+
+	/**
+	 * @return all moves made so far, including the board setup move.
+	 */
+	public List<Move> getMoves() {
+		return moves;
+	}
+
+	/**
+	 * @return the index of the last move made. This index is at least zero and less than
+	 * the sie of getMoves().
+	 */
+	int getLastMoveIndex() {
+		return lastMoveIndex;
 	}
 
 	State getState() {
@@ -128,7 +146,7 @@ public class GamePresentationModel {
 	}
 
 	private void cancelOrStartThinkingFor(Player player) {
-		if (state == PAUSED || state == GAME_OVER) {
+		if (state == GAME_OVER) {
 			return;
 		}
 
@@ -137,11 +155,6 @@ public class GamePresentationModel {
 
 			onStartThinking();
 		}
-	}
-
-	private void playGame() {
-		onStartThinking();
-		fireEvent(Event.STATE_CHANGED);
 	}
 
 	private void setPercentage(Integer percentage) {
@@ -175,7 +188,7 @@ public class GamePresentationModel {
 	}
 
 	private void onInvalidMove() {
-		changeStateTo(State.WAITING_FOR_DRAG);
+		changeStateTo(WAITING_FOR_DRAG);
 	}
 
 	private void onComputerMove(Move move) {
@@ -186,44 +199,60 @@ public class GamePresentationModel {
 	}
 
     private void onMove(Move move) {
+		lastMoveIndex += 1;
+		while (moves.size() > lastMoveIndex) {
+			moves.remove(moves.size()-1);
+		}
+		moves.add(move);
 		board.process(move);
 		if (move.getStatus().isGameOver()) {
-			changeStateTo(State.GAME_OVER);
+			changeStateTo(GAME_OVER);
 		} else {
 			onStartThinking();
 		}
 	}
 
 	void onUndoMove() {
-		cancelComputerThinking();
-		if (board.lastMove() != null && board.lastMove().getPrecedingMove() != null) {
-            highlightMove(board.lastMove());
-            onMove(board.lastMove().getPrecedingMove());
+		if (lastMoveIndex > 0) {
+			showMove(lastMoveIndex - 1, lastMoveIndex);
 		}
+	}
+
+	void onRedoMove() {
+		if (lastMoveIndex + 1 < moves.size()) {
+			showMove(lastMoveIndex + 1, lastMoveIndex + 1);
+		}
+	}
+
+	private void showMove(int moveToShow, int indexOfHighlightedMove) {
+		lastMoveIndex = moveToShow;
+		cancelComputerThinking();
+		setOnlyToHumanPlayers();
+		highlightMove(moves.get(indexOfHighlightedMove));
+		board.process(moves.get(lastMoveIndex));
+		changeStateTo(moves.get(lastMoveIndex).getStatus().isGameOver() ? GAME_OVER : WAITING_FOR_DRAG);
+		fireEvent(Event.SETTING_CHANGED); // because of possible change of computer thinking
 	}
 
 	/**
 	 * Call this method to initialise the board and put the game in paused state.
 	 */
 	void init() {
+		setOnlyToHumanPlayers();
 		board.initBoard();
+		moves.clear();
+		moves.add(board.lastMove()); // add board setup move to the moves
+		lastMoveIndex = 0;
 		targets = null; // prevents showing the last move of previous game in new game
-		changeStateTo(PAUSED);
+		onStartThinking();
 		fireEvent(Event.SETTING_CHANGED);
+		fireEvent(Event.STATE_CHANGED);
+		fireEvent(Event.PERCENTAGE_CHANGED);
 	}
 
-	void onTogglePause() {
-		if (state == GAME_OVER) {
-			return;
-		}
-
-		if (state == State.PAUSED) {
-			playGame();
-		} else {
-			cancelComputerThinking();
-			changeStateTo(PAUSED);
-		}
-		fireEvent(Event.SETTING_CHANGED);
+	private void setOnlyToHumanPlayers() {
+		whitePlayerAi = false;
+		blackPlayerAi = false;
 	}
 
 	private void highlightMove(Move move) {
@@ -234,7 +263,7 @@ public class GamePresentationModel {
 
     private void onPromote(List<Move> promotionMoves) {
 		this.promotionMoves = promotionMoves;
-		changeStateTo(promotionMoves.get(0).getPlayer() == WHITE ? State.PROMOTING_WHITE_PAWN : State.PROMOTING_BLACK_PAWN);
+		changeStateTo(promotionMoves.get(0).getPlayer() == WHITE ? PROMOTING_WHITE_PAWN : PROMOTING_BLACK_PAWN);
 	}
 
 	void onPromoteTo(PlayerPiece selectedPiece) {
@@ -249,9 +278,9 @@ public class GamePresentationModel {
 	private void onStartThinking() {
 		if (board.currentPlayer() == WHITE && whitePlayerAi || board.currentPlayer() == BLACK && blackPlayerAi) {
 			aiController.onStartThinking(board.lastMove());
-			changeStateTo(State.COMPUTER_THINKING);
+			changeStateTo(COMPUTER_THINKING);
 		} else {
-			changeStateTo(State.WAITING_FOR_DRAG);
+			changeStateTo(WAITING_FOR_DRAG);
 			if (board.currentPlayer() == WHITE && blackPlayerAi || board.currentPlayer() == BLACK && whitePlayerAi) {
 				aiController.onStartThinkingDuringOpponentsTurn();
 			}
@@ -262,7 +291,7 @@ public class GamePresentationModel {
 		PlayerPiece playerPiece = board.pieceAt(square);
 		if (playerPiece != null && playerPiece.getPlayer() == board.currentPlayer()) {
 			targets = determineTargetsForValidMoves(square);
-			changeStateTo(State.DRAGGING);
+			changeStateTo(DRAGGING);
 		}
 	}
 
@@ -289,7 +318,7 @@ public class GamePresentationModel {
 	}
 
 	private void cancelComputerThinking() {
-		if (state == State.COMPUTER_THINKING) {
+		if (state == COMPUTER_THINKING) {
 			aiController.cancelThinking();
 		}
 	}

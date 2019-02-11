@@ -26,7 +26,7 @@ public class BoardMovesAndSettingsPanel extends JPanel {
 		add(bottomPanel, BorderLayout.SOUTH);
 	}
 
-	private void scrollToLastMove() {
-		SwingUtilities.invokeLater(() -> movesScrollPane.getVerticalScrollBar().setValue(movesScrollPane.getVerticalScrollBar().getMaximum() ));
+	private void scrollToLastMove(int y) {
+		SwingUtilities.invokeLater(() -> movesScrollPane.getVerticalScrollBar().setValue(y));
 	}
 }

@@ -63,10 +63,16 @@ Click on the hourglass to change the mode to mode 2, where the computer thinks a
 By default the computer will think ahead 3 moves in this mode. Click on the arrow up or down buttons to change
 the number of moves the computer will think ahead.
 
-### Undo moves
+### Undo and redo moves
 
-Click on the button with the arrow to the left to undo the last move. You can click this button multiple times
-to undo multiple moves.
+Click on the button with the arrow to the left to undo the last move. It is possible to undo as far as the beginning 
+of the game and redo moves. Click on the button with the arrow to the right to redo a move.
+
+The currently selected move is shown bold in the moves panel. When undoing moves, both players will be controlled 
+by humans as a way to pause the computer from thinking up new moves again. 
+
+If instead of redoing moves a new move is made (either by a human or computer player),
+all moves following the current move are removed and the new move is added as last move.
 
 ## Details for software developers
 

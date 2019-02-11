@@ -1,21 +1,24 @@
 package nl.gogognome.gogochess.gui;
 
-import static nl.gogognome.gogochess.logic.Player.WHITE;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
-import java.util.*;
+import java.awt.event.*;
 import java.util.List;
+import java.util.*;
+import java.util.function.*;
 import javax.swing.*;
-import nl.gogognome.gogochess.logic.*;
 import nl.gogognome.gogochess.logic.movenotation.*;
 
 public class MovesPanel extends JPanel implements Scrollable, MouseMotionListener {
 
+	interface MoveChangeListener {
+		void onLastMove(int y);
+	}
+
 	private final MoveNotation moveNotation;
 	private final GamePresentationModel presentationModel;
-	private Runnable onMoveAddedListener;
-	private List<String> moves = new LinkedList<>();
+	private MoveChangeListener onMoveAddedListener;
+	private List<String> moves = new ArrayList<>();
+	private int indexOfLastMove = -1;
 
 	private int width = 180;
 	private int fontHeight = 10;
@@ -23,18 +26,18 @@ public class MovesPanel extends JPanel implements Scrollable, MouseMotionListene
 	public MovesPanel(MoveNotation moveNotation, GamePresentationModel presentationModel) {
 		this.moveNotation = moveNotation;
 		this.presentationModel = presentationModel;
-		presentationModel.addListener(this::event);
+		presentationModel.addListener(this::onEvent);
 
 		setAutoscrolls(true);
 		addMouseMotionListener(this);
 		setPreferredSize(new Dimension(width, 10 * getRowHeight()));
 	}
 
-	void setOnMoveAddedListener(Runnable onMoveAddedListener) {
+	void setOnMoveAddedListener(MoveChangeListener onMoveAddedListener) {
 		this.onMoveAddedListener = onMoveAddedListener;
 	}
 
-	private void event(GamePresentationModel.Event event) {
+	private void onEvent(GamePresentationModel.Event event) {
 		if (event == GamePresentationModel.Event.STATE_CHANGED) {
 			updateMoves();
 		}
@@ -42,21 +45,26 @@ public class MovesPanel extends JPanel implements Scrollable, MouseMotionListene
 
 	private void updateMoves() {
 		int oldNrMoves = moves.size();
+		int oldIndexOfLastMove = indexOfLastMove;
+
 		moves.clear();
+		presentationModel.getMoves().stream()
+				.skip(1) // skip board setup move
+				.map(moveNotation::format)
+				.forEach(moves::add);
+		indexOfLastMove = presentationModel.getLastMoveIndex() - 1; // skip board of setup move
 
-		Move move = presentationModel.getBoard().lastMove();
-		while (move != null && move.getPrecedingMove() != null) {
-			moves.add(0, moveNotation.format(move));
-			move = move.getPrecedingMove();
-		}
+		if (oldNrMoves != moves.size() || oldIndexOfLastMove != indexOfLastMove) {
+			if (onMoveAddedListener == null) {
+				return;
+			}
 
-		if (oldNrMoves != moves.size() && onMoveAddedListener != null) {
 			SwingUtilities.invokeLater(() -> {
 				int nrRows = Math.max(10, (moves.size() + 3) / 2);
 				setPreferredSize(new Dimension(width, (nrRows) * getRowHeight()));
 				repaint();
 				revalidate();
-				onMoveAddedListener.run();
+				onMoveAddedListener.onLastMove((indexOfLastMove / 2) * getRowHeight());
 			});
 		}
 	}
@@ -69,17 +77,27 @@ public class MovesPanel extends JPanel implements Scrollable, MouseMotionListene
 		g.fillRect(left, 0, width, getHeight());
 
 		g.setColor(Color.DARK_GRAY);
+		Font normalFont = g.getFont();
+		Font boldFont = normalFont.deriveFont(Font.BOLD);
 		fontHeight = g.getFontMetrics().getHeight();
 		int y = margin + fontHeight;
 		int nrRows = (moves.size() + 1) / 2;
 		for (int row=0; row < nrRows; row++) {
 			g.drawString(Integer.toString(row+1) + '.', margin / 2, y);
-			g.drawString(moves.get(2*row), left + 2 * margin, y);
-			if (2*row + 1 < moves.size()) {
-				g.drawString(moves.get(2*row + 1), left + (width-left) / 2 + margin, y);
+
+			paintMove(g, 2 * row, normalFont, boldFont, left + 2 * margin, y);
+
+			if (2 * row + 1 < moves.size()) {
+				paintMove(g, 2 * row + 1, normalFont, boldFont, left + (width - left) / 2 + margin, y);
 			}
+
 			y += getRowHeight();
 		}
+	}
+
+	private void paintMove(Graphics g, int index, Font normalFont, Font boldFont, int textX, int y) {
+		g.setFont(index == indexOfLastMove ? boldFont : normalFont);
+		g.drawString(moves.get(index), textX, y);
 	}
 
 	private int getRowHeight() {

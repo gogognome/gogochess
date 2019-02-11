@@ -2,7 +2,6 @@ package nl.gogognome.gogochess.gui;
 
 import static nl.gogognome.gogochess.gui.AIThinkingLimit.Unit.*;
 import static nl.gogognome.gogochess.gui.AIThinkingLimit.*;
-import static nl.gogognome.gogochess.gui.GamePresentationModel.State.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.*;
@@ -62,9 +61,9 @@ public class SettingsPanel extends JPanel {
 				} else if (e.getX() < 2 * buttonSize) {
 					presentationModel.onBlackPlayerAI(!presentationModel.isBlackPlayerAi());
 				} else if (e.getX() < 3 * buttonSize){
-					presentationModel.onTogglePause();
-				} else if (e.getX() < 4 * buttonSize){
 					presentationModel.onUndoMove();
+				} else if (e.getX() < 4 * buttonSize){
+					presentationModel.onRedoMove();
 				} else if (e.getX() < 5 * buttonSize) {
 					AIThinkingLimit currentThinkingLimitUnit = presentationModel.getThinkingLimit();
 					presentationModel.setThinkingLimit(otherUnit);
@@ -141,21 +140,10 @@ public class SettingsPanel extends JPanel {
 		drawBlackPlayerStatus(g, x);
 
 		x += buttonSize;
-		g.setColor(LIGHT);
-		g.fillRect(x, 0, buttonSize, buttonSize);
-		g.setColor(DARK);
-		if (presentationModel.getState() == PAUSED) {
-			g.fillRect(x + 3 * buttonSize / 10, 2 * buttonSize / 10, 2 * buttonSize / 10, 6 * buttonSize / 10);
-			g.fillRect(x + 6 * buttonSize / 10, 2 * buttonSize / 10, 2 * buttonSize / 10, 6 * buttonSize / 10);
-		} else {
-			g.fillPolygon(
-					new int[] { x + 2 * buttonSize / 10, x + 2 * buttonSize / 10, x + 8 * buttonSize / 10, x + 2 * buttonSize / 10 },
-					new int[] { 2 * buttonSize / 10, 8 * buttonSize / 10,  buttonSize / 2, 2 * buttonSize / 10 },
-					4);
-		}
+		g.drawImage(undoMove, x, 0, x+buttonSize, buttonSize, 0, 0, 80, 86, null);
 
 		x += buttonSize;
-		g.drawImage(undoMove, x, 0, x+buttonSize, buttonSize, 0, 0, 80, 86, null);
+		g.drawImage(undoMove, x, 0, x+buttonSize, buttonSize, 80, 0, 0, 86, null);
 
 		x += buttonSize;
 		drawThinkingLimitValueAndControls(g, x);
