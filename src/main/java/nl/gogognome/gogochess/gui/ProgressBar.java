@@ -20,8 +20,8 @@ public class ProgressBar extends JPanel {
 	}
 
 	@Override
-	public void paint(Graphics g) {
-		super.paint(g);
+	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
 		g.setColor(Color.BLACK);
 		int margin = 10;
 		int arcSize = 2 * margin;

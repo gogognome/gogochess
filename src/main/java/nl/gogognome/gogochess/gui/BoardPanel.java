@@ -77,8 +77,8 @@ public class BoardPanel extends JPanel {
 	}
 
 	@Override
-	public void paint(Graphics g) {
-		super.paint(g);
+	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
 		paintBoardAndPiecesExceptDraggedPiece(g);
 		paintDraggedPiece(g);
 		if (presentationModel.getState() == PROMOTING_WHITE_PAWN) {

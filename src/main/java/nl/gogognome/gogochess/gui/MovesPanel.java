@@ -4,7 +4,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
 import java.util.*;
-import java.util.function.*;
 import javax.swing.*;
 import nl.gogognome.gogochess.logic.movenotation.*;
 
@@ -70,7 +69,8 @@ public class MovesPanel extends JPanel implements Scrollable, MouseMotionListene
 	}
 
 	@Override
-	public void paint(Graphics g) {
+	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
 		int margin = width * 10 / 100;
 		int left = 0;
 		g.setColor(getBackground());

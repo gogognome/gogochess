@@ -128,7 +128,8 @@ public class SettingsPanel extends JPanel {
 	}
 
 	@Override
-	public void paint(Graphics g) {
+	public void paintComponent(Graphics g) {
+		super.paintComponent(g);
 		logger.debug("Painting settings panel");
 		g.setColor(DARK);
 		g.fillRect(0, 0, getWidth(), getHeight());
