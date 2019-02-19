@@ -1,27 +1,19 @@
 package nl.gogognome.gogochess.logic.ai;
 
-import com.google.inject.Guice;
-import nl.gogognome.gogochess.juice.Module;
-import nl.gogognome.gogochess.logic.Board;
-import nl.gogognome.gogochess.logic.Move;
-import nl.gogognome.gogochess.logic.Moves;
-import nl.gogognome.gogochess.logic.Player;
-import nl.gogognome.gogochess.logic.movenotation.ReverseAlgebraicNotation;
-import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static java.lang.Math.min;
-import static java.util.Arrays.asList;
-import static nl.gogognome.gogochess.logic.Player.BLACK;
-import static nl.gogognome.gogochess.logic.Player.WHITE;
+import static java.lang.Math.*;
+import static java.util.Arrays.*;
+import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
-import static nl.gogognome.gogochess.logic.Status.CHECK_MATE;
+import static nl.gogognome.gogochess.logic.Status.*;
 import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.*;
+import java.util.*;
+import java.util.concurrent.atomic.*;
+import org.junit.jupiter.api.*;
+import com.google.inject.*;
+import nl.gogognome.gogochess.juice.Module;
+import nl.gogognome.gogochess.logic.*;
+import nl.gogognome.gogochess.logic.movenotation.*;
 
 class MiniMaxAlphaBetaArtificialIntelligenceTest {
 
@@ -157,7 +149,7 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 		ArtificialIntelligence ai = buildAI(3);
 		Move nextMove = ai.nextMove(board, board.currentPlayerOpponent(), new ProgressListener());
 
-		assertThat(new ReverseAlgebraicNotation().format(nextMove)).isEqualTo("e7-e5");
+		assertThat(new ReverseAlgebraicNotation().format(nextMove)).isEqualTo("Bf5-g4");
 	}
 
 	@Test

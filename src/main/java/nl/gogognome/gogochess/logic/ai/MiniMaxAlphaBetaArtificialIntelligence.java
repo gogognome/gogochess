@@ -4,6 +4,7 @@ import static java.lang.Math.*;
 import static nl.gogognome.gogochess.logic.Player.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
+import java.util.stream.*;
 import javax.inject.*;
 import org.slf4j.*;
 import nl.gogognome.gogochess.logic.*;
@@ -62,6 +63,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		List<Move> nextMoves = board.currentPlayer().validMoves(board);
 		positonalAnalysis.evaluate(board, nextMoves);
 		moveSort.sort(nextMoves);
+		Map<Move, MoveValue> positionalValues = nextMoves.stream().collect(Collectors.toMap(m -> m, m -> m.getValue()));
 
 		statistics.onPositionsGenerated(nextMoves.size());
 		Progress progress = new Progress(progressListener.getProgressUpdateConsumer());
@@ -73,6 +75,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 			job.onNextStep();
 		}
 
+		nextMoves.stream().forEach(m -> m.setValue(m.getValue().add(positionalValues.get(m))));
 		moveSort.sort(nextMoves);
 		Move nextMove = nextMoves.get(0);
 		progressListener.consumeBestMoves(nextMove.pathTo(moveToBestDeepestMove.get(nextMove)));
@@ -195,7 +198,6 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		Player playerForNextMove = move.getPlayer().opponent();
 		if (playerForNextMove == WHITE) {
 			if (value.getCombinedScore() >= beta) {
-				move.setValue(MoveValue.forWhite(beta));
 				if (killerHeuristic.markAsKiller(move)) {
 					statistics.onCutOffByKillerMove();
 				}
@@ -203,7 +205,6 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 			}
 		} else {
 			if (value.getCombinedScore() <= alpha) {
-				move.setValue(MoveValue.forWhite(alpha));
 				if (killerHeuristic.markAsKiller(move)) {
 					statistics.onCutOffByKillerMove();
 				}
