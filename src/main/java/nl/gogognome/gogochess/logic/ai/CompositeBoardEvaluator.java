@@ -1,6 +1,7 @@
 package nl.gogognome.gogochess.logic.ai;
 
-import static java.util.Arrays.asList;
+import static java.util.Arrays.*;
+import static nl.gogognome.gogochess.logic.MoveValue.*;
 import java.util.*;
 import nl.gogognome.gogochess.logic.*;
 
@@ -13,12 +14,12 @@ public class CompositeBoardEvaluator implements BoardEvaluator {
 	}
 
 	@Override
-	public int value(Board board) {
-		int value = 0;
+	public MoveValue value(Board board) {
+		MoveValue value = ZERO;
 		// This method is called very, very often. To prevent garbage on the heap, use index instead of iterator.
 		//noinspection ForLoopReplaceableByForEach
 		for (int i=0; i<evaluators.size(); i++) {
-			value += evaluators.get(i).value(board);
+			value = value.add(evaluators.get(i).value(board));
 		}
 		return value;
 	}

@@ -6,17 +6,17 @@ import nl.gogognome.gogochess.logic.*;
 /**
  * This class stores values for board positions, which are represented by a hash value.
  */
-public class TranspositionTable {
+class TranspositionTable {
 
 	public static class BoardPosition {
 
 		private final int alpha;
 		private final int beta;
 		private final Move bestDeepestMove;
-		private final int value;
+		private final MoveValue value;
 		private final int depthInTree;
 
-		public BoardPosition(int alpha, int beta, Move bestDeepestMove, int value, int depthInTree) {
+		BoardPosition(int alpha, int beta, Move bestDeepestMove, MoveValue value, int depthInTree) {
 			this.alpha = alpha;
 			this.beta = beta;
 			this.bestDeepestMove = bestDeepestMove;
@@ -24,23 +24,23 @@ public class TranspositionTable {
 			this.depthInTree = depthInTree;
 		}
 
-		public int getAlpha() {
+		int getAlpha() {
 			return alpha;
 		}
 
-		public int getBeta() {
+		int getBeta() {
 			return beta;
 		}
 
-		public Move getBestDeepestMove() {
+		Move getBestDeepestMove() {
 			return bestDeepestMove;
 		}
 
-		public int getValue() {
+		public MoveValue getValue() {
 			return value;
 		}
 
-		public int getDepthInTree() {
+		int getDepthInTree() {
 			return depthInTree;
 		}
 
@@ -48,11 +48,11 @@ public class TranspositionTable {
 
 	private final Map<Long, BoardPosition> boardHashToBestDeepestMove = new HashMap<>(500_000);
 
-	public void clear() {
+	void clear() {
 		boardHashToBestDeepestMove.clear();
 	}
 
-	public BoardPosition getCachedBoardPosition(long hash, int alpha, int beta, int depthInTree) {
+	BoardPosition getCachedBoardPosition(long hash, int alpha, int beta, int depthInTree) {
 		BoardPosition boardPosition = boardHashToBestDeepestMove.get(hash);
 		if (boardPosition == null) {
 			return null;
@@ -64,7 +64,7 @@ public class TranspositionTable {
 		return boardPosition;
 	}
 
-	public void store(long hash, int alpha, int beta, int value, int depthInTree, Move bestDeepestMove) {
+	void store(long hash, int alpha, int beta, MoveValue value, int depthInTree, Move bestDeepestMove) {
 		boardHashToBestDeepestMove.put(hash, new BoardPosition(alpha, beta, bestDeepestMove, value, depthInTree));
 	}
 

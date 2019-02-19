@@ -1,22 +1,15 @@
 package nl.gogognome.gogochess.gui;
 
-import nl.gogognome.gogochess.logic.Board;
-import nl.gogognome.gogochess.logic.Move;
-import nl.gogognome.gogochess.logic.ai.ArtificalIntelligenceCanceledException;
-import nl.gogognome.gogochess.logic.ai.ArtificialIntelligence;
-import nl.gogognome.gogochess.logic.ai.ProgressListener;
-import nl.gogognome.gogochess.logic.ai.RecursiveSearchAI;
-import nl.gogognome.gogochess.logic.movenotation.MoveNotation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
+import static com.google.common.primitives.Ints.*;
+import static java.util.stream.Collectors.*;
+import java.util.*;
 import java.util.concurrent.*;
-import java.util.function.Consumer;
-
-import static com.google.common.primitives.Ints.asList;
+import java.util.function.*;
+import javax.inject.*;
+import org.slf4j.*;
+import nl.gogognome.gogochess.logic.*;
+import nl.gogognome.gogochess.logic.ai.*;
+import nl.gogognome.gogochess.logic.movenotation.*;
 
 public class AiController {
 
@@ -37,7 +30,7 @@ public class AiController {
 
     private final ProgressListener progressListener = new ProgressListener()
             .withProgressUpdateConsumer(this::onSetPercentage)
-            .withBestMovesConsumer(bestMoves -> scheduleAction(() -> this.nextExpectedOpponentsMove = bestMoves.size() >= 2 ? bestMoves.get(1) : null));
+            .withBestMovesConsumer(this::onBestMovesReceived);
 
     private long aiStartTime;
     private long aiMaxEndTime;
@@ -127,6 +120,13 @@ public class AiController {
 
     private void onSetPercentage(int percentage) {
         scheduleAction(() -> setPercentage(percentage));
+    }
+
+    private void onBestMovesReceived(List<Move> bestMoves) {
+        scheduleAction(() -> {
+            logger.info("Best moves found: " + bestMoves.stream().map(moveNotation::format).collect(joining(", ")));
+            nextExpectedOpponentsMove = (bestMoves.size() >= 2) ? bestMoves.get(1) : null;
+        });
     }
 
     private void setPercentage(int percentage) {
@@ -243,11 +243,11 @@ public class AiController {
         updateInitialMaxDepth(actualSeconds, progressListener.getMaxDepthDelta().get());
 
         if (computerThinksDuringOpponentsTurn) {
-            logger.debug("Store response to expected move " + moveNotation.format(lastMove) + ": " + moveNotation.format(move));
+            logger.debug("Store response to expected move " + moveNotation.format(lastMove) + ": " + moveNotation.format(move) + ", value: " + move.getValue());
             responseToExpectedOpponentsMove = move;
             computerThinksDuringOpponentsTurn = false;
         } else {
-            logger.debug("Computer move: " + moveNotation.format(move));
+            logger.debug("Computer move: " + moveNotation.format(move) + ", value: " + move.getValue());
             computerMoveConsumer.accept(move);
         }
     }

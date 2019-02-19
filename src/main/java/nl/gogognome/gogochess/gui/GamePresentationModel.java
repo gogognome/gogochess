@@ -1,23 +1,18 @@
 package nl.gogognome.gogochess.gui;
 
-import com.google.common.collect.ImmutableList;
-import nl.gogognome.gogochess.logic.*;
-import nl.gogognome.gogochess.logic.piece.PlayerPiece;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.swing.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 import static nl.gogognome.gogochess.gui.GamePresentationModel.State.*;
-import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.ADD;
-import static nl.gogognome.gogochess.logic.Player.BLACK;
-import static nl.gogognome.gogochess.logic.Player.WHITE;
+import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.*;
+import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
+import java.util.*;
+import java.util.function.*;
+import javax.inject.*;
+import javax.swing.*;
+import org.slf4j.*;
+import com.google.common.collect.*;
+import nl.gogognome.gogochess.logic.*;
+import nl.gogognome.gogochess.logic.piece.*;
 
 public class GamePresentationModel {
 
@@ -338,11 +333,7 @@ public class GamePresentationModel {
 			return;
 		}
 
-		logger.debug("Fired event: " + event);
-
-		if (event == Event.STATE_CHANGED) {
-			logger.debug("New state: " + state);
-		}
+		logger.debug("Fired event: " + event + (event == Event.STATE_CHANGED ? "New state: " + state : ""));
 	}
 
 }

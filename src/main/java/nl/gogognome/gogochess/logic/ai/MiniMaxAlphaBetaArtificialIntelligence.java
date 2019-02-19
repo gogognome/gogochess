@@ -62,10 +62,6 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		List<Move> nextMoves = board.currentPlayer().validMoves(board);
 		positonalAnalysis.evaluate(board, nextMoves);
 		moveSort.sort(nextMoves);
-//		ReverseAlgebraicNotation notation = new ReverseAlgebraicNotation();
-//		for (Move m : nextMoves) {
-//			logger.debug(notation.format(m) + "\t" + m.getValue());
-//		}
 
 		statistics.onPositionsGenerated(nextMoves.size());
 		Progress progress = new Progress(progressListener.getProgressUpdateConsumer());
@@ -110,9 +106,9 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 			}
 			Player playerForNextMove = move.getPlayer().opponent();
 			if (playerForNextMove == WHITE) {
-				alpha = max(alpha, move.getValue());
+				alpha = max(alpha, move.getValue().getCombinedScore());
 			} else {
-				beta = min(beta, move.getValue());
+				beta = min(beta, move.getValue().getCombinedScore());
 			}
 		}
 
@@ -142,15 +138,15 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 
 		Move bestDeepestMove = null;
 		if (childMoves.get(0).getPlayer() == Player.WHITE) {
-			int value = Integer.MIN_VALUE;
+			MoveValue value = MoveValue.WHITE_MIN_VALUE;
 			for (Move childMove  : childMoves) {
 				Move deepestChildMove = alphaBeta(board, childMove, depth + 1, alpha, beta, progress);
-				int childMoveValue = childMove.getValue();
-				if (childMoveValue > value) {
+				MoveValue childMoveValue = childMove.getValue();
+				if (childMoveValue.isGreaterThan(value)) {
 					value = childMoveValue;
 					bestDeepestMove = deepestChildMove;
 				}
-				alpha = max(alpha, value);
+				alpha = max(alpha, value.getCombinedScore());
 
 				if (job != null) {
 					job.onNextStep();
@@ -164,15 +160,15 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 			}
 			move.setValue(value);
 		} else {
-			int value = Integer.MAX_VALUE;
+			MoveValue value = MoveValue.BLACK_MIN_VALUE;
 			for (Move childMove  : childMoves) {
 				Move deepestChildMove = alphaBeta(board, childMove, depth + 1, alpha, beta, progress);
-				int childMoveValue = childMove.getValue();
-				if (childMoveValue < value) {
+				MoveValue childMoveValue = childMove.getValue();
+				if (childMoveValue.isLessThan(value)) {
 					value = childMoveValue;
 					bestDeepestMove = deepestChildMove;
 				}
-				beta = min(beta, value);
+				beta = min(beta, value.getCombinedScore());
 
 				if (job != null) {
 					job.onNextStep();
@@ -193,21 +189,21 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 
 	private boolean skipQuiescence(Board board, Move move, int alpha, int beta) {
 		statistics.onPositionEvaluated();
-		int value = boardEvaluator.value(board);
+		MoveValue value = boardEvaluator.value(board);
 		move.setValue(value);
 
 		Player playerForNextMove = move.getPlayer().opponent();
 		if (playerForNextMove == WHITE) {
-			if (value >= beta) {
-				move.setValue(beta);
+			if (value.getCombinedScore() >= beta) {
+				move.setValue(MoveValue.forWhite(beta));
 				if (killerHeuristic.markAsKiller(move)) {
 					statistics.onCutOffByKillerMove();
 				}
 				return true;
 			}
 		} else {
-			if (value <= alpha) {
-				move.setValue(alpha);
+			if (value.getCombinedScore() <= alpha) {
+				move.setValue(MoveValue.forWhite(alpha));
 				if (killerHeuristic.markAsKiller(move)) {
 					statistics.onCutOffByKillerMove();
 				}

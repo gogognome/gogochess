@@ -5,9 +5,9 @@ import nl.gogognome.gogochess.logic.*;
 
 public class MoveSort {
 
-	public void sort(List<Move> moves) {
+	void sort(List<Move> moves) {
 		if (!moves.isEmpty()) {
-			moves.sort((m1, m2) -> MoveValues.compareTo(m2.getValue(), m1.getValue(), moves.get(0).getPlayer()));
+			moves.sort((m1, m2) -> MoveValues.compareTo(m2.getValue().getCombinedScore(), m1.getValue().getCombinedScore(), moves.get(0).getPlayer()));
 		}
 	}
 }

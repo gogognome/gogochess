@@ -1,6 +1,6 @@
 package nl.gogognome.gogochess.logic.ai;
 
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.*;
 import static nl.gogognome.gogochess.logic.Piece.*;
 import static nl.gogognome.gogochess.logic.Player.*;
 import java.util.*;
@@ -22,8 +22,8 @@ public class PieceValueEvaluator implements BoardEvaluator {
 	private Map<Piece, Integer> blackPieceToValue = whitePieceToValue;
 
 	@Override
-	public int value(Board board) {
-		return getValueForPieces(board, WHITE) - getValueForPieces(board, BLACK);
+	public MoveValue value(Board board) {
+		return new MoveValue(getValueForPieces(board, WHITE), getValueForPieces(board, BLACK));
 	}
 
 	public int getValueForPieces(Board board, Player player) {

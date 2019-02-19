@@ -16,7 +16,7 @@ public class Move {
 	private final Move precedingMove;
 	private final ImmutableList<BoardMutation> boardMutations;
 	private final Player player;
-	private int value;
+	private MoveValue value;
 	private int boardMutationsHashCode;
 
 	public Move(Move precedingMove, BoardMutation... boardMutations) {
@@ -75,11 +75,11 @@ public class Move {
 		return status;
 	}
 
-	public int getValue() {
+	public MoveValue getValue() {
 		return value;
 	}
 
-	public void setValue(int value) {
+	public void setValue(MoveValue value) {
 		this.value = value;
 	}
 

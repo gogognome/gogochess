@@ -1,5 +1,6 @@
 package nl.gogognome.gogochess.logic.ai;
 
+import static nl.gogognome.gogochess.logic.MoveValue.*;
 import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
 import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
@@ -22,8 +23,10 @@ class CompositeBoardEvaluatorTest {
 
 	@Test
 	void compositeAddsValues() {
-		CompositeBoardEvaluator compositeBoardEvaluator = new CompositeBoardEvaluator(new ConstEvaluator(10), new ConstEvaluator(20));
-		assertEquals(30, compositeBoardEvaluator.value(board));
+		CompositeBoardEvaluator compositeBoardEvaluator = new CompositeBoardEvaluator(
+				new ConstEvaluator(forWhite(10)),
+				new ConstEvaluator(forWhite(20)));
+		assertEquals(forWhite(30), compositeBoardEvaluator.value(board));
 	}
 
 	@Test
@@ -35,26 +38,26 @@ class CompositeBoardEvaluatorTest {
 		board.process(new Move(WHITE,
 				WHITE_PAWN.addTo(E5),
 				BLACK_PAWN.addTo(F7)));
-		int goodSituation = boardEvaluator.value(board);
+		MoveValue goodSituation = boardEvaluator.value(board);
 
 		board = new Board();
 		board.process(new Move(WHITE,
 				WHITE_PAWN.addTo(E5)));
-		int badSituation = boardEvaluator.value(board);
+		MoveValue badSituation = boardEvaluator.value(board);
 
-		assertTrue(goodSituation < badSituation, goodSituation + " should be smaller than " + badSituation);
+		assertTrue(goodSituation.isLessThan(badSituation), goodSituation + " should be smaller than " + badSituation);
 	}
 
 	private static class ConstEvaluator implements BoardEvaluator {
 
-		private final int value;
+		private final MoveValue value;
 
-		private ConstEvaluator(int value) {
+		private ConstEvaluator(MoveValue value) {
 			this.value = value;
 		}
 
 		@Override
-		public int value(Board board) {
+		public MoveValue value(Board board) {
 			return value;
 		}
 	}

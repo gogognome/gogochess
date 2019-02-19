@@ -1,14 +1,11 @@
 package nl.gogognome.gogochess.logic.ai.positionalanalysis;
 
-import nl.gogognome.gogochess.logic.*;
-import nl.gogognome.gogochess.logic.piece.Pawn;
-import nl.gogognome.gogochess.logic.piece.PlayerPiece;
-
-import static nl.gogognome.gogochess.logic.MoveValues.negateForBlack;
-import static nl.gogognome.gogochess.logic.Piece.PAWN;
-import static nl.gogognome.gogochess.logic.Square.RANK_8;
+import static nl.gogognome.gogochess.logic.Piece.*;
+import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
-import static nl.gogognome.gogochess.logic.piece.PlayerPieces.WHITE_PAWN;
+import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
+import nl.gogognome.gogochess.logic.*;
+import nl.gogognome.gogochess.logic.piece.*;
 
 class PawnHeuristicsOpeningAndMiddleGame {
 
@@ -18,86 +15,83 @@ class PawnHeuristicsOpeningAndMiddleGame {
 		this.wingPawnAdvancementValue = wingPawnAdvancementValue;
 	}
 
-	int getPawnHeuristicsForOpeningAndMiddleGame(Board board, Move move, BoardMutation from, BoardMutation to) {
-		return board.temporarilyMove(move, () -> {
-			int value = getValueForWhitePawnMovingToD3_D4_E3_E4(from, to);
-			value += getValueForPieceBlocksWhiteCenterPawn(board, to);
-			value += getValueForPieceBlocksBlackCenterPawn(board, to);
-			value += negateForBlack(getValueForPawnCapturingOtherPiece(board, move, from, to), move);
-			value += negateForBlack(getValueForPawnOnSideOfBoard(from, to), move);
-			return value;
-		});
+	MoveValue getPawnHeuristicsForOpeningAndMiddleGame(Board board, Move move, BoardMutation from, BoardMutation to) {
+		return board.temporarilyMove(move, () -> getValueForWhitePawnMovingToD3_D4_E3_E4(from, to)
+			.add(getValueForPieceBlocksWhiteCenterPawn(board, to))
+			.add(getValueForPieceBlocksBlackCenterPawn(board, to))
+			.add(getValueForPawnCapturingOtherPiece(board, move, from, to))
+			.add(getValueForPawnOnSideOfBoard(from, to), move));
 	}
 
-	private int getValueForWhitePawnMovingToD3_D4_E3_E4(BoardMutation from, BoardMutation to) {
-		int value = 0;
+	private MoveValue getValueForWhitePawnMovingToD3_D4_E3_E4(BoardMutation from, BoardMutation to) {
+		MoveValue value = MoveValue.ZERO;
 		if (from.getPlayerPiece().equals(WHITE_PAWN)) {
 			if (from.getSquare().equals(E2) && to.getSquare().equals(E4)) {
-				value += 30;
+				value = value.addForWhite(30);
 			}
 			if (from.getSquare().equals(E3) && to.getSquare().equals(E4)) {
-				value += 2;
+				value = value.addForWhite(2);
 			}
 			if (from.getSquare().equals(D2) && to.getSquare().equals(D4)) {
-				value += 20;
+				value = value.addForWhite(20);
 			}
 			if (from.getSquare().equals(D3) && to.getSquare().equals(D4)) {
-				value += 2;
+				value = value.addForWhite(2);
 			}
 		}
 		return value;
 	}
 
-	private int getValueForPieceBlocksWhiteCenterPawn(Board board, BoardMutation to) {
-		int pieceBlocksWhiteCenterPawn = 0;
+	private MoveValue getValueForPieceBlocksWhiteCenterPawn(Board board, BoardMutation to) {
+		MoveValue pieceBlocksWhiteCenterPawn = MoveValue.ZERO;
 		if (E3.equals(to.getSquare()) || D3.equals(to.getSquare())) {
 			PlayerPiece blockedPiece = board.pieceAt(to.getSquare().addRanks(-1));
 			if (blockedPiece != null && blockedPiece.getPiece() == PAWN) {
-				pieceBlocksWhiteCenterPawn = -50;
+				pieceBlocksWhiteCenterPawn = pieceBlocksWhiteCenterPawn.addForBlack(50);
 			}
 		}
 		return pieceBlocksWhiteCenterPawn;
 	}
 
-	private int getValueForPieceBlocksBlackCenterPawn(Board board, BoardMutation to) {
-		int pieceBlocksBlackCenterPawn = 0;
+	private MoveValue getValueForPieceBlocksBlackCenterPawn(Board board, BoardMutation to) {
+		MoveValue pieceBlocksBlackCenterPawn = MoveValue.ZERO;
 		if (E6.equals(to.getSquare()) || D6.equals(to.getSquare())) {
 			PlayerPiece blockedPiece = board.pieceAt(to.getSquare().addRanks(1));
 			if (blockedPiece != null && blockedPiece.getPiece() == PAWN) {
-				pieceBlocksBlackCenterPawn = 50;
+				pieceBlocksBlackCenterPawn = pieceBlocksBlackCenterPawn.addForWhite(50);
 			}
 		}
 		return pieceBlocksBlackCenterPawn;
 	}
 
-	private int getValueForPawnCapturingOtherPiece(Board board, Move move, BoardMutation from, BoardMutation to) {
+	private MoveValue getValueForPawnCapturingOtherPiece(Board board, Move move, BoardMutation from, BoardMutation to) {
 		if (!move.isCapture() || from.getPlayerPiece().getPiece() != PAWN) {
-			return 0;
+			return MoveValue.ZERO;
 		}
 
-		int pawnCaptureValue = 0;
+		MoveValue pawnCaptureValue = MoveValue.ZERO;
 		int toColumn = to.getSquare().file();
 		if (isNearerToCenter(from.getSquare(), to.getSquare())) {
-			pawnCaptureValue += 5;
+			pawnCaptureValue = pawnCaptureValue.add(5, move);
 		} else {
-			pawnCaptureValue -= 5;
+			pawnCaptureValue = pawnCaptureValue.add(-5, move);
 		}
 
 		if (board.countNrOccurrencesInFile(to.getPlayerPiece(), toColumn) > 1 && board.isIsolatedPawnInFile(move.getPlayer(), toColumn)) {
-			pawnCaptureValue -= 10;
+			pawnCaptureValue = pawnCaptureValue.add(-10, move);
 		}
 
 		if (move.capturedPlayerPiece().getPiece() == PAWN && (toColumn == 3 || toColumn == 4)) {
 			if (board.isIsolatedPawnInFile(move.getPlayer().opponent(), toColumn)) {
-				pawnCaptureValue += 50;
+				pawnCaptureValue = pawnCaptureValue.add(50, move);
 			}
-			int rowDelta = negateForBlack(1, move);
+			int rowDelta = move.getPlayer() == WHITE ? 1 : -1;
 			Square leftForward = to.getSquare().addFilesAndRanks(-1, rowDelta);
 			Square rightForward = to.getSquare().addFilesAndRanks(1, rowDelta);
 			PlayerPiece pawnOfOpponent = new Pawn(move.getPlayer().opponent());
 			if ((leftForward != null && pawnOfOpponent.equals(board.pieceAt(leftForward)))
 					|| (rightForward != null && pawnOfOpponent.equals(board.pieceAt(rightForward)))) {
-				pawnCaptureValue -= 15;
+				pawnCaptureValue = pawnCaptureValue.add(-15, move);
 			}
 		}
 		return pawnCaptureValue;

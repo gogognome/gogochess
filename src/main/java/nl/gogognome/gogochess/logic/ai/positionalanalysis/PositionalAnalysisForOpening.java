@@ -1,6 +1,5 @@
 package nl.gogognome.gogochess.logic.ai.positionalanalysis;
 
-import static nl.gogognome.gogochess.logic.MoveValues.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
 import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
 import java.util.*;
@@ -44,12 +43,12 @@ class PositionalAnalysisForOpening implements MovesEvaluator {
 		int fromColumn = from.getSquare().file();
 		int toColumn = to.getSquare().file();
 
-		int value = negateForBlack(centralControlHeuristic.getCenterControlDeltaForOpening(from, to), move);
-		value += negateForBlack(castlingHeuristics.getCastlingValue(from.getPlayerPiece().getPiece(), fromColumn, toColumn), move);
-		value += pawnHeuristics.getPawnHeuristicsForOpeningAndMiddleGame(board, move, from, to);
-		value += negateForBlack(getKnightMoveValue(from, to), move);
-		value += negateForBlack(getPieceMovingFromKingSideValue(fromColumn), move);
-
+		MoveValue value = MoveValue.ZERO
+				.add(centralControlHeuristic.getCenterControlDeltaForOpening(from, to), move)
+				.add(castlingHeuristics.getCastlingValue(from.getPlayerPiece().getPiece(), fromColumn, toColumn), move)
+				.add(pawnHeuristics.getPawnHeuristicsForOpeningAndMiddleGame(board, move, from, to))
+				.add(getKnightMoveValue(from, to), move)
+				.add(getPieceMovingFromKingSideValue(fromColumn), move);
 		move.setValue(value);
 	}
 
