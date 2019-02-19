@@ -103,7 +103,7 @@ public class MoveValue implements Comparable<MoveValue> {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null || !obj.getClass().equals(MoveValue.class)) {
+		if (obj == null || !obj.getClass().equals(this.getClass())) {
 			return false;
 		}
 
