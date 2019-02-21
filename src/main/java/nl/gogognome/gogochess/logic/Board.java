@@ -304,7 +304,8 @@ public class Board {
 
 	/**
 	 * Determines if a pawn in the specified file is isolated, i.e., a pawn that has no pawns of the same player
-	 * in adjacent files.
+	 * in adjacent files. Actually this method only checks if the adjacent files have no pawn of the specified player.
+	 * It does not check whether there is a pawn in the specified file.
 	 * @param player the player whose pawn must be checked
 	 * @param file the file containing the pawn
 	 * @return true if the pawn is isolated; false otherwise
@@ -443,7 +444,7 @@ public class Board {
 		return this.hashCode() == that.hashCode();
 	}
 
-	public final static Move INITIAL_BOARD = new Move(BLACK,
+	final static Move INITIAL_BOARD = new Move(BLACK,
 			WHITE_ROOK.addTo(A1),
 			WHITE_KNIGHT.addTo(B1),
 			WHITE_BISHOP.addTo(C1),
