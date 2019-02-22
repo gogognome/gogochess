@@ -64,7 +64,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		List<Move> nextMoves = board.currentPlayer().validMoves(board);
 		positonalAnalysis.evaluate(board, nextMoves);
 		moveSort.sort(nextMoves);
-		Map<Move, MoveValue> positionalValues = nextMoves.stream().collect(Collectors.toMap(m -> m, m -> m.getValue()));
+		Map<Move, MoveValue> positionalValues = nextMoves.stream().collect(Collectors.toMap(m -> m, Move::getValue));
 
 		statistics.onPositionsGenerated(nextMoves.size());
 		Progress progress = new Progress(progressListener.getProgressUpdateConsumer());
@@ -76,7 +76,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 			job.onNextStep();
 		}
 
-		nextMoves.stream().forEach(m -> m.setValue(m.getValue().add(positionalValues.get(m))));
+		nextMoves.forEach(m -> m.setValue(m.getValue().add(positionalValues.get(m), "positional value")));
 		moveSort.sort(nextMoves);
 		Move nextMove = nextMoves.get(0);
 		progressListener.consumeBestMoves(nextMove.pathTo(moveToBestDeepestMove.get(nextMove)));

@@ -23,7 +23,7 @@ public class PieceValueEvaluator implements BoardEvaluator {
 
 	@Override
 	public MoveValue value(Board board) {
-		return new MoveValue(getValueForPieces(board, WHITE), getValueForPieces(board, BLACK));
+		return new MoveValue(getValueForPieces(board, WHITE), getValueForPieces(board, BLACK), "piece values");
 	}
 
 	public int getValueForPieces(Board board, Player player) {

@@ -13,10 +13,10 @@ public class MoveValues {
 	}
 
 	public static MoveValue maxValue(Player player, int depthInTree) {
-		// Reduec max value with depth in tree dependent value. This ensures that a check mate in fewer moves
+		// Reduce max value with depth in tree dependent value. This ensures that a check mate in fewer moves
 		// gets a higher value than a check mate in more moves if the latter happens to have a better positional
 		// score or an unnecessary capture.
-		return new MoveValue(10_000_000 - 1000 * depthInTree, player);
+		return new MoveValue(10_000_000 - 1000 * depthInTree, player, "max value");
 	}
 
 	static int minValue(Player player) {

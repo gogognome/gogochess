@@ -31,7 +31,7 @@ abstract class PositionalAnalysisForEndGameTest {
                 board,
                 move.getMutationRemovingPieceFromStart(),
                 move.getMutationAddingPieceAtDestination());
-        return new MoveValue(score, move);
+        return new MoveValue(score, move, "delta for rook placed behined passed pawn");
     });
 
     static class EndgameWithPawnsTest extends PositionalAnalysisForEndGameTest {
@@ -207,7 +207,7 @@ abstract class PositionalAnalysisForEndGameTest {
                             WHITE_PAWN.addTo(C3),
                             WHITE_ROOK.addTo(A1)),
                     WHITE_ROOK.removeFrom(A1), WHITE_ROOK.addTo(C1));
-            assertThat(value).isEqualTo(forWhite(15));
+            assertThat(value).isEqualTo(forWhite(15, ""));
         }
 
         @Test
@@ -216,7 +216,7 @@ abstract class PositionalAnalysisForEndGameTest {
                             BLACK_PAWN.addTo(C3),
                             WHITE_ROOK.addTo(A8)),
                     WHITE_ROOK.removeFrom(A8), WHITE_ROOK.addTo(C8));
-            assertThat(value).isEqualTo(forWhite(15));
+            assertThat(value).isEqualTo(forWhite(15, ""));
         }
 
         @Test
@@ -270,7 +270,7 @@ abstract class PositionalAnalysisForEndGameTest {
                             BLACK_PAWN.addTo(C3),
                             BLACK_ROOK.addTo(A8)),
                     BLACK_ROOK.removeFrom(A8), BLACK_ROOK.addTo(C8));
-            assertThat(value).isEqualTo(forBlack(15));
+            assertThat(value).isEqualTo(forBlack(15, ""));
         }
 
         @Test
@@ -279,7 +279,7 @@ abstract class PositionalAnalysisForEndGameTest {
                             WHITE_PAWN.addTo(C3),
                             BLACK_ROOK.addTo(A1)),
                     BLACK_ROOK.removeFrom(A1), BLACK_ROOK.addTo(C1));
-            assertThat(value).isEqualTo(forBlack(15));
+            assertThat(value).isEqualTo(forBlack(15, ""));
         }
 
         @Test

@@ -44,11 +44,11 @@ class PositionalAnalysisForOpening implements MovesEvaluator {
 		int toColumn = to.getSquare().file();
 
 		MoveValue value = MoveValue.ZERO
-				.add(centralControlHeuristic.getCenterControlDeltaForOpening(from, to), move)
-				.add(castlingHeuristics.getCastlingValue(from.getPlayerPiece().getPiece(), fromColumn, toColumn), move)
-				.add(pawnHeuristics.getPawnHeuristicsForOpeningAndMiddleGame(board, move, from, to))
-				.add(getKnightMoveValue(from, to), move)
-				.add(getPieceMovingFromKingSideValue(fromColumn), move);
+				.add(centralControlHeuristic.getCenterControlDeltaForOpening(from, to), move,  "center control delta for opening")
+				.add(castlingHeuristics.getCastlingValue(from.getPlayerPiece().getPiece(), fromColumn, toColumn), move, "castling")
+				.add(pawnHeuristics.getPawnHeuristicsForOpeningAndMiddleGame(board, move, from, to), "pawn heuristics for opening and middle game")
+				.add(getKnightMoveValue(from, to), move, "knight move")
+				.add(getPieceMovingFromKingSideValue(fromColumn), move, "piece moving from king side");
 		move.setValue(value);
 	}
 

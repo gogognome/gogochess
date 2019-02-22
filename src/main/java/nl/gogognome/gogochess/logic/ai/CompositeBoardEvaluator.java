@@ -19,7 +19,7 @@ public class CompositeBoardEvaluator implements BoardEvaluator {
 		// This method is called very, very often. To prevent garbage on the heap, use index instead of iterator.
 		//noinspection ForLoopReplaceableByForEach
 		for (int i=0; i<evaluators.size(); i++) {
-			value = value.add(evaluators.get(i).value(board));
+			value = value.add(evaluators.get(i).value(board), "composite board evaluation");
 		}
 		return value;
 	}

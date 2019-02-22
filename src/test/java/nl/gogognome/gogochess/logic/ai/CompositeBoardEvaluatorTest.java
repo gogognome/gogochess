@@ -24,9 +24,9 @@ class CompositeBoardEvaluatorTest {
 	@Test
 	void compositeAddsValues() {
 		CompositeBoardEvaluator compositeBoardEvaluator = new CompositeBoardEvaluator(
-				new ConstEvaluator(forWhite(10)),
-				new ConstEvaluator(forWhite(20)));
-		assertEquals(forWhite(30), compositeBoardEvaluator.value(board));
+				new ConstEvaluator(forWhite(10, "")),
+				new ConstEvaluator(forWhite(20, "")));
+		assertEquals(forWhite(30, ""), compositeBoardEvaluator.value(board));
 	}
 
 	@Test

@@ -37,13 +37,16 @@ class PositionalAnalysisForMiddleGame implements MovesEvaluator {
 			BoardMutation from = move.getMutationRemovingPieceFromStart();
 			BoardMutation to = move.getMutationAddingPieceAtDestination();
 
-			MoveValue value = new MoveValue(centralControlHeuristic.getCenterControlDeltaForMiddleGame(from, to), move)
-					.add(castlingHeuristics.getCastlingValue(from.getPlayerPiece().getPiece(), from.getSquare().file(), to.getSquare().file()), move)
-					.add(kingFieldHeuristic.getKingFieldDeltaForMiddleGame(from, to, opponentKingSquare), move)
-					.add(mobilityAfterMove(board, move), move)
-					.add(pawnHeuristics.getPawnHeuristicsForOpeningAndMiddleGame(board, move, from, to))
-					.add(move.isCapture() ? captureBonus : ZERO)
-					.add(unblocksKingsOrQueensBishopPawn(from, move.getPlayer(), board), move);
+			MoveValue value = new MoveValue(
+					centralControlHeuristic.getCenterControlDeltaForMiddleGame(from, to),
+					move,
+					"center control delta for middle game")
+					.add(castlingHeuristics.getCastlingValue(from.getPlayerPiece().getPiece(), from.getSquare().file(), to.getSquare().file()), move, "castling value")
+					.add(kingFieldHeuristic.getKingFieldDeltaForMiddleGame(from, to, opponentKingSquare), move, "king field delta for middle game")
+					.add(mobilityAfterMove(board, move), move, "mobility after move")
+					.add(pawnHeuristics.getPawnHeuristicsForOpeningAndMiddleGame(board, move, from, to), "pawn heuristics for opening and middle game")
+					.add(move.isCapture() ? captureBonus : ZERO, "capture bones")
+					.add(unblocksKingsOrQueensBishopPawn(from, move.getPlayer(), board), move, "unblocks kings or queens bishop");
 
 			move.setValue(value);
 		}
@@ -57,9 +60,9 @@ class PositionalAnalysisForMiddleGame implements MovesEvaluator {
 		MoveValue pieceValue = pieceValueEvaluator.value(board);
 		MoveValue captureBonus = ZERO;
 		if (board.currentPlayer() == WHITE && pieceValue.isGreaterThan(ZERO)) {
-			captureBonus = forWhite(10);
+			captureBonus = forWhite(10, "white capture bonus");
 		} else if (board.currentPlayer() == BLACK && pieceValue.isLessThan(ZERO)) {
-			captureBonus = forBlack(10);
+			captureBonus = forBlack(10, "black capture bonus");
 		}
 		return captureBonus;
 	}

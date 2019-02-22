@@ -50,18 +50,18 @@ public class PositionalAnalysisForEndGame implements MovesEvaluator {
             MoveValue value = MoveValue.ZERO;
             if (endgameWithPawns && !endgameWithPieces) {
                 value = value
-                        .add(passedPawnFieldHeuristic.getDeltaForPassedPawns(board, move), move)
-                        .add(centralControlHeuristic.getCenterControlDeltaForEndgameWithPawns(from, to), move)
-                        .add(kingFieldHeuristic.getKingFieldDeltaForEndgameWithPawns(from, to, opponentKingSquare), move)
-                        .add(pawnHeuristics.getPawnHeuristicsForOpeningAndEndgame(board, from, to), move);
+                        .add(passedPawnFieldHeuristic.getDeltaForPassedPawns(board, move), move, "delta for passed pawns")
+                        .add(centralControlHeuristic.getCenterControlDeltaForEndgameWithPawns(from, to), move, "center control delta for endgame with pawns")
+                        .add(kingFieldHeuristic.getKingFieldDeltaForEndgameWithPawns(from, to, opponentKingSquare), move, "king field delta for endgame with pawns")
+                        .add(pawnHeuristics.getPawnHeuristicsForEndgame(board, from, to), move, "pawn heuristics for endgame");
             }
 
             if (endgameWithPawns && endgameWithPieces) {
                 value = value
-                        .add(getDeltaForRookPlacedBehindPassedPawn(board, from, to), move)
-                        .add(centralControlHeuristic.getCenterControlDeltaForGeneralEndgame(from, to), move)
-                        .add(kingFieldHeuristic.getKingFieldDeltaForGeneralEndgame(from, to, opponentKingSquare), move)
-                        .add(mobilityAfterMove(board, move), move);
+                        .add(getDeltaForRookPlacedBehindPassedPawn(board, from, to), move, "dela for rook placed behind passed pawn")
+                        .add(centralControlHeuristic.getCenterControlDeltaForGeneralEndgame(from, to), move, "center control delta for general endgame")
+                        .add(kingFieldHeuristic.getKingFieldDeltaForGeneralEndgame(from, to, opponentKingSquare), move, "king field dleta for general endgame")
+                        .add(mobilityAfterMove(board, move), move, "mobility after move");
             }
 
             if (!endgameWithPawns) {
@@ -71,7 +71,7 @@ public class PositionalAnalysisForEndGame implements MovesEvaluator {
                     if (opponentMoves.isEmpty()) {
                         return endOfGameBoardEvaluator.value(board);
                     }
-                    MoveValue bestOpponentValue = new MoveValue(-10000, opponent);
+                    MoveValue bestOpponentValue = new MoveValue(-10000, opponent, "min value approximation");
                     for (Move opponentMove : opponentMoves) {
                         MoveValue opponentValue = board.temporarilyMove(opponentMove, () -> evaluateForEndgameWithPieces(board, move.getPlayer()));
                         bestOpponentValue = opponent == WHITE ?
@@ -79,7 +79,7 @@ public class PositionalAnalysisForEndGame implements MovesEvaluator {
                                 MoveValue.min(bestOpponentValue, opponentValue);
                     }
                     return bestOpponentValue;
-                }));
+                }), "endgame with pieces");
             }
             move.setValue(value);
         }
@@ -90,11 +90,14 @@ public class PositionalAnalysisForEndGame implements MovesEvaluator {
         Player opponent = player.opponent();
         Square opponentKingSquare = board.kingSquareOf(opponent);
 
-        MoveValue value = new MoveValue(centralControlHeuristic.getCenterControlValueForOpponentKingInEndgameWithPieces(opponentKingSquare), player)
-                .add(kingFieldHeuristic.getOpponentKingFieldValueForEndgameWithPieces(ownKingSquare, opponentKingSquare), player)
-                .add(centralControlHeuristic.getCenterControlValueForOwnKingInEndgameWithPieces(ownKingSquare), player);
+        MoveValue value = new MoveValue(
+                centralControlHeuristic.getCenterControlValueForOpponentKingInEndgameWithPieces(opponentKingSquare),
+                player,
+                "center control value for opponent king in endgame with pieces")
+                .add(kingFieldHeuristic.getOpponentKingFieldValueForEndgameWithPieces(ownKingSquare, opponentKingSquare), player, "opponent king field value for endgame with pieces")
+                .add(centralControlHeuristic.getCenterControlValueForOwnKingInEndgameWithPieces(ownKingSquare), player, "center control value for own king in endgame with pieces");
         List<Square> ownPiecesSquares = getOwnPiecesSquaresExceptForKing(board, player);
-        value = value.add(kingFieldHeuristic.getCenterControlValueForPiecesAt(ownKingSquare, ownPiecesSquares), player);
+        value = value.add(kingFieldHeuristic.getCenterControlValueForPiecesAt(ownKingSquare, ownPiecesSquares), player, "center control value");
         return value;
     }
 

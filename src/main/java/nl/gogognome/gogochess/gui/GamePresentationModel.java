@@ -193,7 +193,7 @@ public class GamePresentationModel {
 		});
 	}
 
-    private void onMove(Move move) {
+    void onMove(Move move) {
 		lastMoveIndex += 1;
 		while (moves.size() > lastMoveIndex) {
 			moves.remove(moves.size()-1);
