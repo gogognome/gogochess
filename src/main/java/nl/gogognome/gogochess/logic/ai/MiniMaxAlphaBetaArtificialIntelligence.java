@@ -19,6 +19,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 	private int initialBeta;
 	private int maxDepth;
 	private AtomicInteger maxDepthDelta;
+	private int razorMargin = 200;
 
 	private AtomicBoolean canceled = new AtomicBoolean();
 
@@ -197,14 +198,16 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 
 		Player playerForNextMove = move.getPlayer().opponent();
 		if (playerForNextMove == WHITE) {
-			if (value.getCombinedScore() >= beta) {
+			if (value.getCombinedScore() - razorMargin >= beta) {
+				move.setValue(MoveValue.forWhite(beta, "Razoring during quiescence search"));
 				if (killerHeuristic.markAsKiller(move)) {
 					statistics.onCutOffByKillerMove();
 				}
 				return true;
 			}
 		} else {
-			if (value.getCombinedScore() <= alpha) {
+			if (value.getCombinedScore() + razorMargin <= alpha) {
+				move.setValue(MoveValue.forWhite(alpha, "Razoring during quiescence search"));
 				if (killerHeuristic.markAsKiller(move)) {
 					statistics.onCutOffByKillerMove();
 				}
