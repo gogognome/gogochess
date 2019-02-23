@@ -19,19 +19,19 @@ class MoveValuesTest {
 
 	@Test
 	void maxValue() {
-		assertEquals(forWhite(10_000_000, ""), MoveValues.maxValue(WHITE, 0));
-		assertEquals(forWhite(10_000_000 - 1_000, ""), MoveValues.maxValue(WHITE, 1));
-		assertEquals(forWhite(10_000_000 - 2_000, ""), MoveValues.maxValue(WHITE, 2));
+		assertEquals(forWhite(10_000_000, ""), MoveValues.winValue(WHITE, 0));
+		assertEquals(forWhite(10_000_000 - 1_000, ""), MoveValues.winValue(WHITE, 1));
+		assertEquals(forWhite(10_000_000 - 2_000, ""), MoveValues.winValue(WHITE, 2));
 
-		assertEquals(forBlack(10_000_000, ""), MoveValues.maxValue(BLACK, 0));
-		assertEquals(forBlack(10_000_000 - 1_000, ""), MoveValues.maxValue(BLACK, 1));
-		assertEquals(forBlack(10_000_000 - 2_000, ""), MoveValues.maxValue(BLACK, 2));
+		assertEquals(forBlack(10_000_000, ""), MoveValues.winValue(BLACK, 0));
+		assertEquals(forBlack(10_000_000 - 1_000, ""), MoveValues.winValue(BLACK, 1));
+		assertEquals(forBlack(10_000_000 - 2_000, ""), MoveValues.winValue(BLACK, 2));
 	}
 
 	@Test
 	void minValue() {
-		assertEquals(-1_000_000, MoveValues.minValue(WHITE));
-		assertEquals(1_000_000, MoveValues.minValue(BLACK));
+		assertEquals(forWhite(-20_000_000, ""), MoveValues.minValue(WHITE));
+		assertEquals(forBlack(-20_000_000, ""), MoveValues.minValue(BLACK));
 	}
 
 }

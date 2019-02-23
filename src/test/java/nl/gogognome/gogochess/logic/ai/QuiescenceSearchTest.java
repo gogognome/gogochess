@@ -30,7 +30,7 @@ class QuiescenceSearchTest {
 		quiescenceSearch.search(board, move, MIN_VALUE, MAX_VALUE);
 
 		assertThat(move.getValue().getCombinedScore()).isEqualTo(-430);
-		assertThat(statistics.getNrPositionsGenerated()).isEqualTo(26);
+		assertThat(statistics.getNrPositionsGenerated()).isEqualTo(2);
 		assertThat(statistics.getNrPositionsEvaluated()).isEqualTo(5);
 	}
 
@@ -48,7 +48,7 @@ class QuiescenceSearchTest {
 		quiescenceSearch.search(board, move, MIN_VALUE, MAX_VALUE);
 
 		assertThat(move.getValue().getCombinedScore()).isEqualTo(-900);
-		assertThat(statistics.getNrPositionsGenerated()).isEqualTo(24);
+		assertThat(statistics.getNrPositionsGenerated()).isEqualTo(1);
 		assertThat(statistics.getNrPositionsEvaluated()).isEqualTo(3);
 	}
 

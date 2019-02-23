@@ -1,7 +1,6 @@
 package nl.gogognome.gogochess.logic.ai;
 
 import static java.lang.Math.*;
-import static nl.gogognome.gogochess.logic.Player.*;
 import java.util.*;
 import java.util.concurrent.atomic.*;
 import java.util.stream.*;
@@ -184,32 +183,6 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		}
 
 		return bestDeepestMove;
-	}
-
-	private boolean skipQuiescence(Board board, Move move, int alpha, int beta) {
-		statistics.onPositionEvaluated();
-		MoveValue value = boardEvaluator.value(board);
-		move.setValue(value);
-
-		Player playerForNextMove = move.getPlayer().opponent();
-		if (playerForNextMove == WHITE) {
-			if (value.getCombinedScore() - razorMargin >= beta) {
-				move.setValue(MoveValue.forWhite(beta, "Razoring during quiescence search"));
-				if (killerHeuristic.markAsKiller(move)) {
-					statistics.onCutOffByKillerMove();
-				}
-				return true;
-			}
-		} else {
-			if (value.getCombinedScore() + razorMargin <= alpha) {
-				move.setValue(MoveValue.forWhite(alpha, "Razoring during quiescence search"));
-				if (killerHeuristic.markAsKiller(move)) {
-					statistics.onCutOffByKillerMove();
-				}
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private void storeBestDeepestMoveInCache(Move move, long hash, int alpha, int beta, Move bestDeepestMove) {

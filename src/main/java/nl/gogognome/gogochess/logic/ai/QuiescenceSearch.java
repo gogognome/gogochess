@@ -1,6 +1,5 @@
 package nl.gogognome.gogochess.logic.ai;
 
-import static java.util.stream.Collectors.*;
 import static nl.gogognome.gogochess.logic.MoveValue.*;
 import static nl.gogognome.gogochess.logic.Player.*;
 import java.util.*;
@@ -55,17 +54,10 @@ public class QuiescenceSearch {
 		}
 
 		Move bestDeepestMove = move;
-		List<Move> childMoves = board.currentPlayer().validMoves(board);
+		List<Move> childMoves = board.currentPlayer().validCaptures(board);
 		statistics.onPositionsGenerated(childMoves.size());
-		childMoves = childMoves.stream()
-				.filter(Move::isCapture)
-				.collect(toList());
 		killerHeuristic.putKillerMoveFirst(childMoves);
 		for (Move childMove : childMoves) {
-			if (!childMove.isCapture()) {
-				continue;
-			}
-
 			statistics.onPositionEvaluated();
 			Move deepestMove = search(board, childMove, alpha, beta);
 			value = deepestMove.getValue();

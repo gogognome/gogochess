@@ -10,7 +10,7 @@ public class EndOfGameBoardEvaluator implements BoardEvaluator {
 	public MoveValue value(Board board) {
 		Status status = board.lastMove().getStatus();
 		if (status == CHECK_MATE) {
-			return MoveValues.maxValue(board.lastMove().getPlayer(), board.lastMove().depthInTree());
+			return MoveValues.winValue(board.lastMove().getPlayer(), board.lastMove().depthInTree());
 		}
 		return ZERO;
 	}

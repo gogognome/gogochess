@@ -12,15 +12,15 @@ public class MoveValues {
 		}
 	}
 
-	public static MoveValue maxValue(Player player, int depthInTree) {
+	public static MoveValue winValue(Player player, int depthInTree) {
 		// Reduce max value with depth in tree dependent value. This ensures that a check mate in fewer moves
 		// gets a higher value than a check mate in more moves if the latter happens to have a better positional
 		// score or an unnecessary capture.
 		return new MoveValue(10_000_000 - 1000 * depthInTree, player, "max value");
 	}
 
-	static int minValue(Player player) {
-		return player == WHITE ? -1_000_000 : 1_000_000;
+	public static MoveValue minValue(Player player) {
+		return new MoveValue(-20_000_000, player, "Minimum value");
 	}
 
 }

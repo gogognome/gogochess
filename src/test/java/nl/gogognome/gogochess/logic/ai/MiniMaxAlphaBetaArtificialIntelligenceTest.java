@@ -132,7 +132,7 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 		Move nextMove = ai.nextMove(board, WHITE, new ProgressListener());
 
 		String actualMove = new ReverseAlgebraicNotation().format(nextMove);
-		assertThat(asList("Qd1-e2", "Qd1xc2")).contains(actualMove);
+		assertThat(asList("Qd1-e2", "Qd1xc2", "Qd1-f3")).contains(actualMove);
 	}
 
 	@Test
@@ -177,7 +177,8 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 				asList("Be4xRd5", "Qf7-c7", "Bd5xRg8", "Qc7xQc4", "Bg8xQc4", "Bf4xNe3"),
 				asList("Be4xRd5", "Qf7-c7", "Bd5xRg8", "Bf4xNe3", "Qc4xQc7", "Kh8xBg8", "Qc7xg7+", "Kg8xQg7"),
 				asList("Qc4xRd5", "Qf7xQd5", "Ne3xQd5"),
-				asList("Be4xRd5", "Rg8-f8", "Bd5xQf7", "Rf8xBf7", "Qc4xBf4", "Rf7xQf4"));
+				asList("Be4xRd5", "Rg8-f8", "Bd5xQf7", "Rf8xBf7", "Qc4xBf4", "Rf7xQf4"),
+				asList("Be4xRd5", "Qf7-c7", "Qc4xQc7", "Bf4xQc7", "Bd5xRg8", "Kh8xBg8"));
 	}
 
 	private void assertNextMoves(int maxDepth, Player player, String... expectedMoves) {
