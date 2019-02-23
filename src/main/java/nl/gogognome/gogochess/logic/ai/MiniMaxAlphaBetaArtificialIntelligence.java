@@ -28,6 +28,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 	private final MoveSort moveSort;
 	private final Statistics statistics;
 	private final KillerHeuristic killerHeuristic;
+	private final QuiescenceSearch quiescenceSearch;
 	private final TranspositionTable transpositionTable = new TranspositionTable();
 
 	@Inject
@@ -36,11 +37,12 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 			PositionalAnalysis positionalAnalysis,
 			MoveSort moveSort,
 			Statistics statistics,
-			KillerHeuristic killerHeuristic) {
+			QuiescenceSearch quiescenceSearch, KillerHeuristic killerHeuristic) {
 		this.boardEvaluator = boardEvaluator;
 		this.positonalAnalysis = positionalAnalysis;
 		this.moveSort = moveSort;
 		this.statistics = statistics;
+		this.quiescenceSearch = quiescenceSearch;
 		this.killerHeuristic = killerHeuristic;
 		this.initialMaxDepth = 3;
 		this.initialAlpha = Integer.MIN_VALUE;
@@ -103,20 +105,13 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 			return cachedBoardPosition.getBestDeepestMove();
 		}
 
-		boolean quiescence = depth >= maxDepth + maxDepthDelta.get();
-		if (quiescence) {
-			if (skipQuiescence(board, move, alpha, beta)) {
-				return move;
-			}
-			Player playerForNextMove = move.getPlayer().opponent();
-			if (playerForNextMove == WHITE) {
-				alpha = max(alpha, move.getValue().getCombinedScore());
-			} else {
-				beta = min(beta, move.getValue().getCombinedScore());
-			}
+		if (depth >= maxDepth + maxDepthDelta.get()) {
+			Move bestDeepestMove = quiescenceSearch.search(board, move, alpha, beta);
+			storeBestDeepestMoveInCache(move, hash, alpha, beta, bestDeepestMove);
+			return bestDeepestMove;
 		}
 
-		List<Move> childMoves = getChildMoves(board, move, quiescence);
+		List<Move> childMoves = getChildMoves(board, move);
 		statistics.onPositionsGenerated(childMoves.size());
 		if (childMoves.isEmpty()) {
 			evaluateMove(board, move);
@@ -221,15 +216,13 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		transpositionTable.store(hash, alpha, beta, move.getValue(), move.depthInTree(), bestDeepestMove);
 	}
 
-	private List<Move> getChildMoves(Board board, Move move, boolean capturesOnly) {
+	private List<Move> getChildMoves(Board board, Move move) {
 		board.process(move);
 		Player player = board.currentPlayer();
-		List<Move> childMoves = capturesOnly ? player.validCaptures(board) : player.validMoves(board);
+		List<Move> childMoves = player.validMoves(board);
 
-		if (!capturesOnly) {
-			evaluateMoves(board, childMoves);
-			moveSort.sort(childMoves);
-		}
+		evaluateMoves(board, childMoves);
+		moveSort.sort(childMoves);
 
 		return childMoves;
 	}

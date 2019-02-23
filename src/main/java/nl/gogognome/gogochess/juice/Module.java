@@ -39,7 +39,8 @@ public class Module extends AbstractModule {
 			MoveSort moveSort) {
 		Statistics statistics = new Statistics();
 		KillerHeuristic killerHeuristic = new KillerHeuristic();
-		return new MiniMaxAlphaBetaArtificialIntelligence(boardEvaluator, positionalAnalysis, moveSort, statistics, killerHeuristic);
+		QuiescenceSearch quiescenceSearch = new QuiescenceSearch(boardEvaluator, statistics, killerHeuristic);
+		return new MiniMaxAlphaBetaArtificialIntelligence(boardEvaluator, positionalAnalysis, moveSort, statistics, quiescenceSearch, killerHeuristic);
 	}
 
 	@Provides
