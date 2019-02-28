@@ -180,6 +180,10 @@ public class AiController {
     }
 
     private void letComputerThinkOfBestResponseTo(Move move) {
+        if (move.getStatus().isGameOver()) {
+            return;
+        }
+
         try {
             thinkingSemaphore.acquire();
         } catch (InterruptedException e) {
