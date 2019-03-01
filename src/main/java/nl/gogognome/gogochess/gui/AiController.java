@@ -306,7 +306,7 @@ public class AiController {
 
         long now = System.currentTimeMillis();
         long duration = now - aiStartTime;
-        if (duration < 500 || aiMaxEndTime == aiStartTime || lastTimeMaxDepthDeltaWasChanged + 100 > now) {
+        if (duration < 500 || lastTimeMaxDepthDeltaWasChanged + 100 > now) {
             return;
         }
 
@@ -314,7 +314,7 @@ public class AiController {
         int durationPercentage = (int) (100 * duration / targetDuration);
         float timeLeftPercentage = 100 - durationPercentage;
         float workLeftPercentage = 100 - percentage;
-        if (workLeftPercentage <= 0) {
+        if (workLeftPercentage <= 10) {
             return;
         }
 
@@ -323,7 +323,7 @@ public class AiController {
                 ? (int) Math.round(Math.log(timeLeftPercentage / workLeftPercentage) / Math.log(2))
                 : currentMaxDepthDelta-1;
 
-        if (maxDepthDelta <= 0 && maxDepthDelta != currentMaxDepthDelta) {
+        if (-2 <= maxDepthDelta && maxDepthDelta <= 0 && maxDepthDelta != currentMaxDepthDelta) {
             progressListener.getMaxDepthDelta().set(maxDepthDelta);
             lastTimeMaxDepthDeltaWasChanged = now;
             logger.debug("Duration " + duration + ", Target duration: " + targetDuration + ", Duration %: " + durationPercentage + ", %: " + percentage + ", New delta: " + maxDepthDelta);
