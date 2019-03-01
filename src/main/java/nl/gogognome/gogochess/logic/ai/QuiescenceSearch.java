@@ -13,7 +13,7 @@ public class QuiescenceSearch {
 	private final BoardEvaluator boardEvaluator;
 	private final Statistics statistics;
 	private final KillerHeuristic killerHeuristic;
-	private int margin = 200;
+	private int margin = 1000;
 
 	public QuiescenceSearch(
 			BoardEvaluator boardEvaluator, Statistics statistics,
@@ -38,7 +38,7 @@ public class QuiescenceSearch {
 				}
 				return move;
 			}
-			if (alpha < value.getCombinedScore()) {
+			if (value.getCombinedScore() > alpha) {
 				alpha = value.getCombinedScore();
 			}
 		} else {
