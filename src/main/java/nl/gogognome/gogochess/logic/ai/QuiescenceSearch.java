@@ -13,6 +13,7 @@ public class QuiescenceSearch {
 	private final BoardEvaluator boardEvaluator;
 	private final Statistics statistics;
 	private final KillerHeuristic killerHeuristic;
+	private int margin = 200;
 
 	public QuiescenceSearch(
 			BoardEvaluator boardEvaluator, Statistics statistics,
@@ -30,7 +31,7 @@ public class QuiescenceSearch {
 
 		Player playerForNextMove = move.getPlayer().opponent();
 		if (playerForNextMove == WHITE) {
-			if (value.getCombinedScore() >= beta) {
+			if (value.getCombinedScore() - margin >= beta) {
 				move.setValue(MoveValue.forWhite(beta, "Beta cut off"));
 				if (killerHeuristic.markAsKiller(move)) {
 					statistics.onCutOffByKillerMove();
@@ -41,7 +42,7 @@ public class QuiescenceSearch {
 				alpha = value.getCombinedScore();
 			}
 		} else {
-			if (value.getCombinedScore() <= alpha) {
+			if (value.getCombinedScore() + margin <= alpha) {
 				move.setValue(forBlack(alpha, "Alpha cut off"));
 				if (killerHeuristic.markAsKiller(move)) {
 					statistics.onCutOffByKillerMove();
@@ -69,20 +70,20 @@ public class QuiescenceSearch {
 					}
 					return deepestMove;
 				}
-				if (alpha <= value.getCombinedScore()) {
+				if (value.getCombinedScore() > alpha) {
 					alpha = value.getCombinedScore();
 					move.setValue(value);
 					bestDeepestMove = deepestMove;
 				}
 			} else {
 				if (value.getCombinedScore() <= alpha) {
-					move.setValue(forBlack(alpha, "Alpha cut off"));
+					move.setValue(forBlack(-alpha, "Alpha cut off"));
 					if (killerHeuristic.markAsKiller(childMove)) {
 						statistics.onCutOffByKillerMove();
 					}
 					return deepestMove;
 				}
-				if (beta > value.getCombinedScore()) {
+				if (value.getCombinedScore() < beta) {
 					beta = value.getCombinedScore();
 					move.setValue(value);
 					bestDeepestMove = deepestMove;

@@ -18,6 +18,7 @@ import nl.gogognome.gogochess.logic.movenotation.*;
 class MiniMaxAlphaBetaArtificialIntelligenceTest {
 
 	private Board board = new Board();
+	private ReverseAlgebraicNotation moveNotation = new ReverseAlgebraicNotation();
 
 	@Test
 	void aiFindsMoveLeadingToCheckMateInOneMove() {
@@ -29,7 +30,7 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 		ArtificialIntelligence ai = buildAI(1);
 		Move move = ai.nextMove(board, WHITE, new ProgressListener());
 
-		assertThat("Qg1-h1++, Qg1-h2++, Qg1-g7++, Qg1-g8++").contains(new ReverseAlgebraicNotation().format(move));
+		assertThat("Qg1-h1++, Qg1-h2++, Qg1-g7++, Qg1-g8++").contains(moveNotation.format(move));
 		assertThat(move.getStatus()).isEqualTo(CHECK_MATE);
 	}
 
@@ -119,7 +120,7 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 
 	@Test
 	void aiShouldNotThrowNullPointerException() {
-		new BoardSetup(new ReverseAlgebraicNotation())
+		new BoardSetup(moveNotation)
 				.setupBoard(board,
 						"e2-e4", "d7-d5",
 						"Nb1-c3", "d5-d4",
@@ -131,13 +132,13 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 		ArtificialIntelligence ai = buildAI(3);
 		Move nextMove = ai.nextMove(board, WHITE, new ProgressListener());
 
-		String actualMove = new ReverseAlgebraicNotation().format(nextMove);
+		String actualMove = moveNotation.format(nextMove);
 		assertThat(asList("Qd1-e2", "Qd1xc2", "Qd1-f3")).contains(actualMove);
 	}
 
 	@Test
 	void depth5CausesVeryDeepQuiesenceSearch_aiShouldFindSolutionQuickly() {
-		new BoardSetup(new ReverseAlgebraicNotation())
+		new BoardSetup(moveNotation)
 				.setupBoard(board,
 						"e2-e4", "d7-d6",
 						"Ng1-f3", "Ng8-f6",
@@ -150,7 +151,21 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 		ArtificialIntelligence ai = buildAI(3);
 		Move nextMove = ai.nextMove(board, board.currentPlayerOpponent(), new ProgressListener());
 
-		assertThat(new ReverseAlgebraicNotation().format(nextMove)).isEqualTo("e7-e5");
+		assertThat(moveNotation.format(nextMove)).isEqualTo("e7-e5");
+	}
+
+	@Test
+	void aiShouldNotSacrifceQueen() {
+		new BoardSetup(moveNotation)
+				.setupBoard(board,
+						"e2-e4", "e7-e5",
+						"d2-d4", "d7-d6",
+						"Ng1-f3", "Bc8-g4",
+						"Nb1-c3", "Bg4xNf3");
+
+		assertNextMovesOneOf(3,
+				WHITE,
+				asList("g2xBf3", "e5xd4", "Qd1xd4", "Qd8-f6"));
 	}
 
 	@Test
@@ -207,7 +222,7 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 		ArtificialIntelligence ai = buildAI(0);
 		Move nextMove = ai.nextMove(board, board.currentPlayerOpponent(), new ProgressListener());
 
-		assertThat(new ReverseAlgebraicNotation().format(nextMove)).isNotEqualTo("Qh5xRg6");
+		assertThat(moveNotation.format(nextMove)).isNotEqualTo("Qh5xRg6");
 	}
 
 	@SafeVarargs
