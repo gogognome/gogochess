@@ -72,7 +72,7 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		Progress.Job job = progress.onStartJobWithNrSteps(nextMoves.size());
 		Map<Move, Move> moveToBestDeepestMove = new HashMap<>();
 		for (Move move : nextMoves) {
-			Move bestDeepestMove = alphaBeta(board, move, 0, initialAlpha, initialBeta, progress);
+			Move bestDeepestMove = alphaBeta(board, move, 1, initialAlpha, initialBeta, progress);
 			moveToBestDeepestMove.put(move, bestDeepestMove);
 			job.onNextStep();
 		}
