@@ -3,6 +3,7 @@ package nl.gogognome.gogochess.logic;
 import static java.util.Arrays.*;
 import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.*;
 import static nl.gogognome.gogochess.logic.Piece.*;
+import static nl.gogognome.gogochess.logic.Square.*;
 import static nl.gogognome.gogochess.logic.Status.*;
 import java.util.*;
 import java.util.function.*;
@@ -161,14 +162,27 @@ public class Move {
 
 	private Predicate<BoardMutation> filterForKingDuringCastling() {
 		Predicate<BoardMutation> extraFilter = mutation -> true;
-		if (getBoardMutations().stream()
-				.filter(mutation -> mutation.getPlayerPiece().getPlayer() == getPlayer() && mutation.getMutation() == REMOVE)
-				.count() == 2) {
+		if (isCastling()) {
 			extraFilter = mutation -> mutation.getPlayerPiece().getPiece() == KING;
 		}
 		return extraFilter;
 	}
 
+	public boolean isKingSideCastling() {
+		return isCastling() &&
+				getMutationAddingPieceAtDestination().getSquare().file() == FILE_G;
+	}
+
+	public boolean isQueenSideCastling() {
+		return isCastling() &&
+				getMutationAddingPieceAtDestination().getSquare().file() == FILE_C;
+	}
+
+	boolean isCastling() {
+		return getBoardMutations().stream()
+				.filter(mutation -> mutation.getPlayerPiece().getPlayer() == getPlayer() && mutation.getMutation() == REMOVE)
+				.count() == 2;
+	}
 	public boolean boardMutationsEqual(Move that) {
 		return this.getBoardMutationsHashcode() == that.getBoardMutationsHashcode()
 				&& this.boardMutations.equals(that.boardMutations);

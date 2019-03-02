@@ -173,9 +173,9 @@ public class GamePresentationModel {
 
 	private boolean startAndTargetSquareMatchMove(Move move, Square startSquare, Square targetSquare) {
 		String description = move.toString();
-		if (description.equals("O-O")) {
+		if (move.isKingSideCastling()) {
 			description = move.getPlayer() == WHITE ? E1 + "-" + G1 : E8 + "-" + G8;
-		} else if (description.equals("O-O-O")) {
+		} else if (move.isQueenSideCastling()) {
 			description = move.getPlayer() == WHITE ? E1 + "-" + C1 : E8 + "-" + C8;
 		}
 		return description.contains(startSquare.toString()) && description.contains(targetSquare.toString())

@@ -56,6 +56,58 @@ class MoveTest {
 	}
 
 	@Test
+	void whiteKingSideCastlingChecks() {
+		Move whiteKingSideCastling = new Move(WHITE,
+			WHITE_KING.removeFrom(E1),
+			WHITE_ROOK.removeFrom(H1),
+			WHITE_KING.addTo(G1),
+			WHITE_ROOK.addTo(F1));
+
+		assertThat(whiteKingSideCastling.isCastling()).isTrue();
+		assertThat(whiteKingSideCastling.isKingSideCastling()).isTrue();
+		assertThat(whiteKingSideCastling.isQueenSideCastling()).isFalse();
+	}
+
+	@Test
+	void whiteQueenSideCastlingChecks() {
+		Move whiteKingSideCastling = new Move(WHITE,
+			WHITE_KING.removeFrom(E1),
+			WHITE_ROOK.removeFrom(H1),
+			WHITE_KING.addTo(C1),
+			WHITE_ROOK.addTo(D1));
+
+		assertThat(whiteKingSideCastling.isCastling()).isTrue();
+		assertThat(whiteKingSideCastling.isKingSideCastling()).isFalse();
+		assertThat(whiteKingSideCastling.isQueenSideCastling()).isTrue();
+	}
+
+	@Test
+	void blackKingSideCastlingChecks() {
+		Move whiteKingSideCastling = new Move(WHITE,
+			WHITE_KING.removeFrom(E8),
+			WHITE_ROOK.removeFrom(H8),
+			WHITE_KING.addTo(G8),
+			WHITE_ROOK.addTo(F8));
+
+		assertThat(whiteKingSideCastling.isCastling()).isTrue();
+		assertThat(whiteKingSideCastling.isKingSideCastling()).isTrue();
+		assertThat(whiteKingSideCastling.isQueenSideCastling()).isFalse();
+	}
+
+	@Test
+	void blackQueenSideCastlingChecks() {
+		Move whiteKingSideCastling = new Move(WHITE,
+			WHITE_KING.removeFrom(E8),
+			WHITE_ROOK.removeFrom(H8),
+			WHITE_KING.addTo(C8),
+			WHITE_ROOK.addTo(D8));
+
+		assertThat(whiteKingSideCastling.isCastling()).isTrue();
+		assertThat(whiteKingSideCastling.isKingSideCastling()).isFalse();
+		assertThat(whiteKingSideCastling.isQueenSideCastling()).isTrue();
+	}
+
+	@Test
 	void differentPrecedingMoveButEqualsBoardMuations_BoardMutationsEqual() {
 		Move move1 = new Move(BLACK, BLACK_PAWN.removeFrom(E7), BLACK_PAWN.addTo(E5));
 		Move precedingMove = new Move(WHITE, WHITE_PAWN.removeFrom(E2), WHITE_PAWN.addTo(E4));
