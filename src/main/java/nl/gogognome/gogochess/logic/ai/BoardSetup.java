@@ -3,6 +3,7 @@ package nl.gogognome.gogochess.logic.ai;
 import java.util.*;
 import nl.gogognome.gogochess.logic.*;
 import nl.gogognome.gogochess.logic.movenotation.*;
+import nl.gogognome.gogochess.util.*;
 
 /**
  * Sets up a board in the initial position and replays moves.
@@ -50,8 +51,19 @@ public class BoardSetup {
             }
         }
         if (parsedMove == null) {
-            throw new IllegalArgumentException("The move " + move + " is invalid");
+            int largestNrOfCharactersInCommon = Integer.MAX_VALUE;
+            Move suggestion = null;
+            for (Move validMove : validMoves) {
+                int nrCharactersInCommon = EditDistance.calculate(moveNotation.format(validMove), move);
+                if (nrCharactersInCommon < largestNrOfCharactersInCommon) {
+                    suggestion = validMove;
+                    largestNrOfCharactersInCommon = nrCharactersInCommon;
+                }
+            }
+            throw new IllegalArgumentException("The move " + move + " is invalid"
+                    + (suggestion != null ? "; did you mean " + moveNotation.format(suggestion) : ""));
         }
         return parsedMove;
     }
+
 }
