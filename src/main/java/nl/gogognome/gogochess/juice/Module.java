@@ -45,8 +45,8 @@ public class Module extends AbstractModule {
 
 	@Provides
 	@Singleton
-	GamePresentationModel provideGamePresentationModel(AiController aiController, Board board) {
-		return new GamePresentationModel(aiController, board);
+	GamePresentationModel provideGamePresentationModel(AiController aiController, Board board, MoveNotation moveNotation) {
+		return new GamePresentationModel(aiController, board, moveNotation);
 	}
 
 	@Provides

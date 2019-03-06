@@ -1,5 +1,7 @@
 package nl.gogognome.gogochess.logic.movenotation;
 
+import static java.util.stream.Collectors.*;
+import java.util.*;
 import nl.gogognome.gogochess.logic.*;
 
 public interface MoveNotation {
@@ -17,4 +19,15 @@ public interface MoveNotation {
 	 * @return a single string with the formatted moves
 	 */
 	String format(Move from, Move to);
+
+	/**
+	 * Formats a collection of moves.
+	 * @param moves the moves
+	 * @return a list of string representations of the moves.
+	 */
+	default List<String> format(Collection<Move> moves) {
+		return moves.stream()
+				.map(this::format)
+				.collect(toList());
+	}
 }

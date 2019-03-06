@@ -12,11 +12,14 @@ import javax.swing.*;
 import org.slf4j.*;
 import com.google.common.collect.*;
 import nl.gogognome.gogochess.logic.*;
+import nl.gogognome.gogochess.logic.movenotation.*;
 import nl.gogognome.gogochess.logic.piece.*;
 
 public class GamePresentationModel {
 
 	private final Logger logger = LoggerFactory.getLogger(getClass());
+
+	private final MoveNotation moveNotation;
 
 	public enum Event {
 		STATE_CHANGED,
@@ -52,9 +55,10 @@ public class GamePresentationModel {
 	private List<Move> promotionMoves;
 
 	@Inject
-	public GamePresentationModel(AiController aiController, Board board) {
+	public GamePresentationModel(AiController aiController, Board board, MoveNotation moveNotation) {
 		this.aiController = aiController;
 		this.board = board;
+		this.moveNotation = moveNotation;
 
 		this.aiController.setPercentageConsumer(this::setPercentage);
 		this.aiController.setComputerMoveConsumer(this::onComputerMove);
@@ -200,6 +204,7 @@ public class GamePresentationModel {
 		}
 		moves.add(move);
 		board.process(move);
+		logger.info("Processed move " + moveNotation.format(move));
 		if (move.getStatus().isGameOver()) {
 			changeStateTo(GAME_OVER);
 		} else {
@@ -225,6 +230,7 @@ public class GamePresentationModel {
 		setOnlyToHumanPlayers();
 		highlightMove(moves.get(indexOfHighlightedMove));
 		board.process(moves.get(lastMoveIndex));
+		logger.info("Show move " + moveNotation.format(moves.get(lastMoveIndex)));
 		changeStateTo(moves.get(lastMoveIndex).getStatus().isGameOver() ? GAME_OVER : WAITING_FOR_DRAG);
 		fireEvent(Event.SETTING_CHANGED); // because of possible change of computer thinking
 	}
@@ -239,6 +245,7 @@ public class GamePresentationModel {
 		moves.add(board.lastMove()); // add board setup move to the moves
 		lastMoveIndex = 0;
 		targets = null; // prevents showing the last move of previous game in new game
+		aiController.init();
 		onStartThinking();
 		fireEvent(Event.SETTING_CHANGED);
 		fireEvent(Event.STATE_CHANGED);

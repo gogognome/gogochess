@@ -15,7 +15,7 @@ class MoveNotationTest {
 	@Test
 	void format_null_throwsException() {
 		assertThatExceptionOfType(IllegalArgumentException.class)
-				.isThrownBy(() -> moveNotation.format(null))
+				.isThrownBy(() -> moveNotation.format((Move) null))
 				.withMessage("Move must not be null");
 	}
 

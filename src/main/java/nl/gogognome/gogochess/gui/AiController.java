@@ -48,7 +48,7 @@ public class AiController {
     private Semaphore thinkingSemaphore = new Semaphore(1);
     private int lastKnownPercentage;
     private int initialMaxDepthForTimeLimit = 2;
-    private List<Integer> lastInitialMaxDepths = new ArrayList<>(asList(2, 2, 2, 2));
+    private List<Integer> lastInitialMaxDepths;
 
     private BlockingDeque<Runnable> actionQueue = new LinkedBlockingDeque<>();
     private boolean actionQueueTerminated;
@@ -58,8 +58,13 @@ public class AiController {
     public AiController(ArtificialIntelligence ai, MoveNotation moveNotation) {
         this.ai = ai;
         this.moveNotation = moveNotation;
+        init();
         tickFuture = executorService.scheduleWithFixedDelay(this::onTick, 0, 1, TimeUnit.SECONDS);
         actionQueueFuture = executorService.submit(this::actionQueueHandler);
+    }
+
+    void init() {
+        lastInitialMaxDepths = new ArrayList<>(asList(2, 2, 2, 2));
     }
 
     private void actionQueueHandler() {
