@@ -1,28 +1,24 @@
 package nl.gogognome.gogochess.logic;
 
-import nl.gogognome.gogochess.logic.asserters.BoardAsserter;
-import nl.gogognome.gogochess.logic.movenotation.MoveNotation;
-import nl.gogognome.gogochess.logic.movenotation.ReverseAlgebraicNotation;
-import org.junit.jupiter.api.Test;
-
-import java.util.List;
-
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 import static nl.gogognome.gogochess.logic.Board.*;
-import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.ADD;
-import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.REMOVE;
-import static nl.gogognome.gogochess.logic.Moves.assertMovesContain;
-import static nl.gogognome.gogochess.logic.Player.BLACK;
-import static nl.gogognome.gogochess.logic.Player.WHITE;
+import static nl.gogognome.gogochess.logic.BoardMutation.Mutation.*;
+import static nl.gogognome.gogochess.logic.Moves.*;
+import static nl.gogognome.gogochess.logic.Player.*;
 import static nl.gogognome.gogochess.logic.Squares.*;
 import static nl.gogognome.gogochess.logic.Status.*;
 import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
+import java.util.*;
+import org.junit.jupiter.api.*;
+import nl.gogognome.gogochess.logic.ai.*;
+import nl.gogognome.gogochess.logic.asserters.*;
+import nl.gogognome.gogochess.logic.movenotation.*;
 
 class BoardTest {
 
 	private Board board = new Board();
+	private ReverseAlgebraicNotation moveNotation = new ReverseAlgebraicNotation();
 
 	@Test
 	void processAddMutationToEmptySquareSucceeds() {
@@ -331,6 +327,21 @@ class BoardTest {
 		board.process(move2);
 
 		assertThat(board.gameStartedFromInitialSetup()).isFalse();
+	}
+
+	@Test
+	void blackCannotCaptureItsOwnPawn() {
+		String movesStrings = "c2-c4 e7-e5 e2-e3 Ng8-f6 a2-a3 Nb8-c6 d2-d3 Bf8-c5 h2-h3 O-O Bf1-e2 g7-g5 " +
+				"Nb1-c3 Rf8-e8 b2-b4 Bc5-e7 b4-b5 Nc6-a5 Qd1-c2 d7-d5 c4xd5 Nf6xd5 Ra1-b1 Nd5xNc3 " +
+				"Qc2xNc3 b7-b6 Bc1-d2 Bc8-e6 Be2-f3 Ra8-b8 Ng1-e2 Be7-c5 Ne2-g3 f7-f5 O-O f5-f4 Ng3-e4";
+
+		List<Move> moves = new BoardSetup(moveNotation).parseMoves(movesStrings.split(" "));
+		for (Move move : moves) {
+			board.process(move);
+		}
+
+		List<String> validMoves = moveNotation.format(BLACK.validMoves(board));
+		assertThat(validMoves).doesNotContain("g5xf4");
 	}
 
 	private Move find(List<Move> moves, String moveDescription) {
