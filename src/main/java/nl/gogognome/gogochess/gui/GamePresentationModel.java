@@ -230,7 +230,7 @@ public class GamePresentationModel {
 		setOnlyToHumanPlayers();
 		highlightMove(moves.get(indexOfHighlightedMove));
 		board.process(moves.get(lastMoveIndex));
-		logger.info("Show move " + moveNotation.format(moves.get(lastMoveIndex)));
+		logger.info("Show move " + moveNotation.format(moves.get(indexOfHighlightedMove)));
 		changeStateTo(moves.get(lastMoveIndex).getStatus().isGameOver() ? GAME_OVER : WAITING_FOR_DRAG);
 		fireEvent(Event.SETTING_CHANGED); // because of possible change of computer thinking
 	}
