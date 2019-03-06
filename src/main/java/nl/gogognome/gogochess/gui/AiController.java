@@ -249,7 +249,9 @@ public class AiController {
         int actualSeconds = (int) ((aiEndTime - aiStartTime) / 1000);
         logger.debug("Computer has thought for " + actualSeconds + " seconds");
 
-        updateInitialMaxDepth(actualSeconds, progressListener.getMaxDepthDelta().get());
+        if (actualSeconds > 1 || move.depthInTree() > 5) {
+            updateInitialMaxDepth(actualSeconds, progressListener.getMaxDepthDelta().get());
+        }
 
         if (computerThinksDuringOpponentsTurn) {
             logger.debug("Store response to expected move " + moveNotation.format(lastMove) + ": " + moveNotation.format(move) + ", value: " + move.getValue());
