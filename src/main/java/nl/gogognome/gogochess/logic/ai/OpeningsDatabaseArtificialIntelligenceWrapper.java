@@ -1,30 +1,23 @@
 package nl.gogognome.gogochess.logic.ai;
 
-import nl.gogognome.gogochess.logic.Board;
-import nl.gogognome.gogochess.logic.Move;
-import nl.gogognome.gogochess.logic.Player;
-import nl.gogognome.gogochess.logic.movenotation.MoveNotation;
-import nl.gogognome.gogochess.logic.movenotation.ReverseAlgebraicNotation;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-import static java.util.Collections.singletonList;
+import static java.util.Collections.*;
+import java.util.*;
+import javax.inject.*;
+import nl.gogognome.gogochess.logic.*;
+import nl.gogognome.gogochess.logic.movenotation.*;
 
 public class OpeningsDatabaseArtificialIntelligenceWrapper implements ArtificialIntelligence, RecursiveSearchAI {
 
 	private final ArtificialIntelligence wrappedArtificialIntelligence;
 	private final MoveNotation moveNotation = new ReverseAlgebraicNotation();
 
-	private final static String[][] OPENINGS = new String[][] {
+	final static String[][] OPENINGS = new String[][] {
 			{ "e2-e4", "e7-e5", "Ng1-f3", "Nb8-c6", "Bf1-b5" }, // Ruy Lopez (Spanish)
 			{ "e2-e4", "e7-e5", "Ng1-f3", "Nb8-c6", "Bf1-c4", "Bf8-c5", "d2-d3" }, // Guioco Pianissimo
 			{ "e2-e4", "e7-e5", "Ng1-f3", "Nb8-c6", "Bf1-c4", "Bf8-c5", "b2-b4" }, // Evans Gambit
 			{ "e2-e4", "e7-e5", "d2-d4", "e5xd4", "Qd1xd4" }, // Center game
 			{ "e2-e4", "e7-e5", "f2-f4" }, // King's Gambit
-			{ "e2-e4", "c7-c5",  "Nb1-f3", "d7-d6", "d2-d4", "c5xd4", "Nf3xd4", "Ng8-f6", "Nb1-c3", "g8-g6" }, // Sicilian Defense, Dragon variation
+			{ "e2-e4", "c7-c5",  "Ng1-f3", "d7-d6", "d2-d4", "c5xd4", "Nf3xd4", "Ng8-f6", "Nb1-c3", "g7-g6" }, // Sicilian Defense, Dragon variation
 			{ "e2-e4", "e7-e6", "d2-d4", "d7-d5"}, // French Defense
 			{ "e2-e4", "c7-c6" }, // Caro-Kann Defense
 			{ "e2-e4", "d7-d6" }, // Pirc Defense
