@@ -19,7 +19,7 @@ class PawnHeuristicsOpeningAndMiddleGame {
 		return board.temporarilyMove(move, () -> getValueForWhitePawnMovingToD3_D4_E3_E4(from, to)
 			.add(getValueForPieceBlocksWhiteCenterPawn(board, to), "piece blocks white center pawn")
 			.add(getValueForPieceBlocksBlackCenterPawn(board, to), "piece blocks black center pawn")
-			.add(getValueForPawnCapturingOtherPiece(board, move, from, to), "pawn capturing oher piece")
+			.add(getValueForPawnCapturingOtherPiece(board, move, from, to), "pawn capturing other piece")
 			.add(getValueForPawnOnSideOfBoard(from, to), move, "pawn on side of board"));
 	}
 
@@ -58,7 +58,7 @@ class PawnHeuristicsOpeningAndMiddleGame {
 		if (E6.equals(to.getSquare()) || D6.equals(to.getSquare())) {
 			PlayerPiece blockedPiece = board.pieceAt(to.getSquare().addRanks(1));
 			if (blockedPiece != null && blockedPiece.getPiece() == PAWN) {
-				pieceBlocksBlackCenterPawn = pieceBlocksBlackCenterPawn.addForWhite(50, "piece blocks blackcenter pawn");
+				pieceBlocksBlackCenterPawn = pieceBlocksBlackCenterPawn.addForWhite(50, "piece blocks black center pawn");
 			}
 		}
 		return pieceBlocksBlackCenterPawn;
