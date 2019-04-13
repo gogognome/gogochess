@@ -18,7 +18,6 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 	private int initialBeta;
 	private int maxDepth;
 	private AtomicInteger maxDepthDelta;
-	private int razorMargin = 200;
 
 	private AtomicBoolean canceled = new AtomicBoolean();
 
@@ -60,7 +59,6 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		statistics.reset();
 		transpositionTable.clear();
 
-		long startTime = System.nanoTime();
 		logger.debug("maxDepth: " + maxDepth);
 		List<Move> nextMoves = board.currentPlayer().validMoves(board);
 		positonalAnalysis.evaluate(board, nextMoves);
@@ -81,17 +79,8 @@ public class MiniMaxAlphaBetaArtificialIntelligence implements ArtificialIntelli
 		moveSort.sort(nextMoves);
 		Move nextMove = nextMoves.get(0);
 		progressListener.consumeBestMoves(nextMove.pathTo(moveToBestDeepestMove.get(nextMove)));
-		long endTime = System.nanoTime();
-		logStatistics(startTime, endTime);
+		statistics.logStatistics();
 		return nextMove;
-	}
-
-	private void logStatistics(long startTime, long endTime) {
-		double durationMillis = (endTime - startTime) / 1000000000.0;
-		logger.debug("evaluating " + statistics.getNrPositionsEvaluated()+ " positions took " + durationMillis + " s (" + (statistics.getNrPositionsEvaluated() / (durationMillis)) + " positions/s");
-		logger.debug("generating " + statistics.getNrPositionsGenerated() + " positions took " + durationMillis + " s (" + (statistics.getNrPositionsGenerated() / (durationMillis)) + " positions/s");
-		logger.debug("nr cut offs caused by killer heuristic: " + statistics.getNrCutOffsByKillerMove());
-		logger.debug("nr cache hits: " + statistics.getNrCacheHits());
 	}
 
 	private Move alphaBeta(Board board, Move move, int depth, int alpha, int beta, Progress progress) {
