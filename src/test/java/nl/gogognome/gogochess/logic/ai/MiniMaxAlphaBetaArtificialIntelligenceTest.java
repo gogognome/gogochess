@@ -155,7 +155,7 @@ class MiniMaxAlphaBetaArtificialIntelligenceTest {
 	}
 
 	@Test
-	void aiShouldNotSacrifceQueen() {
+	void aiShouldNotSacrificeQueen() {
 		new BoardSetup(moveNotation)
 				.setupBoard(board,
 						"e2-e4", "e7-e5",
