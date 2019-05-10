@@ -155,8 +155,7 @@ public class AiController {
             if (responseToExpectedOpponentsMove != null) {
                 logger.debug("Computer already finished thinking for the correct move of the opponent.");
                 computerMoveConsumer.accept(responseToExpectedOpponentsMove);
-                expectedOpponentsMove = null;
-                responseToExpectedOpponentsMove = null;
+                clearExpectedOpponentsMove();
                 return;
             }
         }
@@ -168,6 +167,11 @@ public class AiController {
         }
 
         letComputerThinkOfBestResponseTo(lastMove);
+    }
+
+    void clearExpectedOpponentsMove() {
+        expectedOpponentsMove = null;
+        responseToExpectedOpponentsMove = null;
     }
 
     void onStartThinkingDuringOpponentsTurn() {

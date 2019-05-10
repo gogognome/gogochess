@@ -215,12 +215,14 @@ public class GamePresentationModel {
 	void onUndoMove() {
 		if (lastMoveIndex > 0) {
 			showMove(lastMoveIndex - 1, lastMoveIndex);
+			aiController.clearExpectedOpponentsMove();
 		}
 	}
 
 	void onRedoMove() {
 		if (lastMoveIndex + 1 < moves.size()) {
 			showMove(lastMoveIndex + 1, lastMoveIndex + 1);
+			aiController.clearExpectedOpponentsMove();
 		}
 	}
 
