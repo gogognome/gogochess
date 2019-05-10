@@ -209,7 +209,7 @@ class PositionalAnalysisForOpeningTest {
 	void blackWingPawnAdvanceMustBeMinus10Points() {
 		MoveValue value = evaluator.valueOfMove(new Move(WHITE, BLACK_PAWN.addTo(H7)),
 				BLACK_PAWN.removeFrom(H7), BLACK_PAWN.addTo(H5));
-		assertThat(value).isEqualTo(forBlack(-6, "")); // 10 for advancing wing pawn, -2 for moving towards center and -2 for moving from king side
+		assertThat(value).isEqualTo(forBlack(-8, "")); // 10 for advancing wing pawn, -2 for moving towards center and
 	}
 
 	@Test
@@ -217,6 +217,28 @@ class PositionalAnalysisForOpeningTest {
 		MoveValue value = evaluator.valueOfMove(new Move(BLACK, WHITE_PAWN.addTo(A2)),
 				WHITE_PAWN.removeFrom(A2), WHITE_PAWN.addTo(A4));
 		assertThat(value).isEqualTo(forWhite(-8, "")); // -10 for advancing wing pawn and 2 for moving towards center
+	}
+
+	@Test
+	void whiteKingSideRookMovingDoesNotGetPointsForMovingFromKingSide() {
+		MoveValue value = evaluator.valueOfMove(new Move(BLACK, WHITE_ROOK.addTo(H1)),
+				WHITE_ROOK.removeFrom(H1), WHITE_ROOK.addTo(G1));
+
+		MoveValue expectedValue = evaluator.valueOfMove(new Move(BLACK, WHITE_ROOK.addTo(A1)),
+				WHITE_ROOK.removeFrom(A1), WHITE_ROOK.addTo(B1));
+
+		assertThat(value).isEqualTo(expectedValue);
+	}
+
+	@Test
+	void blackKingSideRookMovingDoesNotGetPointsForMovingFromKingSide() {
+		MoveValue value = evaluator.valueOfMove(new Move(WHITE, BLACK_ROOK.addTo(H8)),
+				BLACK_ROOK.removeFrom(H8), BLACK_ROOK.addTo(G8));
+
+		MoveValue expectedValue = evaluator.valueOfMove(new Move(WHITE, BLACK_ROOK.addTo(A8)),
+				BLACK_ROOK.removeFrom(A8), BLACK_ROOK.addTo(B8));
+
+		assertThat(value).isEqualTo(expectedValue);
 	}
 
 	@Test

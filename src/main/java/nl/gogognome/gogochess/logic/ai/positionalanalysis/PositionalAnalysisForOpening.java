@@ -1,5 +1,7 @@
 package nl.gogognome.gogochess.logic.ai.positionalanalysis;
 
+import static nl.gogognome.gogochess.logic.Square.FILE_E;
+import static nl.gogognome.gogochess.logic.Square.FILE_H;
 import static nl.gogognome.gogochess.logic.Squares.*;
 import static nl.gogognome.gogochess.logic.piece.PlayerPieces.*;
 import java.util.*;
@@ -63,7 +65,7 @@ class PositionalAnalysisForOpening implements MovesEvaluator {
 
 	private int getPieceMovingFromKingSideValue(int fromColumn) {
 		int pieceMovingFromKingSideValue = 0;
-		if (fromColumn >= 4) {
+		if (fromColumn >= FILE_E && fromColumn < FILE_H) {
 			pieceMovingFromKingSideValue = 2;
 		}
 		return pieceMovingFromKingSideValue;
